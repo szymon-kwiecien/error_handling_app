@@ -1,6 +1,7 @@
-package pl.error_handling_app;
+package pl.error_handling_app.user;
 
 import jakarta.persistence.*;
+import pl.error_handling_app.company.Company;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +13,8 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String firstName;
+    private String lastName;
     private String email;
     private String password;
     @ManyToOne
@@ -61,5 +64,21 @@ public class User {
 
     public void setRoles(Set<UserRole> roles) {
         this.roles = roles;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

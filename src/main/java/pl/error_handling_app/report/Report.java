@@ -1,6 +1,7 @@
-package pl.error_handling_app;
+package pl.error_handling_app.report;
 
 import jakarta.persistence.*;
+import pl.error_handling_app.user.User;
 
 import java.time.LocalDateTime;
 

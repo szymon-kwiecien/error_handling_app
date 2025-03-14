@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Zarządzaj użytkownikami</title>
+</head>
+<body>
+    <h2>Dodaj użytkownika</h2>
+
+    <form action="#" th:action="@{/admin/add-user}" method="post">
+
+        <div>
+            <label for="firstName">Imię:</label>
+            <input type="text" id="firstName" name="firstName" required>
+        </div>
+        <div>
+            <label for="lastName">Nazwisko:</label>
+            <input type="text" id="lastName" name="lastName" required>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <label for="companyId">Firma:</label>
+            <select id="companyId" name="companyId" required>
+                <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}"></option>
+            </select>
+        </div>
+        <div>
+            <label for="roleId">Rola:</label>
+            <select id="roleId" name="roleId" required>
+                <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+            </select>
+        </div>
+        <div>
+            <button type="submit">Dodaj Użytkownika</button>
+        </div>
+    </form>
+
+
+        <h2>Lista użytkowników</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Imię</th>
+        <th>Nazwisko</th>
+        <th>Adres e-mail</th>
+        <th>Firma</th>
+        <th>Rola</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <form th:action="@{/admin/edit_user/{id}(id=${user.id})}" method="post">
+            <td><input type="text" name="firstName" th:value="${user.firstName}" /></td>
+            <td><input type="text" name="lastName" th:value="${user.lastName}" /></td>
+            <td><input type="email" name="email" th:value="${user.email}" /></td>
+            <td>
+                <select name="companyId">
+                    <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}" th:selected="${company.id == user.companyId}"></option>
+                </select>
+            </td>
+            <td>
+                <select name="roleId">
+                    <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}" th:selected="${user.roles.contains(role)}"></option>
+                </select>
+            </td>
+            <td>
+                <button type="submit">Zatwierdź</button>
+            </td>
+        </form>
+        <td>
+            <form th:action="@{/admin/delete_user/{id}(id=${user.id})}" method="post">
+                <button type="submit">Usuń</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-package pl.error_handling_app;
+package pl.error_handling_app.report;
 
 public enum ReportStatus {
 

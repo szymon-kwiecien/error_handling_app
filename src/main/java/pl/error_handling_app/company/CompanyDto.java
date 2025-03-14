@@ -1,16 +1,17 @@
-package pl.error_handling_app;
+package pl.error_handling_app.company;
 
+public class CompanyDto {
 
-import jakarta.persistence.*;
-
-@Entity
-public class ReportCategory {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
     private String name;
+
+    public CompanyDto(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public CompanyDto() {
+    }
 
     public Long getId() {
         return id;

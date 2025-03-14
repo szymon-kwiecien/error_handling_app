@@ -1,4 +1,4 @@
-package pl.error_handling_app;
+package pl.error_handling_app.user;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
