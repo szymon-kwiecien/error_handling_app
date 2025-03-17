@@ -4,18 +4,31 @@ import java.util.List;
 
 public class UserDto {
 
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
     private Long companyId;
-    private List<String> roles;
+    private Long roleId;
 
-    public UserDto(String firstName, String lastName, String email, Long companyId, List<String> roles) {
+    public UserDto(Long id, String firstName, String lastName, String email, Long companyId, Long roleId) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.companyId = companyId;
-        this.roles = roles;
+        this.roleId = roleId;
+    }
+
+    public UserDto() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFirstName() {
@@ -50,11 +63,11 @@ public class UserDto {
         this.companyId = companyId;
     }
 
-    public List<String> getRoles() {
-        return roles;
+    public Long getRoleId() {
+        return roleId;
     }
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
+    public void setRoleId(Long roleId) {
+        this.roleId = roleId;
     }
 }

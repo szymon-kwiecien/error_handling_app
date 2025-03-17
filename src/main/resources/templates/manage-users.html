@@ -5,8 +5,16 @@
     <title>Zarządzaj użytkownikami</title>
 </head>
 <body>
-    <h2>Dodaj użytkownika</h2>
+<div th:if="${success}">
+    <p th:text="${success}"> Pomyślnie dodano użytkownika</p>
+</div>
 
+<div th:if="${error}">
+    <p th:text="${error}">Wystąpił błąd podczas dodawania użytkownika</p>
+</div>
+
+<div></div>
+    <h2>Dodaj użytkownika</h2>
     <form action="#" th:action="@{/admin/add-user}" method="post">
 
         <div>
@@ -24,6 +32,7 @@
         <div>
             <label for="companyId">Firma:</label>
             <select id="companyId" name="companyId" required>
+                <option value="" disabled selected>Wybierz firmę</option>
                 <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}"></option>
             </select>
         </div>
@@ -53,9 +62,9 @@
     <tbody>
     <tr th:each="user : ${users}">
         <form th:action="@{/admin/edit_user/{id}(id=${user.id})}" method="post">
-            <td><input type="text" name="firstName" th:value="${user.firstName}" /></td>
-            <td><input type="text" name="lastName" th:value="${user.lastName}" /></td>
-            <td><input type="email" name="email" th:value="${user.email}" /></td>
+            <td><input type="text" name="firstName" th:value="${user.firstName}"/></td>
+            <td><input type="text" name="lastName" th:value="${user.lastName}"/></td>
+            <td><input type="email" name="email" th:value="${user.email}"/></td>
             <td>
                 <select name="companyId">
                     <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}" th:selected="${company.id == user.companyId}"></option>
@@ -63,7 +72,7 @@
             </td>
             <td>
                 <select name="roleId">
-                    <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}" th:selected="${user.roles.contains(role)}"></option>
+                    <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}" th:selected="${role.id == user.roleId}"></option>
                 </select>
             </td>
             <td>

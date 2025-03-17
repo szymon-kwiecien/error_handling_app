@@ -20,7 +20,6 @@
                 <constraints nullable="false" unique="true"/>
             </column>
             <column name="password" type="varchar(255)">
-                <constraints nullable="false"/>
             </column>
             <column name="company_id" type="bigint">
                 <constraints nullable="false"/>
