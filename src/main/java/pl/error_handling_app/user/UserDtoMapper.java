@@ -28,9 +28,9 @@ public class UserDtoMapper {
         user.setLastName(userDto.getLastName());
         user.setEmail(userDto.getEmail());
         Company company = companyRepository.findById(userDto.getCompanyId()).orElseThrow(() ->
-                new NoSuchElementException("Company with ID %d not found.".formatted(userDto.getCompanyId())));
+                new NoSuchElementException("Firma nie została znaleziona."));
         UserRole userRole = roleRepository.findById(userDto.getRoleId()).orElseThrow(() ->
-                new NoSuchElementException("Role with ID %d not found".formatted(userDto.getRoleId())));
+                new NoSuchElementException("Rola nie została znaleziona"));
         user.setCompany(company);
         user.getRoles().add(userRole);
         return user;

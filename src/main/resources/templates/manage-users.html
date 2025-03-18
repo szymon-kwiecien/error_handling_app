@@ -61,7 +61,7 @@
     </thead>
     <tbody>
     <tr th:each="user : ${users}">
-        <form th:action="@{/admin/edit_user/{id}(id=${user.id})}" method="post">
+        <form th:action="@{/admin/edit-user/{id}(id=${user.id})}" method="post">
             <td><input type="text" name="firstName" th:value="${user.firstName}"/></td>
             <td><input type="text" name="lastName" th:value="${user.lastName}"/></td>
             <td><input type="email" name="email" th:value="${user.email}"/></td>
@@ -80,7 +80,7 @@
             </td>
         </form>
         <td>
-            <form th:action="@{/admin/delete_user/{id}(id=${user.id})}" method="post">
+            <form th:action="@{/admin/delete-user/{id}(id=${user.id})}" method="post">
                 <button type="submit">Usuń</button>
             </form>
         </td>
