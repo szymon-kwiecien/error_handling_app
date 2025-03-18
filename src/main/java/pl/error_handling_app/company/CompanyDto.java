@@ -4,10 +4,16 @@ public class CompanyDto {
 
     private Long id;
     private String name;
+    private int timeToFirstRespond;
+    private int timeToResolve;
 
-    public CompanyDto(Long id, String name) {
+
+
+    public CompanyDto(Long id, String name, int timeToFirstRespond, int timeToResolve) {
         this.id = id;
         this.name = name;
+        this.timeToFirstRespond = timeToFirstRespond;
+        this.timeToResolve = timeToResolve;
     }
 
     public CompanyDto() {
@@ -27,5 +33,21 @@ public class CompanyDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getTimeToFirstRespond() {
+        return timeToFirstRespond;
+    }
+
+    public void setTimeToFirstRespond(int timeToFirstRespond) {
+        this.timeToFirstRespond = timeToFirstRespond;
+    }
+
+    public int getTimeToResolve() {
+        return timeToResolve;
+    }
+
+    public void setTimeToResolve(int timeToResolve) {
+        this.timeToResolve = timeToResolve;
     }
 }

@@ -11,8 +11,8 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private int timeToFirstRespond;
-    private int timeToResolve;
+    private int timeToFirstRespond; //w godzinach
+    private int timeToResolve; //w godzinach
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> users;
 

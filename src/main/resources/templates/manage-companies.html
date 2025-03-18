@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zarządzaj firmami</title>
+</head>
+<body>
+
+<div th:if="${error}">
+    <p th:text="${error}"></p>
+</div>
+<div>
+    <div th:if="${success}">
+        <p th:text="${success}"></p>
+    </div>
+</div>
+
+<h2 class="mb-3">Dodaj Firmę</h2>
+<form th:action="@{/admin/add-company}" method="post">
+    <div>
+        <label for="name">Nazwa:</label>
+        <input type="text" id="name" name="name" required>
+    </div>
+    <div>
+        <label for="timeToFirstRespond">Czas na pierwszą reakcję (godziny):</label>
+        <input type="number" id="timeToFirstRespond" name="timeToFirstRespond" required>
+    </div>
+    <div>
+        <label for="timeToResolve">Czas na rozwiązanie (godziny):</label>
+        <input type="number" id="timeToResolve" name="timeToResolve" required>
+    </div>
+    <div>
+        <button type="submit">Dodaj Firmę</button>
+    </div>
+</form>
+
+</body>
+</html>
