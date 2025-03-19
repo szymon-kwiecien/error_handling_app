@@ -64,14 +64,18 @@ public class UserService {
         user.setRoles(roles);
     }
 
-    @Transactional
-    public void deleteUser(Long userId) {
+        @Transactional
+        public void deleteUser(Long userId) {
+            User userToDelete = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
+            detachUserFromReports(userToDelete);
+            userRepository.deleteById(userId);
+        }
 
-        User userToDelete = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
+        @Transactional
+        public void detachUserFromReports(User userToDelete) {
         reportRepository.findAllByAssignedEmployee(userToDelete).forEach(report -> report.setAssignedEmployee(null));
         List<Report> reportsToDelete = reportRepository.findAllByReportingUser(userToDelete); //Gdy usuwamy użytkownika to jego zgłoszenia również usuwamy
         reportRepository.deleteAll(reportsToDelete);
-        userRepository.deleteById(userId);
     }
 
     private void checkUserAlreadyExists(String email) {

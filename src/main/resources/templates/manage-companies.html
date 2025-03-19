@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<h2 class="mb-3">Dodaj Firmę</h2>
+<h2>Dodaj Firmę</h2>
 <form th:action="@{/admin/add-company}" method="post">
     <div>
         <label for="name">Nazwa:</label>
@@ -33,6 +33,36 @@
         <button type="submit">Dodaj Firmę</button>
     </div>
 </form>
+
+<h2>Lista Firm</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Nazwa</th>
+        <th>Czas na pierwszą reakcję</th>
+        <th>Czas na rozwiązanie</th>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="company : ${companies}">
+        <form th:action="@{/admin/edit-company/{id}(id=${company.id})}" method="post">
+            <td><input type="text" name="name" th:value="${company.name}"/></td>
+            <td><input type="number" name="timeToFirstRespond" th:value="${company.timeToFirstRespond}"/></td>
+            <td><input type="number" name="timeToResolve" th:value="${company.timeToResolve}"/></td>
+            <td>
+                <button type="submit">Zatwierdź</button>
+            </td>
+        </form>
+        <td>
+            <form th:action="@{/admin/delete-company/{id}(id=${company.id})}" method="post">
+                <button type="submit">Usuń</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
 
 </body>
 </html>
