@@ -34,6 +34,12 @@ public class ReportCategoryService {
         reportCategory.setName(newCategoryName);
     }
 
+    public void deleteCategory(Long id) {
+        ReportCategory reportCategory = reportCategoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Kategoria nie istnieje."));
+        reportCategoryRepository.delete(reportCategory);
+    }
+
     private void isCategoryNameTaken(String categoryName) {
         if(reportCategoryRepository.existsByName(categoryName)) {
             throw new IllegalArgumentException("Kategoria o takiej nazwie już istnieje.");

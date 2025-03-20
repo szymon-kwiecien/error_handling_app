@@ -36,11 +36,15 @@
     <tbody>
 
     <tr th:each="category : ${categories}">
-        <form action="#" th:action="@{/admin/edit-category/{id} (id=${category.id})}" method="post">
+        <form action="#" th:action="@{/admin/edit-category}" method="post">
         <td><input type="text" name="name" th:value="${category.name}"/></td>
+            <input type="hidden" name="id" th:value="${category.id}">
             <td> <button type="submit">Zatwierdź</button></td>
         </form>
-        <td><a href="#" th:href="@{'/admin/delete-category?id=' +  ${category.id}}">Usuń</a></td>
+        <td>
+            <form action="#" th:action="@{/admin/delete-category/{id} (id=${category.id})}" method="post">
+                <button type="submit">Usuń</button>
+            </form></td>
     </tr>
     </tbody>
 </table>

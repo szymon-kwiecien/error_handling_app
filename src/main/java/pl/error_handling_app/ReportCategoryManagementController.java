@@ -36,13 +36,24 @@ public class ReportCategoryManagementController {
         return "redirect:/admin/manage-categories";
     }
 
-    @PostMapping("/edit-category/{id}")
-    public String editCategory(@PathVariable Long id, @RequestParam("name") String newCategoryName, RedirectAttributes redirectAttributes) {
+    @PostMapping("/edit-category")
+    public String editCategory(@RequestParam Long id, @RequestParam("name") String newCategoryName, RedirectAttributes redirectAttributes) {
         try {
             reportCategoryService.editCategory(id, newCategoryName);
             redirectAttributes.addFlashAttribute("success", "Edycja kategorii nastąpiła pomyślnie.");
         } catch(IllegalArgumentException | NoSuchElementException e) {
             redirectAttributes.addFlashAttribute("error", "Podczas edycji kategorii wystąpił błąd: " + e.getMessage());
+        }
+        return "redirect:/admin/manage-categories";
+    }
+
+    @PostMapping("/delete-category/{id}")
+    public String deleteCategory(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            reportCategoryService.deleteCategory(id);
+            redirectAttributes.addFlashAttribute("success", "Kategoria została usunięta.");
+        } catch(NoSuchElementException e) {
+            redirectAttributes.addFlashAttribute("error", "Podczas usuwania kategorii wystąpił błąd: " + e.getMessage());
         }
         return "redirect:/admin/manage-categories";
     }
