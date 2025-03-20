@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zarządzaj kategoriami</title>
+</head>
+<body>
+
+<div th:if="${error}">
+    <p th:text="${error}"></p>
+</div>
+<div>
+    <div th:if="${success}">
+        <p th:text="${success}"></p>
+    </div>
+</div>
+
+<h2>Dodaj Kategorię</h2>
+<form th:action="@{/admin/add-category}" action="#" method="post">
+    <div>
+        <label for="name">Nazwa</label>
+        <input id="name" name="name" type="text">
+    </div>
+    <button type="submit">Dodaj</button>
+</form>
+
+<h2>Lista Kategorii</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Nazwa</th>
+        <th></th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr th:each="category : ${categories}">
+        <form action="#" th:action="@{/admin/edit-category/{id} (id=${category.id})}" method="post">
+        <td><input type="text" name="name" th:value="${category.name}"/></td>
+            <td> <button type="submit">Zatwierdź</button></td>
+        </form>
+        <td><a href="#" th:href="@{'/admin/delete-category?id=' +  ${category.id}}">Usuń</a></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
