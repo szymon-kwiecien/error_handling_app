@@ -1,12 +1,12 @@
 INSERT INTO users (first_name, last_name, email, password, company_id) VALUES
-('Jan', 'Kowalski', 'jan.kowalski@example.com', 'haslo123', 1),
+('Jan', 'Kowalski', 'jan.kowalski@example.com', '{noop}haslo123', 1),
 /* PRACOWNIK */
-('Anna', 'Nowak', 'anna.nowak@example.com', 'bezpieczneHaslo!', 2),
+('Anna', 'Nowak', 'anna.nowak@example.com', '{noop}bezpieczneHaslo!', 2),
 /* ADMIN */
-('Piotr', 'Wiśniewski', 'admin@example.com', 'tajneHaslo1', 3),
-('Maria', 'Dąbrowska', 'maria.dabrowska@example.com', 'mojeSuperHaslo', 4),
+('Piotr', 'Wiśniewski', 'admin@example.com', '{noop}tajneHaslo1', 3),
+('Maria', 'Dąbrowska', 'maria.dabrowska@example.com', '{noop}mojeSuperHaslo', 4),
 /* PRACOWNIK */
-('Tomasz', 'Lewandowski', 'tomasz.lewandowski@example.com', '1234pass', 5);
+('Tomasz', 'Lewandowski', 'tomasz.lewandowski@example.com', '{noop}1234pass', 5);
 
 INSERT INTO user_role (name, description) VALUES
 ('USER', 'Zwykły użytkownik z podstawowymi uprawnieniami'),

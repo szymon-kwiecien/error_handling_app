@@ -8,10 +8,7 @@ import pl.error_handling_app.exception.UserAlreadyExistsException;
 import pl.error_handling_app.report.Report;
 import pl.error_handling_app.report.ReportRepository;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -28,6 +25,10 @@ public class UserService {
         this.userRoleRepository = userRoleRepository;
         this.mapper = mapper;
         this.reportRepository = reportRepository;
+    }
+
+    public Optional<UserCredentialsDto> findCredentialsByEmail(String email) {
+        return userRepository.findByEmail(email).map(UserDtoMapper::mapToCredentials);
     }
 
     public List<UserDto> findAllUsers() {

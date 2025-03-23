@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Zaloguj się</title>
+</head>
+<body>
+
+<h2>Zaloguj się</h2>
+<form action="#" th:action="@{/login}" method="post">
+    <p th:if="${param.error}"
+       th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}">
+        Podczas logowania wystapił błąd.
+    </p>
+    <p th:if="${param.logout}">
+        Zostałeś wylogowany.
+    </p>
+    <label for="username">Adres e-mail</label>
+    <input id="username" name="username" placeholder="wpisz adres e-mail...">
+    <label for="password">Hasło</label>
+    <input id="password" name="password" placeholder="wpisz hasło..." type="password">
+    <button type="submit">Zaloguj się</button>
+</form>
+
+</body>
+</html>

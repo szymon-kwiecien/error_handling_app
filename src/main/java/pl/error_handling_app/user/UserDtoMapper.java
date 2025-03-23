@@ -8,6 +8,8 @@ import pl.error_handling_app.company.CompanyRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserDtoMapper {
@@ -43,5 +45,17 @@ public class UserDtoMapper {
         return new UserDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(),
                 user.getCompany().getId(), userRole);
     }
+
+    static UserCredentialsDto mapToCredentials(User user) {
+        String email = user.getEmail();
+        String password = user.getPassword();
+        Set<String> roles = user.getRoles()
+                .stream()
+                .map(UserRole::getName)
+                .collect(Collectors.toSet());
+        return new UserCredentialsDto(email, password, roles);
+    }
+
+
 
 }
