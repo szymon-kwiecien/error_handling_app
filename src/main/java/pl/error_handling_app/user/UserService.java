@@ -1,5 +1,6 @@
 package pl.error_handling_app.user;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.error_handling_app.company.Company;
@@ -18,13 +19,15 @@ public class UserService {
     private final UserRoleRepository userRoleRepository;
     private final UserDtoMapper mapper;
     private final ReportRepository reportRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.userRoleRepository = userRoleRepository;
         this.mapper = mapper;
         this.reportRepository = reportRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Optional<UserCredentialsDto> findCredentialsByEmail(String email) {
@@ -58,7 +61,6 @@ public class UserService {
         user.setEmail(userDto.getEmail());
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
-        user.setPassword(userDto.getPassword()); //Po dodaniu Spring security muszę to zmienić
         user.setCompany(company);
         Set<UserRole> roles = new HashSet<>();
         roles.add(role);
@@ -79,9 +81,16 @@ public class UserService {
         reportRepository.deleteAll(reportsToDelete);
     }
 
+
+
     private void checkUserAlreadyExists(String email) {
         if(userRepository.findByEmail(email).isPresent()) {
             throw new UserAlreadyExistsException("Użytkownik %s już istnieje!".formatted(email));
         }
+    }
+
+    public boolean isPasswordInvalid(String password, String currentPassword) {
+        System.out.println(currentPassword);
+        return !passwordEncoder.matches(password, currentPassword); //Sprawdzam czy hasło podane w formularzy zmianu e-maila jest nieprawidłowe
     }
 }

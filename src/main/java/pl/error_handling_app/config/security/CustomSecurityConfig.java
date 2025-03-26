@@ -1,9 +1,11 @@
 package pl.error_handling_app.config.security;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,14 +20,21 @@ public class CustomSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        PathRequest.H2ConsoleRequestMatcher h2ConsoleRequestMatcher = PathRequest.toH2Console();
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/img/**", "/styles/**", "/scripts/**").permitAll()
+                .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .anyRequest().authenticated()
         );
         http.formLogin(login -> login.loginPage("/login").permitAll())
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout/**", HttpMethod.GET.name()))
                         .logoutSuccessUrl("/login?logout").permitAll());
+        http.headers(
+                config -> config.frameOptions(
+                        HeadersConfigurer.FrameOptionsConfig::sameOrigin
+                ));
+        http.csrf(csrf -> csrf.ignoringRequestMatchers(h2ConsoleRequestMatcher));
         return http.build();
     }
 
