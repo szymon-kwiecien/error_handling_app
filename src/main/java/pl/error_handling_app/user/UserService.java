@@ -90,7 +90,6 @@ public class UserService {
     }
 
     public boolean isPasswordInvalid(String password, String currentPassword) {
-        System.out.println(currentPassword);
-        return !passwordEncoder.matches(password, currentPassword); //Sprawdzam czy hasło podane w formularzy zmianu e-maila jest nieprawidłowe
+        return !passwordEncoder.matches(password, currentPassword); //Sprawdzam czy obecne hasło podane w formularzy zmianu e-maila jest nieprawidłowe
     }
 }

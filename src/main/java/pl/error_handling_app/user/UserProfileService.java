@@ -1,5 +1,7 @@
 package pl.error_handling_app.user;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +30,7 @@ public class UserProfileService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Użytkownik %s nie został znaleziony.".formatted(email)));
         String roleName = user.getRoles().iterator().next().getName();
         String companyName = user.getCompany() != null ? user.getCompany().getName() : "-";
-        return new UserProfileDetailsDto(user.getId(),user.getFirstName(), user.getLastName(), user.getEmail(), roleName,companyName);
+        return new UserProfileDetailsDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), roleName, companyName);
     }
 
     @Transactional
@@ -51,10 +53,11 @@ public class UserProfileService {
         }
 
         User currentUser = userRepository.findByEmail(currentUserEmail).orElseThrow();
-        if (changeEmailDto.getCurrentPassword() == null || userService.isPasswordInvalid(changeEmailDto.getCurrentPassword(),currentUser.getPassword())) {
+        if (changeEmailDto.getCurrentPassword() == null || userService.isPasswordInvalid(changeEmailDto.getCurrentPassword(), currentUser.getPassword())) {
             throw new InvalidEmailException("Obecne hasło jest nieprawidłowe!");
         }
         currentUser.setEmail(changeEmailDto.getNewEmail());
+        updateAuthentication(changeEmailDto.getNewEmail());
     }
 
     @Transactional
@@ -66,9 +69,22 @@ public class UserProfileService {
             throw new InvalidPasswordException("Hasła nie są takie same lub są za krótkie!");
         }
         User currentUser = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
-        if (changePasswordDto.getCurrentPassword() == null || userService.isPasswordInvalid(changePasswordDto.getCurrentPassword(),currentUser.getPassword())) {
+        if (changePasswordDto.getCurrentPassword() == null || userService.isPasswordInvalid(changePasswordDto.getCurrentPassword(), currentUser.getPassword())) {
             throw new InvalidPasswordException("Obecne hasło jest nieprawidłowe!");
+        }
+        if (!userService.isPasswordInvalid(changePasswordDto.getNewPassword(), currentUser.getPassword())) {
+            throw new InvalidPasswordException("Nowe hasło jest takie samo jak obecne!");
         }
         currentUser.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
     }
+
+
+    private void updateAuthentication(String newEmail) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                newEmail, authentication.getCredentials(), authentication.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+    }
+
 }
+
