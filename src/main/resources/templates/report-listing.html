@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista zgłoszeń</title>
+    <style>   /* tymczasowo style dodane inline */
+        table, tr,th,td {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Lista zgłoszeń</h2>
+
+<form method="get">
+    <label>Status:</label>
+    <select name="status" onchange="this.form.submit()">
+        <option value="all" th:selected="${status == 'all'}">Wszystkie</option>
+        <option value="PENDING" th:selected="${status == 'PENDING'}">Oczekujące</option>
+        <option value="UNDER_REVIEW" th:selected="${status == 'UNDER_REVIEW'}">W trakcie</option>
+        <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Zamknięte</option>
+    </select>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Tytuł</th>
+            <th>Kategoria</th>
+            <th>Status</th>
+            <th>Data dodania</th>
+            <th>Przypisany pracownik</th>
+            <th>Zgłaszający użytkownik</th>
+            <th>Ostatnia wiadomość</th>
+            <th>Szczegóły</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="report, status: ${reports}">
+            <td th:text="${(currentPage - 1)*pageSize + status.count}">1</td>
+            <td th:text="${report.title}">Niedziałający panel logowania</td>
+            <td th:text="${report.categoryName}">Ogólne błędy</td>
+            <td th:text="${report.statusName}">W trakcie</td>
+            <td th:text="${#temporals.format(report.dateAdded, 'dd-MM-yyyy HH:mm')}"></td>
+            <td th:text="${report.assignedEmployee}">Jan Kowalski</td>
+            <td th:text="${report.reportingUser}">Anna Kowalska</td>
+            <td th:text="${#temporals.format(report.lastMessageTime, 'dd-MM-yyyy HH:mm')}"></td>
+            <td><a href="#" th:href="@{/report(id=${report.id})}">Sprawdź</a></td>
+        </tr>
+    </tbody>
+
+
+</table>
+
+<div>
+    <a th:if="${currentPage > 1}" th:href="@{/reports(page=${currentPage - 1}, status=${status})}">Poprzednia</a>
+    <span th:text="${currentPage} + ' / ' + ${totalPages}"></span>
+    <a th:if="${currentPage < totalPages}" th:href="@{/reports(page=${currentPage + 1}, status=${status})}">Następna</a>
+</div>
+
+</body>
+</html>
