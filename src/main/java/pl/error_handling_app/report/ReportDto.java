@@ -10,9 +10,12 @@ public class ReportDto {
     private String categoryName;
     private String statusName;
     private LocalDateTime dateAdded;
+    private LocalDateTime dueDate;
+    private LocalDateTime toFirstRespondDate;
     private String reportingUser;
     private String assignedEmployee;
     private LocalDateTime lastMessageTime;
+    private int leftTimePercentage;
 
 
     public Long getId() {
@@ -85,5 +88,29 @@ public class ReportDto {
 
     public void setReportingUser(String reportingUser) {
         this.reportingUser = reportingUser;
+    }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public LocalDateTime getToFirstRespondDate() {
+        return toFirstRespondDate;
+    }
+
+    public void setToFirstRespondDate(LocalDateTime toFirstRespondDate) {
+        this.toFirstRespondDate = toFirstRespondDate;
+    }
+
+    public int getLeftTimePercentage() {
+        return leftTimePercentage;
+    }
+
+    public void setLeftTimePercentage(int leftTimePercentage) {
+        this.leftTimePercentage = leftTimePercentage;
     }
 }

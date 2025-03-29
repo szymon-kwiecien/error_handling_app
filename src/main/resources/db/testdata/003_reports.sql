@@ -10,12 +10,12 @@ INSERT INTO report_category(name) VALUES
 
 INSERT INTO report (title, description, dated_added, due_date, time_to_respond, category_id, status, reporting_user_id, assigned_employee_id) VALUES
 ('Aplikacja nie uruchamia się', 'Po aktualizacji systemu aplikacja przestała działać.', '2024-03-01 10:30:00', '2024-03-05 15:00:00', '2024-03-01 12:30:00', 1, 'PENDING', 1, 2),
-('Błąd podczas logowania', 'Użytkownicy zgłaszają problemy z logowaniem do systemu.', '2024-03-02 09:00:00', '2024-03-06 12:00:00', '2024-03-02 10:00:00', 2, 'UNDER_REVIEW', 2, 3),
+('Błąd podczas logowania', 'Użytkownicy zgłaszają problemy z logowaniem do systemu.', '2024-03-02 09:00:00', '2025-05-10 12:00:00', '2024-03-02 10:00:00', 2, 'UNDER_REVIEW', 2, 3),
 ('Wolne ładowanie strony', 'Główna strona aplikacji ładuje się ponad 10 sekund.', '2024-03-03 14:45:00', '2024-03-08 18:00:00', '2024-03-03 16:00:00', 3, 'PENDING', 3, 4),
 ('Nowa funkcja - eksport danych', 'Potrzebna funkcja eksportu raportów do plików CSV.', '2024-03-04 11:15:00', '2024-03-10 20:30:00', '2024-03-04 13:15:00', 4, 'PENDING', 4, NULL),
 ('Luki bezpieczeństwa', 'Podejrzenie podatności XSS w formularzach.', '2024-03-05 13:20:00', '2024-03-12 14:00:00', '2024-03-05 15:20:00', 5, 'PENDING', 5, 1),
 ('Znikające dane w tabeli', 'Po odświeżeniu strony znikają rekordy w tabeli.', '2024-03-06 08:10:00', '2024-03-09 17:00:00', '2024-03-06 09:00:00', 6, 'COMPLETED', 1, 2),
-('Awarie serwera', 'Serwer restartuje się bez ostrzeżenia.', '2024-03-07 16:30:00', '2024-03-15 09:00:00', '2024-03-07 17:00:00', 7, 'PENDING', 2, 3),
+('Awarie serwera', 'Serwer restartuje się bez ostrzeżenia.', '2024-03-07 16:30:00', '2025-09-15 09:00:00', '2026-08-15 17:00:00', 7, 'PENDING', 2, 3),
 ('Problem z responsywnością', 'Strona nie dostosowuje się poprawnie na urządzeniach mobilnych.', '2024-03-08 10:00:00', '2024-03-14 14:00:00', '2024-03-08 11:00:00', 8, 'UNDER_REVIEW', 3, 4),
 ('Dodanie ciemnego motywu', 'Sugestia dodania trybu ciemnego w aplikacji.', '2024-03-09 12:30:00', '2024-03-20 15:00:00', '2024-03-09 13:30:00', 7, 'PENDING', 4, NULL),
 ('Brak powiadomień email', 'System nie wysyła powiadomień o nowych zgłoszeniach.', '2024-03-10 17:00:00', '2024-03-18 19:30:00', '2024-03-10 18:00:00', 6, 'PENDING', 5, 1),
