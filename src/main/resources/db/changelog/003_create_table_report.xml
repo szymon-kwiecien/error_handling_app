@@ -51,5 +51,4 @@
                 referencedColumnNames="id"/>
 
     </changeSet>
-
 </databaseChangeLog>

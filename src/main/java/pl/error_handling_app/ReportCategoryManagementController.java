@@ -21,7 +21,7 @@ public class ReportCategoryManagementController {
 
     @GetMapping("/manage-categories")
     public String manageCategories(Model model) {
-        model.addAttribute("categories", reportCategoryService.findAllCategories());
+        model.addAttribute("categories", reportCategoryService.getAllCategories());
         return "manage-categories";
     }
 

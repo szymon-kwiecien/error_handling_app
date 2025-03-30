@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Dodaj zgłoszenie</title>
+</head>
+<body>
+
+<div th:if="${error}">
+    <p th:text="${error}">Wystąpił błąd podczas dodawania zgłoszenia. Spróbuj ponownie.</p>
+</div>
+
+<div th:if="${param.success}">
+    <h1>Przyjęliśmy twoje zgłoszenie!</h1>
+    <a href="#" th:href="@{/home}">Powrót do strony głównej</a>
+</div>
+
+<div th:unless="${param.success}">
+    <form method="post" action="#" th:action="@{/reports/add}" th:object="${report}" enctype="multipart/form-data">
+        <h2>Dodaj nowe zgłoszenie</h2>
+        <div th:if="${param.invalid}">
+            <strong>Błędne dane!</strong> Nie podano wszyskich danych lub dane są niepoprawne!
+        </div>
+
+
+        <div>
+            <label for="title">Tytuł</label>
+            <input type="text" name="title" id="title" th:field="*{title}" placeholder="Wpisz tytuł...">
+        </div>
+
+        <div>
+            <label for="description">Opis</label>
+            <textarea th:field="*{description}" name="description" id="description" rows="10" placeholder="Opisz zdarzenie..."></textarea>
+        </div>
+
+        <div>
+            <label for="">Kategoria</label>
+            <select th:field="*{categoryId}" name="categoryId" id="" required>
+                <option value="" disabled selected>Wybierz kategorię</option>
+                <th:block th:each="category : ${categories}">
+                    <option th:value="${category.id}" th:text="${category.name}"></option>
+                </th:block>
+            </select>
+        </div>
+
+        <div>
+            <label for="file">Dołącz załączniki</label>
+            <input th:field="*{file}" type="file" name="file" id="file" multiple>
+        </div>
+        <div>
+            <button type="submit">Dodaj zgłoszenie</button>
+        </div>
+    </form>
+</div>
+
+
+</body>
+</html>

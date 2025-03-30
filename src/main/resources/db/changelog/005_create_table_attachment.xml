@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.2.xsd">
+
+    <changeSet id="005-1" author="szymon-kw">
+        <createTable tableName="attachment">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="file_path" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="adding_user" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_size" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_icon_class" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="report_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="attachment"
+                baseColumnNames="report_id"
+                constraintName="fk_attachment_report"
+                referencedTableName="report"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+    </changeSet>
+
+</databaseChangeLog>

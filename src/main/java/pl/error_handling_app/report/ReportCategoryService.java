@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class ReportCategoryService {
@@ -15,8 +16,12 @@ public class ReportCategoryService {
         this.reportCategoryRepository = reportCategoryRepository;
     }
 
-    public List<ReportCategoryDto> findAllCategories() {
+    public List<ReportCategoryDto> getAllCategories() {
         return reportCategoryRepository.findAll().stream().map(this::map).toList();
+    }
+
+    public Optional<ReportCategory> getCategoryById(Long id) {
+        return reportCategoryRepository.findById(id);
     }
 
     public void addCategory(ReportCategoryDto categoryDto) {

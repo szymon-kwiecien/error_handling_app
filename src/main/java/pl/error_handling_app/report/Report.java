@@ -1,9 +1,11 @@
 package pl.error_handling_app.report;
 
 import jakarta.persistence.*;
+import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.user.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Report {
@@ -24,6 +26,9 @@ public class Report {
     private User reportingUser;
     @ManyToOne
     private User assignedEmployee;
+    @OneToMany
+    @JoinColumn(name = "report_id")
+    private List<Attachment> attachments;
     private Double addedToFirstReactionDuration;
     private Double addedToCompleteDuration;
 
@@ -121,5 +126,13 @@ public class Report {
 
     public void setAddedToCompleteDuration(Double addedToCompleteDuration) {
         this.addedToCompleteDuration = addedToCompleteDuration;
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
     }
 }
