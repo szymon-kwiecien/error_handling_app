@@ -2,6 +2,7 @@ package pl.error_handling_app.report;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NewReportDto {
@@ -9,7 +10,7 @@ public class NewReportDto {
     private String title;
     private String description;
     private Long categoryId;
-    private List<MultipartFile> file;
+    private List<MultipartFile> file = new ArrayList<>();
 
     public String getTitle() {
         return title;

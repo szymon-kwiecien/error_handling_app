@@ -65,8 +65,11 @@ public class ReportController {
         }
         try {
             reportService.addNewReport(report);
-        } catch(UsernameNotFoundException | IllegalArgumentException e) {
-            model.addAttribute("error", "Wystąpił błąd podczas dodawania zgłoszenia. Spróbuj ponownie.");
+        } catch(Exception e) {
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "Wystąpił błąd podczas dodawania zgłoszenia. Spróbuj ponownie.";
+            model.addAttribute("error", errorMessage);
+            model.addAttribute("report",report);
+            model.addAttribute("categories", reportCategoryService.getAllCategories());
             return "add-new-report";
         }
             return "redirect:/reports/add?success";

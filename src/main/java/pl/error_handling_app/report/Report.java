@@ -26,7 +26,7 @@ public class Report {
     private User reportingUser;
     @ManyToOne
     private User assignedEmployee;
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "report_id")
     private List<Attachment> attachments;
     private Double addedToFirstReactionDuration;

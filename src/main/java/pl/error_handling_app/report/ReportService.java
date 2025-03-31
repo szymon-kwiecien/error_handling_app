@@ -1,11 +1,14 @@
 package pl.error_handling_app.report;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.file.FileService;
@@ -33,6 +36,7 @@ public class ReportService {
     private final ReportCategoryService reportCategoryService;
     private final UserRepository userRepository;
     private final FileService fileService;
+    Logger logger = LoggerFactory.getLogger(getClass());
 
     public ReportService(ReportRepository reportRepository, ReportCategoryService reportCategoryService, UserRepository userRepository, FileService fileService) {
         this.reportRepository = reportRepository;
@@ -63,19 +67,25 @@ public class ReportService {
         return (int) ((remainingDuration * 100) / totalDuration); //ilosc pozostalego czasu wzgledem calkowitego czasu (w procentach)
     }
 
+    @Transactional
     public void addNewReport(NewReportDto newReportDto) {
 
         ReportCategory category = getCategory(newReportDto.getCategoryId());
         User user = getCurrentUser();
         Report report = createReport(newReportDto, user, category);
-
+        boolean reportHasValidFiles = checkReportHasValidFiles(newReportDto);
         //zapis dodanych zalaczników
-        if (!newReportDto.getFile().isEmpty()) {
+        if (reportHasValidFiles) {
             List<Attachment> attachments = saveAttachments(newReportDto.getFile(), user);
             report.setAttachments(attachments);
         }
-
         reportRepository.save(report);
+    }
+
+    private boolean checkReportHasValidFiles(NewReportDto newReportDto) {
+        return newReportDto.getFile().stream()
+                .anyMatch(file ->
+                        file != null && file.getOriginalFilename() != null && !file.getOriginalFilename().isBlank() && file.getSize() > 0);
     }
 
     private ReportCategory getCategory(Long categoryId) {
@@ -107,7 +117,7 @@ public class ReportService {
 
     private List<Attachment> saveAttachments(List<MultipartFile> files, User user) {
         List<Attachment> attachments = new ArrayList<>();
-
+        fileService.createDirectoryForAttachmentsIfNotExists();
         for (MultipartFile file : files) {
             String fileName = file.getOriginalFilename();
             Path filePath = Paths.get("uploads/" + fileName);
@@ -129,7 +139,8 @@ public class ReportService {
                 attachments.add(attachment);
 
             } catch (IOException e) {
-                System.err.println("Błąd podczas zapisywania pliku: " + e.getMessage());
+                logger.error("Wystąpil błąd podczas zapisywania pliku {}: {}", filePath, e.getMessage(), e);
+                throw new RuntimeException("Wystąpił błąd podczas zapisywania plików. Spróbuj ponownie.");
             }
         }
         return attachments;

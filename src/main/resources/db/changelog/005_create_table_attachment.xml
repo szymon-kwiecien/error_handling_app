@@ -29,7 +29,6 @@
                 <constraints nullable="false"/>
             </column>
             <column name="report_id" type="bigint">
-                <constraints nullable="false"/>
             </column>
         </createTable>
 
@@ -40,7 +39,6 @@
                 referencedTableName="report"
                 referencedColumnNames="id"
                 onDelete="CASCADE"/>
-
     </changeSet>
 
 </databaseChangeLog>
