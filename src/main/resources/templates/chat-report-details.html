@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">>
+<head>
+    <meta charset="UTF-8">
+    <title>Szczegóły zgłoszenia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://kit.fontawesome.com/57474b4673.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div>
+    <div>
+        <div>
+            <h5>
+                Status: <span th:styleappend="'color: ' + ${statusColor}" th:text="${report.getStatus().description}">W trakcie</span>
+            </h5>
+        </div>
+        <a th:if="${report.getStatus().description == 'Zakończone'}" sec:authorize="!hasRole('ROLE_USER')" th:href="@{'/reports/delete?reportId=' + ${reportId}}">Usuń</a>
+        <a th:unless="${report.getStatus().description == 'Zakończone'}" sec:authorize="!hasRole('ROLE_USER')" th:href="@{'/reports/close?reportId=' + ${reportId}}">Zamknij Zgłoszenie</a>
+
+    </div>
+    <div>
+
+        <div>
+            <div>Tytuł zgłoszenia:</div>
+            <div th:text="${report.getTitle()}">Tytuł zgłoszeniaTytuł zgłoszeniaTytuł zgłoszenia</div>
+        </div>
+        <div>
+            <div>Opis:</div>
+            <div th:text="${report.getDescription()}">Opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia
+                opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia</div>
+        </div>
+        <div>
+            <div>Kategoria:</div>
+            <div th:text="${report.category?.getName() ?: 'Brak'}">Problemy ogólne</div>
+        </div>
+        <div>
+            <div>Przydzielony pracownik:</div>
+            <div>
+                <span th:text="${report.assignedEmployee?.getEmail() ?: 'Brak'}">employee@test.pl</span>
+                <form th:unless="${report.getStatus().description == 'Zakończone'}" sec:authorize="hasRole('ROLE_ADMINISTRATOR')" th:action="@{/reports/assign}" method="post">
+                    <input type="hidden" name="reportId" th:value="${report.id}">
+                    <select name="employeeId">
+                        <option value="" disabled selected>Wybierz pracownika</option>
+                        <th:block th:each="employee : ${employees}">
+                            <option th:value="${employee.id}"
+                                    th:selected="${report.assignedEmployee?.id == employee.id}"
+                                    th:text="${employee.email}">
+                            </option>
+                        </th:block>
+                    </select>
+                    <button type="submit">Zapisz</button>
+                </form>
+            </div>
+
+        </div>
+        <div sec:authorize="!hasRole('ROLE_USER')">
+            <div>Zgłaszający:</div>
+            <div th:text="${report.getReportingUser().getEmail()}">user@ok.pl</div>
+        </div>
+        <div sec:authorize="!hasRole('ROLE_USER')">
+            <div>Firma:</div>
+            <div th:text="${report.getReportingUser().getCompany().getName()}">New Techologies SA</div>
+        </div>
+
+    </div>
+    <div th:unless="${report.getStatus().description == 'Zakończone'}" sec:authorize="!hasRole('ROLE_USER')">
+        <div th:if="${report.getStatus().description == 'Oczekujące'}">
+            <strong>Czas na odpowiedź:</strong>
+            <div style="height: 20px">
+                <div th:style="|background-color: ${timeToRespondColor}; width: ${timeToRespondProgress};|"></div>
+                <span th:text="|${report.getRemainingTime(true).days} dni, ${report.getRemainingTime(true).hours} godz. ${report.getRemainingTime(true).minutes} min.|"
+                      style="z-index: 2;">5 Dni. 10 Godz. 50 Min.</span>
+            </div>
+        </div>
+        <div>
+            <strong>Pozostały czas na rozwiązanie:</strong>
+            <div style="height: 20px">
+                <div th:style="|background-color: ${timeToResolveColor}; width: ${timeToResolveProgress};|"></div>
+                <span th:text="|${report.getRemainingTime(false).days} dni, ${report.getRemainingTime(false).hours} godz. ${report.getRemainingTime(false).minutes} min.|"
+                      style="z-index: 2;">5 Dni. 10 Godz. 50 Min.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <h2>
+        Załączniki
+    </h2>
+
+<div>
+    <div th:each="attachment : ${attachments}">
+        <div>
+                <i th:class="|fa-solid fa-4x ${attachment.fileIconClass}|"></i>
+            <div>
+                <div>
+                    <h6 th:text="${attachment.fileName}">testowy.pdf</h6>
+                    <p><small th:text="${attachment.fileSize}">5 MB</small></p>
+                    <p th:text="|Przesłał: ${attachment.addingUser}|">jankowalski@ok.pl</p>
+                    <p th:text="${#temporals.format(attachment.timestamp, 'HH:mm, dd.MM.yyyy')}"> 14:30, 28.03.2025</p>
+                </div>
+                <div>
+                    <a th:href="${attachment.filePath}" target="_blank">
+                        <i class="fa-solid fa-2xl fa-share-from-square"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -83,4 +83,10 @@ public class User {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+    public boolean hasRole(String role) {
+        return roles != null && roles.stream()
+                .map(UserRole::getName)
+                .anyMatch(roleString -> roleString.equals(role));
+    }
 }
