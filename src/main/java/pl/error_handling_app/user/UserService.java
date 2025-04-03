@@ -10,6 +10,7 @@ import pl.error_handling_app.report.Report;
 import pl.error_handling_app.report.ReportRepository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -28,6 +29,17 @@ public class UserService {
         this.mapper = mapper;
         this.reportRepository = reportRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public List<UserInReportDto> findUsersByRoleName(String roleName) {
+        return userRepository.findALlByRoles_Name(roleName).stream().map(UserDtoMapper::mapToUserInReportDto).toList();
+    }
+
+    public Optional<UserDetailsDto> findUserDetailsByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(user -> new UserDetailsDto(user.getEmail(), user.getRoles().stream()
+                        .map(UserRole::getName)
+                        .collect(Collectors.toSet())));
     }
 
     public Optional<UserCredentialsDto> findCredentialsByEmail(String email) {

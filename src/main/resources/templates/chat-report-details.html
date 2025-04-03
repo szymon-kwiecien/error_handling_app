@@ -33,19 +33,19 @@
         </div>
         <div>
             <div>Kategoria:</div>
-            <div th:text="${report.category?.getName() ?: 'Brak'}">Problemy ogólne</div>
+            <div th:text="${report.categoryName ?: 'Brak'}">Problemy ogólne</div>
         </div>
         <div>
             <div>Przydzielony pracownik:</div>
             <div>
-                <span th:text="${report.assignedEmployee?.getEmail() ?: 'Brak'}">employee@test.pl</span>
+                <span th:text="${report.assignedEmployee ?: 'Brak'}">employee@test.pl</span>
                 <form th:unless="${report.getStatus().description == 'Zakończone'}" sec:authorize="hasRole('ROLE_ADMINISTRATOR')" th:action="@{/reports/assign}" method="post">
-                    <input type="hidden" name="reportId" th:value="${report.id}">
+                    <input type="hidden" name="reportId" th:value="${reportId}">
                     <select name="employeeId">
                         <option value="" disabled selected>Wybierz pracownika</option>
                         <th:block th:each="employee : ${employees}">
                             <option th:value="${employee.id}"
-                                    th:selected="${report.assignedEmployee?.id == employee.id}"
+                                    th:selected="${report.assignedEmployeeId == employee.id}"
                                     th:text="${employee.email}">
                             </option>
                         </th:block>
@@ -57,11 +57,11 @@
         </div>
         <div sec:authorize="!hasRole('ROLE_USER')">
             <div>Zgłaszający:</div>
-            <div th:text="${report.getReportingUser().getEmail()}">user@ok.pl</div>
+            <div th:text="${report.getReportingUser()}">user@ok.pl</div>
         </div>
         <div sec:authorize="!hasRole('ROLE_USER')">
             <div>Firma:</div>
-            <div th:text="${report.getReportingUser().getCompany().getName()}">New Techologies SA</div>
+            <div th:text="${report.getReportingUserCompanyName()}">New Techologies SA</div>
         </div>
 
     </div>

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import pl.error_handling_app.attachment.Attachment;
+import pl.error_handling_app.attachment.AttachmentDto;
 import pl.error_handling_app.file.FileService;
 import pl.error_handling_app.user.User;
 import pl.error_handling_app.user.UserRepository;
@@ -44,6 +45,10 @@ public class ReportService {
         this.reportCategoryService = reportCategoryService;
         this.userRepository = userRepository;
         this.fileService = fileService;
+    }
+
+    public Optional<ReportDetailsDto> findReportById(Long reportId) {
+        return reportRepository.findById(reportId).map(this::mapToReportDetailsDto);
     }
 
     public Page<ReportDto> findReports(String titelFragment, ReportStatus status, Pageable pageable) {
@@ -166,6 +171,23 @@ public class ReportService {
         reportDto.setReportingUser(reportingUser);
         reportDto.setLastMessageTime(LocalDateTime.MAX); //tymczasowo (póki nie wprowadziłem modułu czatu)
         return reportDto;
+    }
+
+    private ReportDetailsDto mapToReportDetailsDto(Report report) {
+        String categoryName = report.getCategory() != null ? report.getCategory().getName() : "-";
+        User reportingUser = report.getReportingUser();
+        String reportingUserEmail = reportingUser != null ? reportingUser.getEmail() : "brak";
+        String reportingUserCompanyName = reportingUser != null &&
+                reportingUser.getCompany() != null ? reportingUser.getCompany().getName() : "brak";
+        User assignedEmployee = report.getAssignedEmployee();
+        Long assignedEmployeeId = assignedEmployee != null ? assignedEmployee.getId() : null;
+        String assignedEmployeeEmail = assignedEmployee != null ? assignedEmployee.getEmail() : "brak";
+        List<AttachmentDto> attachments = report.getAttachments()
+                .stream().map(attachment -> new AttachmentDto(attachment.getFilePath(), attachment.getAddingUser(),
+                        attachment.getTimestamp(), attachment.getFileName(), attachment.getFileSize(), attachment.getFileIconClass())).toList();
+        return new ReportDetailsDto(report.getTitle(), report.getDescription(), report.getDatedAdded(),
+                report.getDueDate(), report.getTimeToRespond(), categoryName, report.getStatus(), reportingUserEmail,
+                reportingUserCompanyName, assignedEmployeeId, assignedEmployeeEmail, attachments);
     }
 
 

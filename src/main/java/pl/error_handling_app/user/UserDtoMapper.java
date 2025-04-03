@@ -56,6 +56,10 @@ public class UserDtoMapper {
         return new UserCredentialsDto(email, password, roles);
     }
 
+    static UserInReportDto mapToUserInReportDto(User user) {
+        return new UserInReportDto(user.getId(), user.getEmail(), user.getCompany().getName());
+    }
+
 
 
 }
