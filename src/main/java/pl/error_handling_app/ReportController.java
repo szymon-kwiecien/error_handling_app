@@ -18,8 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.error_handling_app.report.*;
 
-import java.awt.*;
-
 @Controller
 @RequestMapping("/reports")
 public class ReportController {
@@ -104,6 +102,21 @@ public class ReportController {
         }
         return "redirect:/report?id=" + reportId;
     }
+
+    @Secured("ROLE_ADMINISTRATOR")
+    @PostMapping("/assign")
+    public String assignEmployeeToReport(@RequestParam Long reportId, @RequestParam Long employeeId,
+                                         RedirectAttributes redirectAttributes) {
+
+        try {
+            reportService.assignEmployeeToReport(reportId, employeeId);
+            redirectAttributes.addFlashAttribute("successMessage", "Pracownik został przypisany do zgłoszenia.");
+        } catch(IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Podczas przypisywania pracownika wystąpił błąd: " + e.getMessage());
+        }
+        return "redirect:/report?id=" + reportId;
+    }
+
 
     private Sort getSort(String sort) {
         return switch (sort) {

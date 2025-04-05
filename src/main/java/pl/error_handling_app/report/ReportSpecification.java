@@ -2,6 +2,7 @@ package pl.error_handling_app.report;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import pl.error_handling_app.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,14 @@ public class ReportSpecification {
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    public static Specification<Report> filterByAssignedEmployee(User user) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("assignedEmployee"), user);
+    }
+
+    public static Specification<Report> filterByReportingUser(User user) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("reportingUser"), user);
     }
 }
 

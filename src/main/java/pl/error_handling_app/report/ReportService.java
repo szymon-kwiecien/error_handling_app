@@ -7,13 +7,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.attachment.AttachmentDto;
+import pl.error_handling_app.exception.UserNotFoundException;
 import pl.error_handling_app.file.FileService;
 import pl.error_handling_app.user.User;
 import pl.error_handling_app.user.UserRepository;
@@ -55,8 +55,17 @@ public class ReportService {
     }
 
     public Page<ReportDto> findReports(String titelFragment, ReportStatus status, Pageable pageable) {
+        User user = getCurrentUser();
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getName().equals("ADMINISTRATOR"));
+        boolean isEmployee = user.getRoles().stream().anyMatch(role -> role.getName().equals("EMPLOYEE"));
         Specification<Report> reportSpecification = ReportSpecification.filterBy(titelFragment, status);
-        return reportRepository.findAll(reportSpecification, pageable).map(this::mapToDto);
+        if (isAdmin) {
+            return reportRepository.findAll(reportSpecification, pageable).map(this::mapToDto);
+        } else if (isEmployee) {
+            return reportRepository.findAll(Specification.where(reportSpecification).and(ReportSpecification.filterByAssignedEmployee(user)),pageable).map(this::mapToDto);
+        } else {
+            return reportRepository.findAll(Specification.where(reportSpecification).and(ReportSpecification.filterByReportingUser(user)),pageable).map(this::mapToDto);
+        }
     }
 
     public int calculateTimeLeftPercentage(ReportDto report) {
@@ -105,7 +114,7 @@ public class ReportService {
     private User getCurrentUser() {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("Użytkownik %s nie został znaleziony.".formatted(currentUserEmail)));
+                .orElseThrow(() -> new UserNotFoundException("Użytkownik %s nie został znaleziony.".formatted(currentUserEmail)));
     }
 
 
@@ -203,6 +212,8 @@ public class ReportService {
     public void closeReport(Long reportId, String currentUserName) {
         Report report = getAuthorizedReport(reportId, currentUserName);
         report.setStatus(ReportStatus.COMPLETED);
+        report.setAddedToCompleteDuration(); //po zamknięciu zgłoszenia ustawiam ilość czasu między dodaniem zgłoszenia a jego zamknięciem, która będzie
+        //wykorzystana do utworzenia statystyk w raportach
     }
 
     private Report getAuthorizedReport(Long reportId, String currentUserName) {
@@ -225,4 +236,21 @@ public class ReportService {
                         .anyMatch("ADMINISTRATOR"::equals);
     }
 
+    @Transactional
+    public void assignEmployeeToReport(Long reportId, Long employeeId) {
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Zgłoszenie nie zostało znalezione"));
+        User employee = userRepository.findById(employeeId)
+                .orElseThrow(() -> new IllegalArgumentException("Wybrany pracownik nie został znaleziony"));
+
+        if (employee.getRoles().stream().noneMatch(role -> role.getName().equals("EMPLOYEE"))) {
+            throw new IllegalArgumentException("Wybrany użytkownik nie jest pracownikiem!");
+        }
+        if(report.getAssignedEmployee() == null) {
+            report.setAddedToFirstReactionDuration(); //przy pierwszym przypisaniu pracownika do zgłoszenia zmienia się status na "UNDER_REVIEW"
+            // a więc czas między dodaniem zgłoszenia a pierwszym przypisaniem pracownika do zgłoszenia to czas pierwszej reakcji na zgłoszenie
+        }
+        report.setAssignedEmployee(employee);
+        report.setStatus(ReportStatus.UNDER_REVIEW);
+    }
 }
