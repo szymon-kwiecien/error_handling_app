@@ -9,6 +9,9 @@
 </head>
 <body>
 
+<p th:if="${successMessage}" th:text="${successMessage}">Zgłoszenie zostało zamknięte</p>
+<p th:if="${errorMessage}" th:text="${errorMessage}">Wystąpił błąd podczas zamykania zgłoszenia</p>
+
 <div>
     <div>
         <div>
@@ -16,19 +19,26 @@
                 Status: <span th:styleappend="'color: ' + ${statusColor}" th:text="${report.getStatus().description}">W trakcie</span>
             </h5>
         </div>
-        <a th:if="${report.getStatus().description == 'Zakończone'}" sec:authorize="!hasRole('ROLE_USER')" th:href="@{'/reports/delete?reportId=' + ${reportId}}">Usuń</a>
-        <a th:unless="${report.getStatus().description == 'Zakończone'}" sec:authorize="!hasRole('ROLE_USER')" th:href="@{'/reports/close?reportId=' + ${reportId}}">Zamknij Zgłoszenie</a>
+        <form sec:authorize="hasRole('ROLE_ADMINISTRATOR')" th:action="@{'/reports/delete'}" method="post">
+            <input type="hidden" name="reportId" th:value="${reportId}" />
+            <button type="submit">Usuń</button>
+        </form>
+        <form th:if="${report.getStatus().description != 'Zakończone'}" sec:authorize="hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_EMPLOYEE')"
+              th:action="@{'/reports/close'}" method="post">
+            <input type="hidden" name="reportId" th:value="${reportId}" />
+            <button type="submit">Zamknij zgłoszenie</button>
+        </form>
 
     </div>
     <div>
 
         <div>
             <div>Tytuł zgłoszenia:</div>
-            <div th:text="${report.getTitle()}">Tytuł zgłoszeniaTytuł zgłoszeniaTytuł zgłoszenia</div>
+            <div th:text="${report.title}">Tytuł zgłoszeniaTytuł zgłoszeniaTytuł zgłoszenia</div>
         </div>
         <div>
             <div>Opis:</div>
-            <div th:text="${report.getDescription()}">Opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia
+            <div th:text="${report.description}">Opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia
                 opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia</div>
         </div>
         <div>
@@ -57,11 +67,11 @@
         </div>
         <div sec:authorize="!hasRole('ROLE_USER')">
             <div>Zgłaszający:</div>
-            <div th:text="${report.getReportingUser()}">user@ok.pl</div>
+            <div th:text="${report.reportingUser}">user@ok.pl</div>
         </div>
         <div sec:authorize="!hasRole('ROLE_USER')">
             <div>Firma:</div>
-            <div th:text="${report.getReportingUserCompanyName()}">New Techologies SA</div>
+            <div th:text="${report.reportingUserCompanyName}">New Techologies SA</div>
         </div>
 
     </div>

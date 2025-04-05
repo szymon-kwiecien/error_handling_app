@@ -66,10 +66,10 @@ public class ChatController {
 
 
     private boolean hasAccessToChat(UserDetailsDto user, ReportDetailsDto report) {
-        if(user.getRoles().contains("ADMINISTRATOR") || report.getReportingUser().contains(user.getEmail())) {
+        if(user.getRoles().contains("ADMINISTRATOR") || report.getReportingUser().equals(user.getEmail())) {
             return true;
         }
-        return report.getAssignedEmployee() != null && report.getAssignedEmployee().contains(user.getEmail());
+        return report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user.getEmail());
     }
 
     private int calculateProgress(LocalDateTime startTime, LocalDateTime endTime) {

@@ -54,7 +54,6 @@ public class UserService {
             checkUserAlreadyExists(newUser.getEmail());
             User userToSave = mapper.map(newUser);
             userRepository.save(userToSave);
-
     }
 
     @Transactional

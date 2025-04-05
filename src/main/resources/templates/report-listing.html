@@ -11,6 +11,10 @@
 </head>
 <body>
 
+<p th:if="${successMessage}" th:text="${successMessage}">Zgłoszenie zostało pomyśnie usunięte</p>
+<p th:if="${errorMessage}" th:text="${errorMessage}">Wystąpił błąd podczas usuwania zgłoszenia</p>
+
+
 <h2>Lista zgłoszeń</h2>
 
 <form method="get">

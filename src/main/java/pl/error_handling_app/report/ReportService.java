@@ -5,16 +5,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.attachment.AttachmentDto;
 import pl.error_handling_app.file.FileService;
 import pl.error_handling_app.user.User;
 import pl.error_handling_app.user.UserRepository;
+import pl.error_handling_app.user.UserRole;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -190,5 +193,36 @@ public class ReportService {
                 reportingUserCompanyName, assignedEmployeeId, assignedEmployeeEmail, attachments);
     }
 
+    @Transactional
+    public void deleteReport(Long reportId, String currentUserName) {
+        Report report = getAuthorizedReport(reportId, currentUserName);
+        reportRepository.delete(report);
+    }
+
+    @Transactional
+    public void closeReport(Long reportId, String currentUserName) {
+        Report report = getAuthorizedReport(reportId, currentUserName);
+        report.setStatus(ReportStatus.COMPLETED);
+    }
+
+    private Report getAuthorizedReport(Long reportId, String currentUserName) {
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zgłoszenie nie zostało znalezione."));
+
+        User user = userRepository.findByEmail(currentUserName)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Błąd uwierzytelnienia."));
+
+        if (!hasPermissionToCloseOrDeleteReport(report, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Brak uprawnień do wykonania tej operacji.");
+        }
+        return report;
+    }
+
+    private boolean hasPermissionToCloseOrDeleteReport(Report report, User user) {
+        return (report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user)) ||
+                user.getRoles().stream()
+                        .map(UserRole::getName)
+                        .anyMatch("ADMINISTRATOR"::equals);
+    }
 
 }
