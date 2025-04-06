@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.error_handling_app.report.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/reports")
@@ -113,6 +116,20 @@ public class ReportController {
             redirectAttributes.addFlashAttribute("successMessage", "Pracownik został przypisany do zgłoszenia.");
         } catch(IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Podczas przypisywania pracownika wystąpił błąd: " + e.getMessage());
+        }
+        return "redirect:/report?id=" + reportId;
+    }
+
+    @PostMapping("/attachment/upload")
+    public String uploadAttachment(@RequestParam Long reportId, @RequestParam List<MultipartFile> files,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            reportService.addAttachmentsToExistingReport(reportId, files);
+            redirectAttributes.addFlashAttribute("successMessage", "Załączniki zostały dodane pomyślnie.");
+        } catch (ResponseStatusException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Nie znaleziono zgłoszenia.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Wystąpił błąd podczas dodawania załączników: " + e.getMessage());
         }
         return "redirect:/report?id=" + reportId;
     }

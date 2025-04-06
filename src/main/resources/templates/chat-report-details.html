@@ -120,6 +120,21 @@
     </div>
 </div>
 
+<form th:action="@{/reports/attachment/upload}" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="reportId" th:value="${reportId}" />
+
+    <div>
+        <label for="attachmentFiles">Wybierz załączniki:</label>
+        <input type="file" id="attachmentFiles" name="files" multiple
+               th:disabled="${report.status.description == 'Zakończone'}" />
+    </div>
+
+    <button type="submit"
+            th:disabled="${report.status.description == 'Zakończone'}">
+        Dodaj załączniki
+    </button>
+</form>
+
 
 </body>
 </html>

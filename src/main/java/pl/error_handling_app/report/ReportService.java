@@ -75,9 +75,11 @@ public class ReportService {
         Instant dueDate = report.getDueDate().atZone(ZoneId.systemDefault()).toInstant(); // gdy zgłoszenie ma status różny od PENDING
 
         long totalDuration = report.getStatusName()
-                .equalsIgnoreCase(PENDING_STATUS_POLISH_NAME) ? Duration.between(dateAdded, toFirstRespondDate).toSeconds() : Duration.between(dateAdded, dueDate).toSeconds();
+                .equalsIgnoreCase(PENDING_STATUS_POLISH_NAME) ?
+                Duration.between(dateAdded, toFirstRespondDate).toSeconds() : Duration.between(dateAdded, dueDate).toSeconds();
         long remainingDuration = report.getStatusName()
-                .equalsIgnoreCase(PENDING_STATUS_POLISH_NAME) ? Duration.between(now, toFirstRespondDate).toSeconds() : Duration.between(now, dueDate).toSeconds();
+                .equalsIgnoreCase(PENDING_STATUS_POLISH_NAME) ?
+                Duration.between(now, toFirstRespondDate).toSeconds() : Duration.between(now, dueDate).toSeconds();
 
         if (remainingDuration <= 0) return 0; //gdy minął termin to zwracamy 0
         if (remainingDuration >= totalDuration) return 100; //gdy pozostały czas jest wiekszy lub równy całkowitemu to zwracam 100
@@ -91,7 +93,7 @@ public class ReportService {
         ReportCategory category = getCategory(newReportDto.getCategoryId());
         User user = getCurrentUser();
         Report report = createReport(newReportDto, user, category);
-        boolean reportHasValidFiles = checkReportHasValidFiles(newReportDto);
+        boolean reportHasValidFiles = areFilesValid(newReportDto.getFile());
         //zapis dodanych zalaczników
         if (reportHasValidFiles) {
             List<Attachment> attachments = saveAttachments(newReportDto.getFile(), user);
@@ -100,8 +102,8 @@ public class ReportService {
         reportRepository.save(report);
     }
 
-    private boolean checkReportHasValidFiles(NewReportDto newReportDto) {
-        return newReportDto.getFile().stream()
+    private boolean areFilesValid(List<MultipartFile> files) {
+        return files.stream()
                 .anyMatch(file ->
                         file != null && file.getOriginalFilename() != null && !file.getOriginalFilename().isBlank() && file.getSize() > 0);
     }
@@ -252,5 +254,35 @@ public class ReportService {
         }
         report.setAssignedEmployee(employee);
         report.setStatus(ReportStatus.UNDER_REVIEW);
+    }
+
+    @Transactional
+    public void addAttachmentsToExistingReport(Long reportId, List<MultipartFile> files) {
+
+        if (!areFilesValid(files)) {
+            throw new IllegalArgumentException("Pliki są niepoprawne. Spróbuj jeszcze raz");
+        }
+
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zgłoszenie nie istnieje"));
+
+        User currentUser = getCurrentUser();
+
+        if (!hasPermissionToAddAttachments(report, currentUser)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Nie masz uprawnień aby dodać załączniki do tego zgłoszenia");
+        }
+        List<Attachment> newAttachments = saveAttachments(files, currentUser);
+        if (report.getAttachments() == null) {
+            report.setAttachments(new ArrayList<>());
+        }
+        report.getAttachments().addAll(newAttachments);
+    }
+
+    private boolean hasPermissionToAddAttachments(Report report, User user) {
+        boolean isAdmin = user.getRoles().stream()
+                .map(UserRole::getName).anyMatch("ADMINISTRATOR"::equals);
+        boolean isReportingUser = report.getReportingUser().equals(user);
+        boolean isAssignedEmployee = report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user);
+        return isReportingUser || isAssignedEmployee || isAdmin;
     }
 }
