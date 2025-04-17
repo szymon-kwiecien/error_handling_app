@@ -1,13 +1,14 @@
 package pl.error_handling_app.chat;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.report.ReportDetailsDto;
 import pl.error_handling_app.report.ReportService;
@@ -24,10 +25,12 @@ public class ChatController {
 
     private final UserService userService;
     private final ReportService reportService;
+    private final ChatService chatService;
 
-    public ChatController(UserService userService, ReportService reportService) {
+    public ChatController(UserService userService, ReportService reportService, ChatService chatService) {
         this.userService = userService;
         this.reportService = reportService;
+        this.chatService = chatService;
     }
 
     @GetMapping("/report")
@@ -62,6 +65,28 @@ public class ChatController {
             return "chat-report-details";
         }
         throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
+
+
+    @PostMapping("api/chat/send")
+    @ResponseBody
+    public ResponseEntity<?> sendMessage(@RequestBody ChatMessageDto dto) {
+
+        try {
+            chatService.sendMessage(dto);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/api/chat/history/{reportId}")
+    @ResponseBody
+    public Page<ChatMessageDto> getMessages(@PathVariable Long reportId,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "20") int size) {
+        return chatService.getMessagesForReport(reportId, page, size);
     }
 
 

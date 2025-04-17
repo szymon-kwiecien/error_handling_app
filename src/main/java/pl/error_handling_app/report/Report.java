@@ -2,10 +2,12 @@ package pl.error_handling_app.report;
 
 import jakarta.persistence.*;
 import pl.error_handling_app.attachment.Attachment;
+import pl.error_handling_app.chat.ChatMessage;
 import pl.error_handling_app.user.User;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,6 +29,8 @@ public class Report {
     private User reportingUser;
     @ManyToOne
     private User assignedEmployee;
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
+    private List<ChatMessage> messages = new ArrayList<>();
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "report_id")
     private List<Attachment> attachments;
@@ -135,5 +139,13 @@ public class Report {
 
     public void setAttachments(List<Attachment> attachments) {
         this.attachments = attachments;
+    }
+
+    public List<ChatMessage> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<ChatMessage> messages) {
+        this.messages = messages;
     }
 }

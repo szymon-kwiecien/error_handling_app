@@ -95,6 +95,17 @@
     </div>
 </div>
 
+<h2>Czat</h2>
+
+<div id="chat-container" th:data-report-id="${reportId}" th:data-username="${username}" style="border: 1px solid #ccc; padding: 10px; max-height: 400px; overflow-y: auto;">
+    <div id="chat-messages"></div>
+</div>
+
+<form id="chat-form">
+    <input type="text" id="chat-input" placeholder="Wpisz wiadomość..." style="width: 80%;" />
+    <button type="submit">Wyślij</button>
+</form>
+
     <h2>
         Załączniki
     </h2>
@@ -135,6 +146,8 @@
     </button>
 </form>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script src="#" th:src="@{/js/chat.js}"></script>
 </body>
 </html>

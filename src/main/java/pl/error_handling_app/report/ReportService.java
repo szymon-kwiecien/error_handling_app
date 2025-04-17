@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.attachment.AttachmentDto;
+import pl.error_handling_app.chat.ChatMessageDto;
 import pl.error_handling_app.exception.UserNotFoundException;
 import pl.error_handling_app.file.FileService;
 import pl.error_handling_app.user.User;
@@ -285,4 +286,5 @@ public class ReportService {
         boolean isAssignedEmployee = report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user);
         return isReportingUser || isAssignedEmployee || isAdmin;
     }
+
 }
