@@ -1,5 +1,7 @@
 package pl.error_handling_app.report;
 
+import java.util.Objects;
+
 public class ReportCategoryDto {
 
     private Long id;
@@ -28,4 +30,5 @@ public class ReportCategoryDto {
     public void setName(String name) {
         this.name = name;
     }
+    
 }

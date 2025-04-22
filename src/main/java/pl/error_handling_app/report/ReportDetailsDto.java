@@ -154,4 +154,5 @@ public class ReportDetailsDto {
         }
         return new RemainingTime(days, hours, minutes, isExpired);
     }
+
 }

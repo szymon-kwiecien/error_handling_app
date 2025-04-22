@@ -7,4 +7,5 @@ import java.util.Optional;
 public interface ReportCategoryRepository extends JpaRepository<ReportCategory, Long> {
 
     boolean existsByName(String name);
+    Optional<ReportCategory> findByName(String name);
 }

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Generuj raport</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script>
+        function validateDates(event) {
+            const dateFrom = document.getElementById("dateFrom").value;
+            const dateTo = document.getElementById("dateTo").value;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (dateTo) {
+                const dateToObj = new Date(dateTo);
+                dateToObj.setHours(0, 0, 0, 0);
+                if (dateToObj > today) {
+                    alert("Data 'Do' nie może być datą z przyszłości");
+                    event.preventDefault();
+                    return false;
+                }
+            }
+
+            if (dateFrom && dateTo) {
+                const dateFromObj = new Date(dateFrom);
+                dateFromObj.setHours(0, 0, 0, 0);
+                const dateToObj = new Date(dateTo);
+                dateToObj.setHours(0, 0, 0, 0);
+
+                if (dateFromObj > dateToObj) {
+                    alert("Data 'Od' nie może być późniejsza niż data 'Do'");
+                    event.preventDefault();
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
+
+</head>
+<body>
+
+<div>
+    <h1>Generuj raport</h1>
+    <div>
+        <div>
+            <form action="" th:action="@{/generate-summary}" method="post" onsubmit="return validateDates(event);">
+                <div>
+                    <label for="dateFrom">Wybierz okres:</label>
+                    <div>
+                        <div>
+                            <input type="date" id="dateFrom" name="dateFrom">
+                        </div>
+                        <div>
+                            <input type="date" id="dateTo" name="dateTo" th:value="${T(java.time.LocalDate).now()}">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="categoryName">Kategoria:</label>
+                    <select id="categoryName" name="categoryName">
+                        <option value="">Wszystkie</option>
+                        <option th:each="category: ${categories}" th:value="${category}" th:text="${category}"></option>
+                    </select>
+                </div>
+                <div>
+                    <label for="status">Status:</label>
+                    <select id="status" name="status">
+                        <option value="">Wszystkie</option>
+                        <option th:each="status : ${statusList}" th:value="${status}" th:text="${status.description}"></option>
+                    </select>
+                </div>
+                <div th:if="${employees}">
+                    <label for="user">Przypisany pracownik:</label>
+                    <select id="user" name="user">
+                        <option value="all" selected>Wszyscy</option>
+                        <option th:each="employee : ${employees}" th:value="${employee.email}" th:text="${employee.email}"></option>
+                    </select>
+                </div>
+                <div th:unless="${employees}">
+                    <input type="hidden" name="user" th:value="${currentEmployee}">
+                </div>
+                <div>
+                    <label for="sort">Sortowanie:</label>
+                    <select id="sort" name="sort">
+                        <option value="addedDateDesc" selected>Data zgłoszenia (od najnowszych)</option>
+                        <option value="addedDateAsc">Data zgłoszenia (od najstarszych)</option>
+                        <option value="remainingTimeAsc">Pozostały czas (rosnąco)</option>
+                        <option value="remainingTimeDesc">Pozostały czas (malejąco)</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="checkbox" id="reportsTable" name="showReportsTable" checked>
+                    <label for="reportsTable">Wygeneruj tabelę z listą zgłoszeń</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="charts" name="showCharts" checked>
+                    <label for="charts">Wygeneruj wykresy</label>
+                </div>
+                <div>
+                    <button type="submit">Generuj raport</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

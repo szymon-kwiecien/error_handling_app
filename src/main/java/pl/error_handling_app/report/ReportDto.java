@@ -1,6 +1,8 @@
 package pl.error_handling_app.report;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class ReportDto {
 
@@ -11,11 +13,13 @@ public class ReportDto {
     private String statusName;
     private LocalDateTime dateAdded;
     private LocalDateTime dueDate;
-    private LocalDateTime toFirstRespondDate;
+    private LocalDateTime toRespondDate;
     private String reportingUser;
     private String assignedEmployee;
     private LocalDateTime lastMessageTime;
     private int leftTimePercentage;
+    private Double addedToFirstReactionDuration;
+    private Double addedToCompleteDuration;
 
 
     public Long getId() {
@@ -98,12 +102,12 @@ public class ReportDto {
         this.dueDate = dueDate;
     }
 
-    public LocalDateTime getToFirstRespondDate() {
-        return toFirstRespondDate;
+    public LocalDateTime getToRespondDate() {
+        return toRespondDate;
     }
 
-    public void setToFirstRespondDate(LocalDateTime toFirstRespondDate) {
-        this.toFirstRespondDate = toFirstRespondDate;
+    public void setToRespondDate(LocalDateTime toRespondDate) {
+        this.toRespondDate = toRespondDate;
     }
 
     public int getLeftTimePercentage() {
@@ -112,5 +116,55 @@ public class ReportDto {
 
     public void setLeftTimePercentage(int leftTimePercentage) {
         this.leftTimePercentage = leftTimePercentage;
+    }
+
+    public Double getAddedToFirstReactionDuration() {
+        return addedToFirstReactionDuration;
+    }
+
+    public void setAddedToFirstReactionDuration() {
+        this.addedToFirstReactionDuration = (double) Duration.between(dateAdded, LocalDateTime.now()).toMinutes() / 60.0;
+    }
+
+    public Double getAddedToCompleteDuration() {
+        return addedToCompleteDuration;
+    }
+
+    public void setAddedToCompleteDuration() {
+        this.addedToCompleteDuration = (double) Duration.between(dateAdded, LocalDateTime.now()).toMinutes() / 60.0;
+    }
+
+
+    public RemainingTime getRemainingTime(boolean forFirstRespond) {
+        Duration duration = Duration.between(LocalDateTime.now(), forFirstRespond? toRespondDate : dueDate);
+        long days;
+        long hours;
+        long minutes;
+        boolean isExpired;
+        if (duration.getSeconds() < 0){
+            days = 0;
+            hours = 0;
+            minutes = 0;
+            isExpired = true;
+        } else {
+            days = duration.toDays();
+            hours = duration.toHours() % 24;
+            minutes = duration.toMinutes() % 60;
+            isExpired = false;
+        }
+        return new RemainingTime(days, hours, minutes, isExpired);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ReportDto reportDto = (ReportDto) o;
+        return leftTimePercentage == reportDto.leftTimePercentage && Objects.equals(id, reportDto.id) && Objects.equals(title, reportDto.title) && Objects.equals(description, reportDto.description) && Objects.equals(categoryName, reportDto.categoryName) && Objects.equals(statusName, reportDto.statusName) && Objects.equals(dateAdded, reportDto.dateAdded) && Objects.equals(dueDate, reportDto.dueDate) && Objects.equals(toRespondDate, reportDto.toRespondDate) && Objects.equals(reportingUser, reportDto.reportingUser) && Objects.equals(assignedEmployee, reportDto.assignedEmployee) && Objects.equals(lastMessageTime, reportDto.lastMessageTime) && Objects.equals(addedToFirstReactionDuration, reportDto.addedToFirstReactionDuration) && Objects.equals(addedToCompleteDuration, reportDto.addedToCompleteDuration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, description, categoryName, statusName, dateAdded, dueDate, toRespondDate, reportingUser, assignedEmployee, lastMessageTime, leftTimePercentage, addedToFirstReactionDuration, addedToCompleteDuration);
     }
 }

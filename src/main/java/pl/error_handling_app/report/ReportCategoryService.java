@@ -24,6 +24,10 @@ public class ReportCategoryService {
         return reportCategoryRepository.findById(id);
     }
 
+    public Optional<ReportCategory> getCategoryByName(String name) {
+        return reportCategoryRepository.findByName(name);
+    }
+
     public void addCategory(ReportCategoryDto categoryDto) {
         isCategoryNameTaken(categoryDto.getName());
         ReportCategory reportCategory = new ReportCategory();

@@ -42,7 +42,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createMessageElement(msg) {
         const div = document.createElement('div');
-        const time = new Date(msg.timestamp + 'Z').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        let date = new Date(msg.timestamp);
+
+        if (typeof msg.timestamp === 'string' && !msg.timestamp.endsWith('Z')) {
+            date = new Date(msg.timestamp + 'Z');
+            date.setHours(date.getHours() - 2)
+        } else {
+            date = new Date(msg.timestamp);
+            date.setHours(date.getHours() + 2)
+        }
+
+        const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         div.innerHTML = `<strong>${msg.sender}</strong> <small>${time}</small><br>${msg.content}`;
         return div;
     }

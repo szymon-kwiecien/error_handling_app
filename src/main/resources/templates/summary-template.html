@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Raport</title>
+    <style>
+        body, table {
+            font-family: 'Roboto', sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            word-wrap: break-word;
+            margin-bottom: 90px;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-size: 12px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .email {
+            display: flex;
+            flex-direction: column;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .email p {
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .email .email-domain {
+            margin-top: 2px;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        .charts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+            page-break-inside: avoid;
+        }
+
+        .charts img {
+            width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
+
+        .no-reports {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 150px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+<h2 th:text="${summaryHeader}">Raport dotyczący zgłoszeń</h2>
+<p><span class="label">Data wygenerowania:</span> <span th:text="${currentDate}"></span></p>
+<p><span class="label">Wygenerowano przez:</span> <span th:text="${currentUserName}"></span></p>
+<p><span class="label">Przedział dat uwzględniony w raporcie:</span> <span th:text="${dateRange}"></span></p>
+<p><span class="label">Kategoria zgłoszeń uwzględniona w raporcie:</span> <span th:text="${categories}"></span></p>
+<p><span class="label">Status zgłoszeń uwzględniony w raporcie:</span> <span th:text="${status}"></span></p>
+<p><span class="label">Posortowano według:</span> <span th:text="${sort}"></span></p>
+
+
+<div th:unless="${reports.isEmpty()}">
+    <table th:if="${showReportsTable}">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Tytuł</th>
+            <th>Kategoria</th>
+            <th>Status</th>
+            <th>Data zgłoszenia</th>
+            <th>Pozostały czas</th>
+            <th>Zgłaszający</th>
+            <th>Przypisany pracownik</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="report, iterStat : ${reports}">
+            <td th:text="${iterStat.index + 1}"></td>
+            <td th:text="${report.title}"></td>
+            <td th:text="${report.categoryName}"></td>
+            <td th:text="${report.statusName}"></td>
+            <td th:text="${formattedDates.get(report.id)}"></td>
+            <td th:text="${remainingTime[iterStat.index]}"></td>
+            <td>
+                <div class="email">
+                    <p class="email-part" th:text="${reportingUserEmailLocalPart[report.id]}"></p>
+                    <p class="email-domain" th:text="${reportingUserEmailDomain[report.id]}"></p>
+                </div>
+            </td>
+            <td th:if="${report.assignedEmployee}">
+                <div class="email">
+                    <p class="email-part" th:text="${assignedUserEmailLocalPart[report.id]}"></p>
+                    <p class="email-domain" th:text="${assignedUserEmailDomain[report.id]}"></p>
+                </div>
+            </td>
+            <td th:unless="${report.assignedEmployee}">-</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="charts" th:if="${showCharts}">
+        <img th:src="${categoryReportChart}" alt="Wykres liczby zgłoszeń z podziałem na kategorie"/>
+        <img th:src="${statusReportChart}" alt="Wykres liczby zgłoszeń z podziałem na status"/>
+        <img th:src="${averageCompletionTimeChart}" alt="Wykres średnich czasów obsługi zgłoszeń"/>
+    </div>
+</div>
+
+<div th:if="${reports.isEmpty()}">
+    <p class="no-reports">Nie znaleziono zgłoszeń spełniających powyższe kryteria.</p>
+</div>
+
+</body>
+</html>

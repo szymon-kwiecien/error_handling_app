@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.attachment.AttachmentDto;
-import pl.error_handling_app.chat.ChatMessageDto;
 import pl.error_handling_app.exception.UserNotFoundException;
 import pl.error_handling_app.file.FileService;
 import pl.error_handling_app.user.User;
@@ -25,18 +24,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.*;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportService {
 
-    private final static String PENDING_STATUS_POLISH_NAME = "Oczekujące";
+    public final static String PENDING_STATUS_POLISH_NAME = "Oczekujące";
+    public final static String COMPLETED_STATUS_POLISH_NAME = "Zakończone";
 
     private final ReportRepository reportRepository;
     private final ReportCategoryService reportCategoryService;
@@ -72,7 +71,7 @@ public class ReportService {
     public int calculateTimeLeftPercentage(ReportDto report) {
         Instant now = Instant.now();
         Instant dateAdded = report.getDateAdded().atZone(ZoneId.systemDefault()).toInstant();
-        Instant toFirstRespondDate = report.getToFirstRespondDate().atZone(ZoneId.systemDefault()).toInstant(); //gdy zgloszenie ma status PENDING(oczekujace)
+        Instant toFirstRespondDate = report.getToRespondDate().atZone(ZoneId.systemDefault()).toInstant(); //gdy zgloszenie ma status PENDING(oczekujace)
         Instant dueDate = report.getDueDate().atZone(ZoneId.systemDefault()).toInstant(); // gdy zgłoszenie ma status różny od PENDING
 
         long totalDuration = report.getStatusName()
@@ -175,7 +174,7 @@ public class ReportService {
         reportDto.setDescription(report.getDescription());
         reportDto.setDateAdded(report.getDatedAdded());
         reportDto.setDueDate(report.getDueDate());
-        reportDto.setToFirstRespondDate(report.getTimeToRespond());
+        reportDto.setToRespondDate(report.getTimeToRespond());
         String categoryName = report.getCategory() != null ? report.getCategory().getName() : "-";
         reportDto.setCategoryName(categoryName);
         String statusName = report.getStatus() != null ? report.getStatus().description : "-";
@@ -278,6 +277,121 @@ public class ReportService {
         }
         report.getAttachments().addAll(newAttachments);
     }
+
+    public List<ReportDto> getReportsByDateRange(LocalDateTime dateFrom, LocalDateTime dateTo) {
+        return reportRepository.findAllByDatedAddedIsBetween(dateFrom, dateTo).stream()
+                .map(this::mapToDto).toList();
+    }
+
+    public List<ReportDto> getReportsByCategoryAndStatus(ReportCategory category, ReportStatus status) {
+        List<ReportDto> reportsByCategory = filterReportsByCategory(category);
+        List<ReportDto> reportsByStatus = filterReportsByStatus(status);
+        reportsByCategory.retainAll(reportsByStatus);
+        return reportsByCategory;
+    }
+
+    public List<ReportDto> filterReportsByCategory(ReportCategory category) {
+        return filterReports(report -> report.getCategory() != null &&
+                report.getCategory().getId().equals(category.getId()));
+    }
+
+    public List<ReportDto> filterReportsByStatus(ReportStatus status) {
+        return filterReports(report -> status.equals(report.getStatus()));
+    }
+
+    private List<ReportDto> filterReports(Predicate<Report> predicate) {
+        return reportRepository.findAll().stream()
+                .filter(predicate)
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<ReportDto> filterReportsByAssignedEmployee(List<ReportDto> reports, User employee) {
+        return reports.stream()
+                .filter(report -> report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(employee.getEmail()))
+                .collect(Collectors.toList());
+    }
+
+    public String sortReports(List<ReportDto> reports, String sort) {
+        return switch (sort) {
+            case "remainingTimeAsc" -> {
+                reports.sort(Comparator.<ReportDto, Boolean>comparing(
+                        report -> report.getRemainingTime(checkIsForFirstResponse(report)).isExpired() || report.getStatusName().equals(COMPLETED_STATUS_POLISH_NAME)
+                ).thenComparing(
+                        report -> report.getRemainingTime(checkIsForFirstResponse(report)),
+                        Comparator.comparing(RemainingTime::isExpired)
+                                .thenComparing(RemainingTime::getDays)
+                                .thenComparing(RemainingTime::getHours)
+                                .thenComparing(RemainingTime::getMinutes)
+                ));
+                yield "Pozostały czas do końca (rosnąco)";
+            }
+            case "remainingTimeDesc" -> {
+                reports.sort(Comparator.<ReportDto, Boolean>comparing(
+                        report -> report.getRemainingTime(checkIsForFirstResponse(report)).isExpired() || report.getStatusName().equals(COMPLETED_STATUS_POLISH_NAME)
+                ).thenComparing(
+                        report -> report.getRemainingTime(checkIsForFirstResponse(report)),
+                        Comparator.comparing(RemainingTime::isExpired).reversed()
+                                .thenComparing(RemainingTime::getDays, Comparator.reverseOrder())
+                                .thenComparing(RemainingTime::getHours, Comparator.reverseOrder())
+                                .thenComparing(RemainingTime::getMinutes, Comparator.reverseOrder())
+                ));
+                yield "Pozostały czas do końca (malejąco)";
+            }
+            case "addedDateAsc" -> {
+                reports.sort(Comparator.comparing(ReportDto::getDateAdded));
+                yield "Data zgłoszenia (od najstarszych)";
+            }
+            case "addedDateDesc" -> {
+                reports.sort(Comparator.comparing(ReportDto::getDateAdded).reversed());
+                yield "Data zgłoszenia (od najnowszych)";
+            }
+            default -> "Brak";
+        };
+    }
+
+    public Map<LocalDate, Double> getAverageFirstReactionTimesForReports(List<ReportDto> reports, LocalDate startDate, LocalDate endDate) {
+        return calculateAverageTimes(reports, startDate, endDate, ReportDto::getAddedToFirstReactionDuration);
+    }
+
+    public Map<LocalDate, Double> getAverageCompletionTimesForReports(List<ReportDto> reports, LocalDate startDate, LocalDate endDate) {
+        return calculateAverageTimes(reports, startDate, endDate, ReportDto::getAddedToCompleteDuration);
+    }
+
+
+    private Map<LocalDate, Double> calculateAverageTimes(List<ReportDto> reports, LocalDate startDate, LocalDate endDate, Function<ReportDto, Double> timeExtractor) {
+        Map<LocalDate, List<Double>> groupedTimes = startDate.withDayOfMonth(1)
+                .datesUntil(endDate.withDayOfMonth(1).plusMonths(1), Period.ofMonths(1))
+                .collect(Collectors.toMap(
+                        date -> date,
+                        date -> new ArrayList<>()
+                ));
+
+        //pogrupowanie czasow wg miesiecy
+        reports.stream()
+                .filter(report -> !report.getDateAdded().toLocalDate().isBefore(startDate) &&
+                        !report.getDateAdded().toLocalDate().isAfter(endDate))
+                .forEach(report -> {
+                    LocalDate month = report.getDateAdded().toLocalDate().with(TemporalAdjusters.firstDayOfMonth());
+                    Double duration = timeExtractor.apply(report);
+                    if (duration != null) {
+                        groupedTimes.get(month).add(duration);
+                    }
+                });
+
+        //obliczenie srednich dla każdego miesiaca
+        return groupedTimes.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0.0)
+                ));
+    }
+
+    private boolean checkIsForFirstResponse(ReportDto report) {
+        return report.getStatusName().equals(PENDING_STATUS_POLISH_NAME);
+    }
+
+
 
     private boolean hasPermissionToAddAttachments(Report report, User user) {
         boolean isAdmin = user.getRoles().stream()

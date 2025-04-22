@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import pl.error_handling_app.user.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecificationExecutor<Report> {
@@ -14,5 +15,5 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
     List<Report> findAllByReportingUser(User user);
     Page<Report> findAllByStatus(ReportStatus status, Pageable pageable);
     Page<Report> findByTitleContainingIgnoreCase(String title, Pageable pageable);
-
+    List<Report> findAllByDatedAddedIsBetween(LocalDateTime dateFrom, LocalDateTime dateTo);
 }

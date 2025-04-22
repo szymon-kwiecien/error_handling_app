@@ -35,6 +35,10 @@ public class UserService {
         return userRepository.findALlByRoles_Name(roleName).stream().map(UserDtoMapper::mapToUserInReportDto).toList();
     }
 
+    public Optional<User> findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public Optional<UserDetailsDto> findUserDetailsByEmail(String email) {
         return userRepository.findByEmail(email)
                 .map(user -> new UserDetailsDto(user.getEmail(), user.getRoles().stream()
