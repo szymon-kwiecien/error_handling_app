@@ -1,53 +1,70 @@
 <!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Zarządzaj kategoriami</title>
-</head>
-<body>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Zarządzaj kategoriami')}"></head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-<div th:if="${error}">
-    <p th:text="${error}"></p>
-</div>
-<div>
-    <div th:if="${success}">
-        <p th:text="${success}"></p>
+<div th:replace="~{fragments/header :: headerFragment}"></div>
+
+<main class="container mx-auto px-6 py-10 flex-grow">
+    <h1 class="text-3xl font-bold mb-6 text-center">Zarządzaj kategoriami</h1>
+
+    <div th:if="${error}" class="mb-4 p-4 bg-red-700 text-white rounded">
+        <p th:text="${error}">Wystąpił błąd</p>
     </div>
-</div>
-
-<h2>Dodaj Kategorię</h2>
-<form th:action="@{/admin/add-category}" action="#" method="post">
-    <div>
-        <label for="name">Nazwa</label>
-        <input id="name" name="name" type="text">
+    <div th:if="${success}" class="mb-4 p-4 bg-green-700 text-white rounded">
+        <p th:text="${success}">Pomyślnie dodano kategorię</p>
     </div>
-    <button type="submit">Dodaj</button>
-</form>
 
-<h2>Lista Kategorii</h2>
-<table>
-    <thead>
-    <tr>
-        <th>Nazwa</th>
-        <th></th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-
-    <tr th:each="category : ${categories}">
-        <form action="#" th:action="@{/admin/edit-category}" method="post">
-        <td><input type="text" name="name" th:value="${category.name}"/></td>
-            <input type="hidden" name="id" th:value="${category.id}">
-            <td> <button type="submit">Zatwierdź</button></td>
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
+        <h2 class="text-2xl font-semibold mb-4">Dodaj kategorię</h2>
+        <form th:action="@{/admin/add-category}" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+                <label for="name" class="block mb-1">Nazwa</label>
+                <input id="name" name="name" type="text" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 px-4 rounded transition">
+                    Dodaj
+                </button>
+            </div>
         </form>
-        <td>
-            <form action="#" th:action="@{/admin/delete-category/{id} (id=${category.id})}" method="post">
-                <button type="submit">Usuń</button>
-            </form></td>
-    </tr>
-    </tbody>
-</table>
+    </div>
+
+    <div>
+        <h2 class="text-2xl font-semibold mb-4">Lista kategorii</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-gray-800 text-left rounded-lg overflow-hidden shadow-md">
+                <thead>
+                <tr class="bg-gray-700 text-gray-200">
+                    <th class="py-2 px-4">Nazwa</th>
+                    <th class="py-2 px-4">Zatwierdź</th>
+                    <th class="py-2 px-4">Usuń</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="category : ${categories}" class="border-t border-gray-700">
+                    <form th:action="@{/admin/edit-category}" method="post">
+                        <td class="py-2 px-4">
+                            <input type="text" name="name" th:value="${category.name}" class="bg-gray-700 text-white p-1 rounded w-full"/>
+                            <input type="hidden" name="id" th:value="${category.id}">
+                        </td>
+                        <td class="py-2 px-4">
+                            <button type="submit" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-white">Zatwierdź</button>
+                        </td>
+                    </form>
+                    <td class="py-2 px-4">
+                        <form th:action="@{/admin/delete-category/{id}(id=${category.id})}" method="post">
+                            <button type="submit" class="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white">Usuń</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footerFragment}"></div>
 
 </body>
 </html>

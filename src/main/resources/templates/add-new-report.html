@@ -1,58 +1,76 @@
 <!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Dodaj zgłoszenie</title>
-</head>
-<body>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Dodaj zgłoszenie')}"></head>
+<body class="bg-gray-950 text-gray-100 font-inter min-h-screen flex flex-col">
 
-<div th:if="${error}">
-    <p th:text="${error}">Wystąpił błąd podczas dodawania zgłoszenia. Spróbuj ponownie.</p>
-</div>
+<header th:replace="~{fragments/header :: headerFragment}"></header>
 
-<div th:if="${param.success}">
-    <h1>Przyjęliśmy twoje zgłoszenie!</h1>
-    <a href="#" th:href="@{/home}">Powrót do strony głównej</a>
-</div>
+<main class="flex-grow flex items-center justify-center p-6">
+    <div class="w-full max-w-2xl bg-gray-900 shadow-lg rounded-3xl p-10 space-y-6">
+        <h2 class="text-3xl font-bold text-center text-white">Dodaj nowe zgłoszenie</h2>
 
-<div th:unless="${param.success}">
-    <form method="post" action="#" th:action="@{/reports/add}" th:object="${report}" enctype="multipart/form-data">
-        <h2>Dodaj nowe zgłoszenie</h2>
-        <div th:if="${param.invalid}">
-            <strong>Błędne dane!</strong> Nie podano wszyskich danych lub dane są niepoprawne!
+        <div th:if="${error}" class="bg-red-600 text-white px-4 py-3 rounded-lg text-center">
+            <p th:text="${error}">Wystąpił błąd podczas dodawania zgłoszenia. Spróbuj ponownie.</p>
         </div>
 
-
-        <div>
-            <label for="title">Tytuł</label>
-            <input type="text" name="title" id="title" th:field="*{title}" placeholder="Wpisz tytuł...">
+        <div th:if="${param.success}" class="text-center space-y-4">
+            <h1 class="text-xl font-semibold text-green-400">Przyjęliśmy twoje zgłoszenie!</h1>
+            <a href="#" th:href="@{/home}"
+               class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full transition">Powrót do strony głównej</a>
         </div>
 
-        <div>
-            <label for="description">Opis</label>
-            <textarea th:field="*{description}" name="description" id="description" rows="10" placeholder="Opisz zdarzenie..."></textarea>
-        </div>
+        <div th:unless="${param.success}">
+            <form method="post" action="#" th:action="@{/reports/add}" th:object="${report}" enctype="multipart/form-data" class="space-y-6">
 
-        <div>
-            <label for="">Kategoria</label>
-            <select th:field="*{categoryId}" name="categoryId" id="" required>
-                <option value="" disabled selected>Wybierz kategorię</option>
-                <th:block th:each="category : ${categories}">
-                    <option th:value="${category.id}" th:text="${category.name}"></option>
-                </th:block>
-            </select>
-        </div>
+                <div th:if="${param.invalid}" class="bg-yellow-600 text-white px-4 py-2 rounded-lg text-center">
+                    <strong>Błędne dane!</strong> Nie podano wszystkich danych lub dane są niepoprawne!
+                </div>
 
-        <div>
-            <label for="file">Dołącz załączniki</label>
-            <input th:field="*{file}" type="file" name="file" id="file" multiple>
-        </div>
-        <div>
-            <button type="submit">Dodaj zgłoszenie</button>
-        </div>
-    </form>
-</div>
+                <div>
+                    <label for="title" class="block mb-1 font-semibold">Tytuł</label>
+                    <input type="text" name="title" id="title" th:field="*{title}" placeholder="Wpisz tytuł..."
+                           class="w-full bg-gray-800 text-white border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
 
+                <div>
+                    <label for="description" class="block mb-1 font-semibold">Opis</label>
+                    <textarea th:field="*{description}" name="description" id="description" rows="6"
+                              placeholder="Opisz zdarzenie..."
+                              class="w-full bg-gray-800 text-white border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"></textarea>
+                </div>
+
+                <div>
+                    <label for="category" class="block mb-1 font-semibold">Kategoria</label>
+                    <select th:field="*{categoryId}" name="categoryId" id="category" required
+                            class="w-full bg-gray-800 text-white border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        <option value="" disabled selected>Wybierz kategorię</option>
+                        <th:block th:each="category : ${categories}">
+                            <option th:value="${category.id}" th:text="${category.name}"></option>
+                        </th:block>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="file" class="block mb-1 font-semibold">Załączniki</label>
+                    <input th:field="*{file}" type="file" name="file" id="file" multiple
+                           class="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4
+                            file:rounded-xl file:border-0 file:font-semibold
+                            file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition" />
+                </div>
+
+                <div class="text-center">
+                    <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold shadow-md transition">
+                        Dodaj zgłoszenie
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footerFragment}"></footer>
 
 </body>
 </html>

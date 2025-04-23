@@ -1,150 +1,129 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="https://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">>
-<head>
-    <meta charset="UTF-8">
-    <title>Szczegóły zgłoszenia</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://kit.fontawesome.com/57474b4673.js" crossorigin="anonymous"></script>
-</head>
-<body>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Szczegóły zgłoszenia')}"></head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-<p th:if="${successMessage}" th:text="${successMessage}">Zgłoszenie zostało zamknięte</p>
-<p th:if="${errorMessage}" th:text="${errorMessage}">Wystąpił błąd podczas zamykania zgłoszenia</p>
+<div th:replace="~{fragments/header :: headerFragment}"></div>
 
-<div>
-    <div>
-        <div>
-            <h5>
-                Status: <span th:styleappend="'color: ' + ${statusColor}" th:text="${report.getStatus().description}">W trakcie</span>
-            </h5>
-        </div>
-        <form sec:authorize="hasRole('ROLE_ADMINISTRATOR')" th:action="@{'/reports/delete'}" method="post">
-            <input type="hidden" name="reportId" th:value="${reportId}" />
-            <button type="submit">Usuń</button>
-        </form>
-        <form th:if="${report.getStatus().description != 'Zakończone'}" sec:authorize="hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_EMPLOYEE')"
-              th:action="@{'/reports/close'}" method="post">
-            <input type="hidden" name="reportId" th:value="${reportId}" />
-            <button type="submit">Zamknij zgłoszenie</button>
-        </form>
+<main class="container mx-auto px-6 py-10 flex-grow">
+    <h1 class="text-3xl font-bold mb-6 text-center">Szczegóły zgłoszenia</h1>
 
+    <div th:if="${errorMessage}" class="mb-4 p-4 bg-red-700 text-white rounded">
+        <p th:text="${errorMessage}">Wystąpił błąd podczas zamykania zgłoszenia</p>
     </div>
-    <div>
+    <div th:if="${successMessage}" class="mb-4 p-4 bg-green-700 text-white rounded">
+        <p th:text="${successMessage}">Zgłoszenie zostało zamknięte</p>
+    </div>
 
-        <div>
-            <div>Tytuł zgłoszenia:</div>
-            <div th:text="${report.title}">Tytuł zgłoszeniaTytuł zgłoszeniaTytuł zgłoszenia</div>
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
+        <h2 class="text-2xl font-semibold mb-4">Status zgłoszenia</h2>
+        <div class="flex justify-between items-center">
+            <div>
+                <h5 class="text-lg">Status:
+                    <span class="font-semibold" th:styleappend="'color: ' + ${statusColor}" th:text="${report.getStatus().description}">W trakcie</span>
+                </h5>
+            </div>
+            <div class="flex space-x-4">
+                <form sec:authorize="hasRole('ROLE_ADMINISTRATOR')" th:action="@{'/reports/delete'}" method="post">
+                    <input type="hidden" name="reportId" th:value="${reportId}" />
+                    <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded">Usuń</button>
+                </form>
+                <form th:if="${report.getStatus().description != 'Zakończone'}" sec:authorize="hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_EMPLOYEE')" th:action="@{'/reports/close'}" method="post">
+                    <input type="hidden" name="reportId" th:value="${reportId}" />
+                    <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded">Zamknij zgłoszenie</button>
+                </form>
+            </div>
         </div>
-        <div>
-            <div>Opis:</div>
-            <div th:text="${report.description}">Opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia
-                opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia opis zgloszenia</div>
+    </div>
+
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
+        <h2 class="text-2xl font-semibold mb-4">Szczegóły zgłoszenia</h2>
+        <div class="mb-4">
+            <div class="font-medium">Tytuł zgłoszenia:</div>
+            <div th:text="${report.title}">Tytuł zgłoszenia</div>
         </div>
-        <div>
-            <div>Kategoria:</div>
+        <div class="mb-4">
+            <div class="font-medium">Opis:</div>
+            <div th:text="${report.description}">Opis zgłoszenia</div>
+        </div>
+        <div class="mb-4">
+            <div class="font-medium">Kategoria:</div>
             <div th:text="${report.categoryName ?: 'Brak'}">Problemy ogólne</div>
         </div>
-        <div>
-            <div>Przydzielony pracownik:</div>
+        <div class="mb-4">
+            <div class="font-medium">Przydzielony pracownik:</div>
             <div>
                 <span th:text="${report.assignedEmployee ?: 'Brak'}">employee@test.pl</span>
                 <form th:unless="${report.getStatus().description == 'Zakończone'}" sec:authorize="hasRole('ROLE_ADMINISTRATOR')" th:action="@{/reports/assign}" method="post">
                     <input type="hidden" name="reportId" th:value="${reportId}">
-                    <select name="employeeId">
+                    <select name="employeeId" class="bg-gray-700 text-white p-2 rounded">
                         <option value="" disabled selected>Wybierz pracownika</option>
                         <th:block th:each="employee : ${employees}">
                             <option th:value="${employee.id}"
                                     th:selected="${report.assignedEmployeeId == employee.id}"
-                                    th:text="${employee.email}">
-                            </option>
+                                    th:text="${employee.email}"></option>
                         </th:block>
                     </select>
-                    <button type="submit">Zapisz</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded">Zapisz</button>
                 </form>
             </div>
-
         </div>
-        <div sec:authorize="!hasRole('ROLE_USER')">
-            <div>Zgłaszający:</div>
+        <div sec:authorize="!hasRole('ROLE_USER')" class="mb-4">
+            <div class="font-medium">Zgłaszający:</div>
             <div th:text="${report.reportingUser}">user@ok.pl</div>
         </div>
-        <div sec:authorize="!hasRole('ROLE_USER')">
-            <div>Firma:</div>
+        <div sec:authorize="!hasRole('ROLE_USER')" class="mb-4">
+            <div class="font-medium">Firma:</div>
             <div th:text="${report.reportingUserCompanyName}">New Techologies SA</div>
         </div>
-
     </div>
-    <div th:unless="${report.getStatus().description == 'Zakończone'}" sec:authorize="!hasRole('ROLE_USER')">
-        <div th:if="${report.getStatus().description == 'Oczekujące'}">
-            <strong>Czas na odpowiedź:</strong>
-            <div style="height: 20px">
-                <div th:style="|background-color: ${timeToRespondColor}; width: ${timeToRespondProgress};|"></div>
-                <span th:text="|${report.getRemainingTime(true).days} dni, ${report.getRemainingTime(true).hours} godz. ${report.getRemainingTime(true).minutes} min.|"
-                      style="z-index: 2;">5 Dni. 10 Godz. 50 Min.</span>
-            </div>
+
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
+        <h2 class="text-2xl font-semibold mb-4">Czat</h2>
+        <div id="chat-container" th:data-report-id="${reportId}" th:data-username="${username}" class="border border-gray-700 p-4 max-h-96 overflow-y-auto mb-4">
+            <div id="chat-messages"></div>
         </div>
-        <div>
-            <strong>Pozostały czas na rozwiązanie:</strong>
-            <div style="height: 20px">
-                <div th:style="|background-color: ${timeToResolveColor}; width: ${timeToResolveProgress};|"></div>
-                <span th:text="|${report.getRemainingTime(false).days} dni, ${report.getRemainingTime(false).hours} godz. ${report.getRemainingTime(false).minutes} min.|"
-                      style="z-index: 2;">5 Dni. 10 Godz. 50 Min.</span>
-            </div>
-        </div>
+        <form id="chat-form" class="flex space-x-2">
+            <input type="text" id="chat-input" placeholder="Wpisz wiadomość..." class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded">Wyślij</button>
+        </form>
     </div>
-</div>
 
-<h2>Czat</h2>
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold mb-4">Załączniki</h2>
+        <div th:each="attachment : ${attachments}">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-4">
+                    <i th:class="'fa-solid fa-4x ' + ${attachment.fileIconClass}" class="fa-solid fa-file fa-4x"></i>
 
-<div id="chat-container" th:data-report-id="${reportId}" th:data-username="${username}" style="border: 1px solid #ccc; padding: 10px; max-height: 400px; overflow-y: auto;">
-    <div id="chat-messages"></div>
-</div>
-
-<form id="chat-form">
-    <input type="text" id="chat-input" placeholder="Wpisz wiadomość..." style="width: 80%;" />
-    <button type="submit">Wyślij</button>
-</form>
-
-    <h2>
-        Załączniki
-    </h2>
-
-<div>
-    <div th:each="attachment : ${attachments}">
-        <div>
-                <i th:class="|fa-solid fa-4x ${attachment.fileIconClass}|"></i>
-            <div>
-                <div>
-                    <h6 th:text="${attachment.fileName}">testowy.pdf</h6>
-                    <p><small th:text="${attachment.fileSize}">5 MB</small></p>
-                    <p th:text="|Przesłał: ${attachment.addingUser}|">jankowalski@ok.pl</p>
-                    <p th:text="${#temporals.format(attachment.timestamp, 'HH:mm, dd.MM.yyyy')}"> 14:30, 28.03.2025</p>
+                    <div>
+                        <h6 th:text="${attachment.fileName}">testowy.pdf</h6>
+                        <p><small th:text="${attachment.fileSize}">5 MB</small></p>
+                        <p th:text="|Przesłał: ${attachment.addingUser}|">jankowalski@ok.pl</p>
+                        <p th:text="${#temporals.format(attachment.timestamp, 'HH:mm, dd.MM.yyyy')}">14:30, 28.03.2025</p>
+                    </div>
                 </div>
-                <div>
-                    <a th:href="${attachment.filePath}" target="_blank">
-                        <i class="fa-solid fa-2xl fa-share-from-square"></i>
-                    </a>
-                </div>
+                <a th:href="${attachment.filePath}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded">
+                    Pobierz
+                </a>
             </div>
         </div>
     </div>
-</div>
 
-<form th:action="@{/reports/attachment/upload}" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="reportId" th:value="${reportId}" />
-
-    <div>
-        <label for="attachmentFiles">Wybierz załączniki:</label>
-        <input type="file" id="attachmentFiles" name="files" multiple
-               th:disabled="${report.status.description == 'Zakończone'}" />
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md mt-10">
+        <form th:action="@{/reports/attachment/upload}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="reportId" th:value="${reportId}" />
+            <div class="mb-4">
+                <label for="attachmentFiles" class="block text-lg">Wybierz załączniki:</label>
+                <input type="file" id="attachmentFiles" name="files" multiple th:disabled="${report.status.description == 'Zakończone'}" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
+            </div>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded" th:disabled="${report.status.description == 'Zakończone'}">Dodaj załączniki</button>
+        </form>
     </div>
 
-    <button type="submit"
-            th:disabled="${report.status.description == 'Zakończone'}">
-        Dodaj załączniki
-    </button>
-</form>
+</main>
+
+<div th:replace="~{fragments/footer :: footerFragment}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>

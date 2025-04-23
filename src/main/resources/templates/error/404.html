@@ -1,12 +1,24 @@
 <!DOCTYPE html>
 <html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Strona nie została znaleziona</title>
-</head>
-<body>
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Strona nie została znaleziona')}"></head>
+<body class="bg-gray-800 text-white font-sans">
 
-<h1>Strona nie została znaleziona</h1>
-<a href="#" th:href="@{/home}">Powrót do panelu użytkownika</a>
+<nav class="bg-gray-900 p-4 shadow-md">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="space-x-6">
+            <a href="#" th:href="@{/home}" class="text-white hover:text-indigo-500">Strona Główna</a>
+            <a href="/logout" th:href="@{/logout}" class="text-white hover:text-indigo-500">Wyloguj się</a>
+        </div>
+    </div>
+</nav>
+
+<div class="flex justify-center items-center h-screen">
+    <div class="text-center">
+        <h1 class="text-5xl font-bold text-indigo-500 mb-6">Strona nie została znaleziona</h1>
+        <p class="text-xl text-gray-300 mb-8">Ups! Wygląda na to, że ta strona nie istnieje.</p>
+        <a href="#" th:href="@{/home}" class="bg-indigo-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-indigo-700 transition duration-300">Powrót do panelu użytkownika</a>
+    </div>
+</div>
+
 </body>
 </html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="headerFragment" class="bg-gray-800 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="#" th:href="@{/home}" class="flex items-center space-x-3">
+            <img th:src="@{/img/logo.png}" alt="Logo" class="h-14 w-auto">
+        </a>
+        <nav class="space-x-6 flex items-center">
+            <a href="#" th:href="@{/home}" class="hover:text-blue-400">STRONA GŁÓWNA</a>
+            <a href="/logout" th:href="@{/logout}" class="hover:text-red-400">WYLOGUJ SIĘ</a>
+        </nav>
+    </div>
+</header>
+</body>
+</html>

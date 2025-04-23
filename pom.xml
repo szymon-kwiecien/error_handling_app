@@ -108,6 +108,10 @@
             <artifactId>jfreechart</artifactId>
             <version>1.5.5</version>
         </dependency>
+        <dependency>
+            <groupId>nz.net.ultraq.thymeleaf</groupId>
+            <artifactId>thymeleaf-layout-dialect</artifactId>
+        </dependency>
 
     </dependencies>
 

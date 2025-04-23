@@ -1,20 +1,51 @@
 <!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Strona główna</title>
-</head>
-<body>
-<a href="#" th:href="@{/logout}"> Wyloguj</a>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Panel użytkownika')}"></head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-<h1>Witaj, Szymon</h1>
-<a href="#" th:href="@{/admin/manage-users}">Zarządzaj użytkownikami</a>
-<a href="#" th:href="@{/admin/manage-companies}">Zarządzaj firmami</a>
-<a href="#" th:href="@{/admin/manage-categories}">Zarządzaj kategoriami</a>
-<a href="#" th:href="@{/reports}">Panel zgłoszeń</a>
-<a href="#">Nowe zgłoszenie</a>
-<a href="#">Raporty</a>
-<a href="#" th:href="@{/profile}">Profil</a>
+<div th:replace="~{fragments/header :: headerFragment}"></div>
+<main class="container mx-auto px-6 py-10 flex-grow">
+    <h1 class="text-4xl font-bold mb-20 text-center" th:text="|Witaj, ${userName}|">Witaj, Szymon</h1>
+
+    <div class="grid gap-6 justify-center grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <a sec:authorize="hasRole('ROLE_ADMINISTRATOR')" href="#" th:href="@{/admin/manage-users}" class="bg-gray-800 hover:bg-gray-700 text-white rounded-lg p-8 text-center flex flex-col items-center shadow-lg transition duration-300 ease-in-out h-48">
+            <i class="fas fa-users fa-4x mb-4"></i>
+            <span class="font-semibold">Zarządzaj użytkownikami</span>
+        </a>
+
+        <a sec:authorize="hasRole('ROLE_ADMINISTRATOR')" href="#" th:href="@{/admin/manage-companies}" class="bg-gray-800 hover:bg-gray-700 text-white rounded-lg p-8 text-center flex flex-col items-center shadow-lg transition duration-300 ease-in-out h-48">
+            <i class="fas fa-building fa-4x mb-4"></i>
+            <span class="font-semibold">Zarządzaj firmami</span>
+        </a>
+
+        <a sec:authorize="hasRole('ROLE_ADMINISTRATOR')" href="#" th:href="@{/admin/manage-categories}" class="bg-gray-800 hover:bg-gray-700 text-white rounded-lg p-8 text-center flex flex-col items-center shadow-lg transition duration-300 ease-in-out h-48">
+            <i class="fas fa-tags fa-4x mb-4"></i>
+            <span class="font-semibold">Zarządzaj kategoriami</span>
+        </a>
+
+        <a href="#" th:href="@{/reports}" class="bg-gray-800 hover:bg-gray-700 text-white rounded-lg p-8 text-center flex flex-col items-center shadow-lg transition duration-300 ease-in-out h-48">
+            <i class="fas fa-clipboard-list fa-4x mb-4"></i>
+            <span class="font-semibold">Panel zgłoszeń</span>
+        </a>
+
+        <a sec:authorize="hasRole('ROLE_USER')" href="#" th:href="@{/reports/add}" class="bg-gray-800 hover:bg-gray-700 text-white rounded-lg p-8 text-center flex flex-col items-center shadow-lg transition duration-300 ease-in-out h-48">
+            <i class="fas fa-plus-circle fa-4x mb-4"></i>
+            <span class="font-semibold">Nowe zgłoszenie</span>
+        </a>
+
+        <a sec:authorize="hasAnyRole('ROLE_EMPLOYEE', 'ROLE_ADMINISTRATOR')" href="#" th:href="@{/summaries}" class="bg-gray-800 hover:bg-gray-700 text-white rounded-lg p-8 text-center flex flex-col items-center shadow-lg transition duration-300 ease-in-out h-48">
+            <i class="fas fa-chart-line fa-4x mb-4"></i>
+            <span class="font-semibold">Raporty</span>
+        </a>
+
+        <a href="#" th:href="@{/profile}" class="bg-gray-800 hover:bg-gray-700 text-white rounded-lg p-8 text-center flex flex-col items-center shadow-lg transition duration-300 ease-in-out h-48">
+            <i class="fas fa-user fa-4x mb-4"></i>
+            <span class="font-semibold">Profil</span>
+        </a>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footerFragment}"></div>
 
 </body>
 </html>

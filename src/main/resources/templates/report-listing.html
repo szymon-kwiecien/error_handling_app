@@ -1,120 +1,140 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Lista zgłoszeń</title>
-    <style>   /* tymczasowo style dodane inline */
-        table, tr,th,td {
-            border: 1px solid black;
-        }
-    </style>
-</head>
-<body>
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Lista zgłoszeń')}"></head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-<p th:if="${successMessage}" th:text="${successMessage}">Zgłoszenie zostało pomyśnie usunięte</p>
-<p th:if="${errorMessage}" th:text="${errorMessage}">Wystąpił błąd podczas usuwania zgłoszenia</p>
+<div th:replace="~{fragments/header :: headerFragment}"></div>
 
+<main class="container mx-auto px-6 py-10 flex-grow">
+    <h1 class="text-3xl font-bold mb-6 text-center">Lista zgłoszeń</h1>
 
-<h2>Lista zgłoszeń</h2>
+    <div th:if="${successMessage}" class="mb-4 p-4 bg-green-700 text-white rounded">
+        <p th:text="${successMessage}">Zgłoszenie zostało pomyślnie usunięte</p>
+    </div>
+    <div th:if="${errorMessage}" class="mb-4 p-4 bg-red-700 text-white rounded">
+        <p th:text="${errorMessage}">Wystąpił błąd podczas usuwania zgłoszenia</p>
+    </div>
 
-<form method="get">
-    <input type="hidden" name="size" th:value="${pageSize}">
-    <input type="hidden" name="status" th:value="${status}">
-    <input type="hidden" name="sort" th:value="${sort}">
-    <label for="search">Wyszukaj zgłoszenie:</label>
-    <input type="text" id="search" name="search" placeholder="Wpisz wybrany fragment..." th:value="${search}">
-    <button type="submit">Szukaj</button>
-</form>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <form method="get" class="bg-gray-800 p-4 rounded-lg shadow-md">
+            <input type="hidden" name="size" th:value="${pageSize}">
+            <input type="hidden" name="status" th:value="${status}">
+            <input type="hidden" name="sort" th:value="${sort}">
+            <label for="search" class="block mb-2">Wyszukaj zgłoszenie:</label>
+            <input type="text" id="search" name="search" placeholder="Wpisz wybrany fragment..." th:value="${search}"
+                   class="w-full p-2 rounded bg-gray-700 border border-gray-600 mb-2">
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded">Szukaj</button>
+        </form>
 
-<form method="get">
-    <input type="hidden" name="search" th:value="${search}">
-    <input type="hidden" name="sort" th:value="${sort}">
-    <label>Status:</label>
-    <select name="status" onchange="this.form.submit()">
-        <option value="all" th:selected="${status == 'all'}">Wszystkie</option>
-        <option value="PENDING" th:selected="${status == 'PENDING'}">Oczekujące</option>
-        <option value="UNDER_REVIEW" th:selected="${status == 'UNDER_REVIEW'}">W trakcie</option>
-        <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Zamknięte</option>
-    </select>
-</form>
+        <form method="get" class="bg-gray-800 p-4 rounded-lg shadow-md">
+            <input type="hidden" name="search" th:value="${search}">
+            <input type="hidden" name="sort" th:value="${sort}">
+            <label class="block mb-2">Status:</label>
+            <select name="status" onchange="this.form.submit()"
+                    class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <option value="all" th:selected="${status == 'all'}">Wszystkie</option>
+                <option value="PENDING" th:selected="${status == 'PENDING'}">Oczekujące</option>
+                <option value="UNDER_REVIEW" th:selected="${status == 'UNDER_REVIEW'}">W trakcie</option>
+                <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Zamknięte</option>
+            </select>
+        </form>
 
-<form method="get">
-    <input type="hidden" name="search" th:value="${search}">
-    <input type="hidden" name="status" th:value="${status}">
-    <input type="hidden" name="size" th:value="${pageSize}">
-    <label>Sortowanie:</label>
-    <select name="sort" onchange="this.form.submit()">
-        <option value="addedDateDesc" th:selected="${sort == 'addedDateDesc'}">Data dodania (od najnowszych)</option>
-        <option value="addedDateAsc" th:selected="${sort == 'addedDateAsc'}">Data dodania (od najstarszych)</option>
-        <option value="remainingTimeAsc" th:selected="${sort == 'remainingTimeAsc'}">Pozostały czas (rosnąco)</option>
-        <option value="remainingTimeDesc" th:selected="${sort == 'remainingTimeDesc'}">Pozostały czas (malejąco)</option>
-    </select>
-</form>
+        <form method="get" class="bg-gray-800 p-4 rounded-lg shadow-md">
+            <input type="hidden" name="search" th:value="${search}">
+            <input type="hidden" name="status" th:value="${status}">
+            <input type="hidden" name="size" th:value="${pageSize}">
+            <label class="block mb-2">Sortowanie:</label>
+            <select name="sort" onchange="this.form.submit()"
+                    class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <option value="addedDateDesc" th:selected="${sort == 'addedDateDesc'}">Data dodania (od najnowszych)</option>
+                <option value="addedDateAsc" th:selected="${sort == 'addedDateAsc'}">Data dodania (od najstarszych)</option>
+                <option value="remainingTimeAsc" th:selected="${sort == 'remainingTimeAsc'}">Pozostały czas (rosnąco)</option>
+                <option value="remainingTimeDesc" th:selected="${sort == 'remainingTimeDesc'}">Pozostały czas (malejąco)</option>
+            </select>
+        </form>
+    </div>
 
-<p th:text="|Znalezionych wyników: ${reports.getTotalElements()}|">Znalezionych wyników: 10</p>
+    <p class="mb-4" th:text="|Znalezionych wyników: ${reports.getTotalElements()}|">Znalezionych wyników: 10</p>
 
-<table>
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Tytuł</th>
-            <th>Kategoria</th>
-            <th>Status</th>
-            <th>Data dodania</th>
-            <th>Przypisany pracownik</th>
-            <th>Zgłaszający użytkownik</th>
-            <th>Ostatnia wiadomość</th>
-            <th>Szczegóły</th>
-        </tr>
-    </thead>
-    <tbody>
-    <th:block th:each="report, status: ${reports}">
-        <tr>
-            <td th:text="${(currentPage - 1)*pageSize + status.count}">1</td>
-            <td th:text="${report.title}">Niedziałający panel logowania</td>
-            <td th:text="${report.categoryName}">Ogólne błędy</td>
-            <td th:text="${report.statusName}">W trakcie</td>
-            <td th:text="${#temporals.format(report.dateAdded, 'dd-MM-yyyy HH:mm')}"></td>
-            <td th:text="${report.assignedEmployee}">Jan Kowalski</td>
-            <td th:text="${report.reportingUser}">Anna Kowalska</td>
-            <td th:text="${#temporals.format(report.lastMessageTime, 'dd-MM-yyyy HH:mm')}"></td>
-            <td><a href="#" th:href="@{/report(id=${report.id})}">Sprawdź</a></td>
-        </tr>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-gray-800 rounded-lg overflow-hidden shadow text-base">
+        <thead>
+            <tr class="bg-gray-700 text-gray-200">
+                <th class="p-2">#</th>
+                <th class="p-2">Tytuł</th>
+                <th class="p-2">Kategoria</th>
+                <th class="p-2">Status</th>
+                <th class="p-2">Data dodania</th>
+                <th class="p-2">Pracownik</th>
+                <th class="p-2">Zgłaszający</th>
+                <th class="p-2">Ostatnia wiadomość</th>
+                <th class="p-2">Szczegóły</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block th:each="report, status: ${reports}">
+                <tr class="border-t border-gray-700">
+                    <td class="p-2" th:text="${(currentPage - 1)*pageSize + status.count}"></td>
+                    <td class="p-2" th:text="${report.title}"></td>
+                    <td class="p-2" th:text="${report.categoryName}"></td>
+                    <td class="p-2" th:text="${report.statusName}"></td>
+                    <td class="p-2" th:text="${#temporals.format(report.dateAdded, 'dd-MM-yyyy HH:mm')}"></td>
+                    <td class="p-2" th:text="${report.assignedEmployee}"></td>
+                    <td class="p-2" th:text="${report.reportingUser}"></td>
+                    <td class="p-2" th:text="${#temporals.format(report.lastMessageTime, 'dd-MM-yyyy HH:mm')}"></td>
+                    <td class="p-2">
+                        <a th:href="@{/report(id=${report.id})}"
+                           class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 transition">
+                            Sprawdź
+                        </a>
 
-        <tr>
-            <td colspan="9">
-                <div style="width: 100%; background-color: #ddd; border-radius: 5px; overflow: hidden;">
-                    <div th:style="'width: ' + ${report.leftTimePercentage} + '%; background-color: ' +
-                           (${report.leftTimePercentage} >= 70 ? 'green' : (${report.leftTimePercentage} >= 25 ? 'yellow' : 'red')) +
-                           '; height: 10px;'"></div>
-                </div>
-                <span th:text="${report.leftTimePercentage} + '%'"></span>
-            </td>
-        </tr>
-    </th:block>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="9" class="px-4 py-2">
+                        <div class="w-full bg-gray-700 rounded h-3 overflow-hidden">
+                            <div th:style="'width: ' + ${report.leftTimePercentage} + '%; background-color: ' +
+                                        (${report.leftTimePercentage} >= 70 ? 'green' :
+                                        (${report.leftTimePercentage} >= 25 ? 'yellow' : 'red')) +
+                                        '; height: 100%;'" class="transition-all"></div>
+                        </div>
+                        <span th:text="${report.leftTimePercentage == 0} ? 'Czas minął' : ${report.leftTimePercentage} + '%'"></span>
+                    </td>
+                </tr>
+            </th:block>
+            </tbody>
+        </table>
+    </div>
 
-    </tbody>
-</table>
+    <div class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+        <form method="get" class="flex items-center gap-2">
+            <input type="hidden" name="page" th:value="${currentPage}">
+            <input type="hidden" name="status" th:value="${status}">
+            <input type="hidden" name="sort" th:value="${sort}">
+            <input type="hidden" name="search" th:value="${search}">
+            <label for="size">Ilość na stronę:</label>
+            <select name="size" id="size" onchange="this.form.submit()"
+                    class="p-2 rounded bg-gray-700 border border-gray-600">
+                <option value="5" th:selected="${pageSize == 5}">5</option>
+                <option value="10" th:selected="${pageSize == 10}">10</option>
+                <option value="15" th:selected="${pageSize == 15}">15</option>
+                <option value="20" th:selected="${pageSize == 20}">20</option>
+            </select>
+        </form>
 
-<form method="get">
-    <input type="hidden" name="page" th:value="${currentPage}">
-    <input type="hidden" name="status" th:value="${status}">
-    <input type="hidden" name="sort" th:value="${sort}">
-    <input type="hidden" name="search" th:value="${search}">
-    <label for="size">Ilość wyników na stronie</label>
-<select name="size" id="size" onchange="this.form.submit()">
-    <option value="5" th:selected="${pageSize == 5}">5</option>
-    <option value="10" th:selected="${pageSize == 10}">10</option>
-    <option value="15" th:selected="${pageSize == 15}">15</option>
-    <option value="20" th:selected="${pageSize == 20}">20</option>
-</select>
-</form>
+        <div class="flex items-center gap-4">
+            <a th:if="${currentPage > 1}"
+               th:href="@{/reports(page=${currentPage - 1}, status=${status}, size=${pageSize}, search=${search}, sort=${sort})}"
+               class="text-indigo-400 hover:underline">Poprzednia</a>
+            <span th:text="${currentPage} + ' / ' + ${totalPages}">1 / 5</span>
+            <a th:if="${currentPage < totalPages}"
+               th:href="@{/reports(page=${currentPage + 1}, status=${status}, size=${pageSize}, search=${search}, sort=${sort})}"
+               class="text-indigo-400 hover:underline">Następna</a>
+        </div>
+    </div>
+</main>
 
-<div>
-    <a th:if="${currentPage > 1}" th:href="@{/reports(page=${currentPage - 1}, status=${status}, size=${pageSize}, search=${search}, sort=${sort})}">Poprzednia</a>
-    <span th:text="${currentPage} + ' / ' + ${totalPages}"></span>
-    <a th:if="${currentPage < totalPages}" th:href="@{/reports(page=${currentPage + 1}, status=${status}, size=${pageSize}, search=${search}, sort=${sort})}">Następna</a>
-</div>
+<div th:replace="~{fragments/footer :: footerFragment}"></div>
 
 </body>
 </html>

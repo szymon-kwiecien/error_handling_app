@@ -28,7 +28,9 @@ public class CustomSecurityConfig implements WebMvcConfigurer {
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                 .anyRequest().authenticated()
         );
-        http.formLogin(login -> login.loginPage("/login").permitAll())
+        http.formLogin(login -> login.loginPage("/login")
+                        .defaultSuccessUrl("/home")
+                        .permitAll())
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout/**", HttpMethod.GET.name()))
                         .logoutSuccessUrl("/login?logout").permitAll());

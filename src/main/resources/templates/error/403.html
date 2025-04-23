@@ -1,13 +1,19 @@
 <!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Brak uprawnień</title>
-</head>
-<body>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Brak uprawnień')}"></head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-<h1>Niestety nie masz uprawnień, aby odwiedzić tą stronę.</h1>
-<a href="#" th:href="@{/home}">Powrót do panelu użytkownika</a>
+<div th:replace="~{fragments/header :: headerFragment}"></div>
+
+<main class="container mx-auto px-6 py-20 flex-grow text-center">
+    <h1 class="text-4xl font-bold text-red-500 mb-6">Brak uprawnień</h1>
+    <p class="text-lg mb-8">Niestety nie masz uprawnień, aby odwiedzić tę stronę.</p>
+    <a href="#" th:href="@{/home}" class="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded text-lg transition">
+        Powrót do panelu użytkownika
+    </a>
+</main>
+
+<div th:replace="~{fragments/footer :: footerFragment}"></div>
 
 </body>
 </html>

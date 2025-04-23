@@ -123,21 +123,7 @@ public class SummaryController {
             }
         }
 
-        Context context = new Context();
-        String summaryHeader = user.equals("all") ?"Raport dotyczący zgłoszeń" : "Raport dotyczący pracownika %s".formatted(user);
-        context.setVariable("summaryHeader", summaryHeader);
-        context.setVariable("reports", reports);
-        Map<Long, String> formattedDates = getFormattedDates(reports);
-        context.setVariable("formattedDates", formattedDates);
-        context.setVariable("currentDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        context.setVariable("currentUserName", SecurityContextHolder.getContext().getAuthentication().getName());
-        String dateRange = dateFrom + " - " + dateTo;
-        context.setVariable("dateRange", dateRange);
-        String categorName = category != null ? category.getName() : "Wszystkie";
-        context.setVariable("categories", categorName);
-        String statusName = status != null ? status.description : "Wszystkie";
-        context.setVariable("status", statusName);
-        context.setVariable("sort", sortedBy);
+        Context context = getContext(dateFrom, dateTo, status, user, reports, category, sortedBy);
         if(showReportsTable) {
             String[] remainingTime = calculateRemainingTime(reports);
             context.setVariable("remainingTime", remainingTime);
@@ -194,6 +180,25 @@ public class SummaryController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Context getContext(LocalDate dateFrom, LocalDate dateTo, ReportStatus status, String user, List<ReportDto> reports, ReportCategory category, String sortedBy) {
+        Context context = new Context();
+        String summaryHeader = user.equals("all") ?"Raport dotyczący zgłoszeń" : "Raport dotyczący pracownika %s".formatted(user);
+        context.setVariable("summaryHeader", summaryHeader);
+        context.setVariable("reports", reports);
+        Map<Long, String> formattedDates = getFormattedDates(reports);
+        context.setVariable("formattedDates", formattedDates);
+        context.setVariable("currentDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        context.setVariable("currentUserName", SecurityContextHolder.getContext().getAuthentication().getName());
+        String dateRange = dateFrom + " - " + dateTo;
+        context.setVariable("dateRange", dateRange);
+        String categorName = category != null ? category.getName() : "Wszystkie";
+        context.setVariable("categories", categorName);
+        String statusName = status != null ? status.description : "Wszystkie";
+        context.setVariable("status", statusName);
+        context.setVariable("sort", sortedBy);
+        return context;
     }
 
     private String[] calculateRemainingTime(List<ReportDto> reports) {

@@ -1,79 +1,92 @@
 <!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Edytuj profil</title>
-</head>
-<body>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Edycja profilu')}"></head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-<div th:if="${error}">
-    <p th:text="${error}"></p>
-</div>
-<div>
-    <div th:if="${successMessage}">
+<div th:replace="~{fragments/header :: headerFragment}"></div>
+
+<main class="container mx-auto px-6 py-10 flex-grow max-w-3xl">
+    <h1 class="text-3xl font-bold mb-8 text-center">Edytuj profil</h1>
+
+    <div th:if="${error}" class="bg-red-600 text-white px-4 py-3 rounded mb-4">
+        <p th:text="${error}"></p>
+    </div>
+    <div th:if="${successMessage}" class="bg-green-600 text-white px-4 py-3 rounded mb-4">
         <p th:text="${successMessage}"></p>
     </div>
-</div>
 
+    <div class="bg-gray-800 rounded-lg p-6 mb-8 shadow">
+        <div class="grid grid-cols-1 gap-4">
             <div>
-                <label for="firstName"><strong>Imię:</strong></label>
-                <p id="firstName" th:text="${userDetails.firstName}">Jan</p>
+                <label class="text-gray-400 text-sm">Imię:</label>
+                <p id="firstName" class="text-lg font-medium" th:text="${userDetails.firstName}">Jan</p>
             </div>
             <div>
-                <label for="lastName"><strong>Nazwisko:</strong></label>
-                <p id="lastName" th:text="${userDetails.lastName}">Kowalski</p>
+                <label class="text-gray-400 text-sm">Nazwisko:</label>
+                <p id="lastName" class="text-lg font-medium" th:text="${userDetails.lastName}">Kowalski</p>
             </div>
             <div>
-                <label for="company"><strong>Firma:</strong></label>
-                <p id="company" th:text="${userDetails.companyName}">NewTechnologiesComp</p>
-            </div>
-
-            <div>
-                <label for="role"><strong>Typ konta:</strong></label>
-                <p id="role" th:text="${userDetails.role}">Administrator</p>
+                <label class="text-gray-400 text-sm">Firma:</label>
+                <p id="company" class="text-lg font-medium" th:text="${userDetails.companyName}">NewTechnologiesComp</p>
             </div>
             <div>
-                <label for="currentEmail"><strong>Aktualny email:</strong></label>
-                <p id="currentEmail" th:text="${userDetails.email}">jankowalski@wp.pl</p>
+                <label class="text-gray-400 text-sm">Typ konta:</label>
+                <p id="role" class="text-lg font-medium" th:text="${userDetails.role}">Administrator</p>
             </div>
+            <div>
+                <label class="text-gray-400 text-sm">Aktualny e-mail:</label>
+                <p id="currentEmail" class="text-lg font-medium" th:text="${userDetails.email}">jankowalski@wp.pl</p>
+            </div>
+        </div>
+    </div>
 
+    <div class="bg-gray-800 rounded-lg p-6 mb-8 shadow">
+        <h2 class="text-2xl font-semibold mb-4">Zmień e-mail</h2>
+        <form th:action="@{/profile/change-email}" method="post" th:object="${emailChangeDto}" class="space-y-4">
+            <input type="hidden" name="userId" th:field="*{userId}" th:value="${userDetails.id}"/>
+            <div>
+                <label for="email" class="block text-sm mb-1">Nowy e-mail:</label>
+                <input type="email" id="email" th:field="*{newEmail}" placeholder="Wprowadź nowy adres e-mail"
+                       class="w-full p-2 rounded bg-gray-700 border border-gray-600" required />
+            </div>
+            <div>
+                <label for="currentPasswordForEmail" class="block text-sm mb-1">Hasło:</label>
+                <input type="password" id="currentPasswordForEmail" th:field="*{currentPassword}" placeholder="Wprowadź hasło"
+                       class="w-full p-2 rounded bg-gray-700 border border-gray-600" required />
+            </div>
+            <div class="text-right">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded">Zmień e-mail</button>
+            </div>
+        </form>
+    </div>
 
+    <div class="bg-gray-800 rounded-lg p-6 shadow">
+        <h2 class="text-2xl font-semibold mb-4">Zmień hasło</h2>
+        <form th:action="@{/profile/change-password}" method="post" th:object="${passwordChangeDto}" class="space-y-4">
+            <input type="hidden" name="userId" th:field="*{userId}" th:value="${userDetails.id}"/>
+            <div>
+                <label for="password" class="block text-sm mb-1">Nowe hasło:</label>
+                <input type="password" id="password" th:field="*{newPassword}" placeholder="Wprowadź nowe hasło"
+                       class="w-full p-2 rounded bg-gray-700 border border-gray-600" required />
+            </div>
+            <div>
+                <label for="confirmNewPassword" class="block text-sm mb-1">Potwierdź nowe hasło:</label>
+                <input type="password" id="confirmNewPassword" th:field="*{confirmedNewPassword}" placeholder="Wprowadź ponownie nowe hasło"
+                       class="w-full p-2 rounded bg-gray-700 border border-gray-600" required />
+            </div>
+            <div>
+                <label for="currentPassword" class="block text-sm mb-1">Obecne hasło:</label>
+                <input type="password" id="currentPassword" th:field="*{currentPassword}" placeholder="Wprowadź obecne hasło"
+                       class="w-full p-2 rounded bg-gray-700 border border-gray-600" required />
+            </div>
+            <div class="text-right">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded">Zmień hasło</button>
+            </div>
+        </form>
+    </div>
+</main>
 
-<form th:action="@{/profile/change-email}" method="post" th:object="${emailChangeDto}">
-    <input type="hidden" name="userId" th:field="*{userId}" th:value="${userDetails.id}"/>
-    <div>
-        <label for="email"><strong>Nowy e-mail:</strong></label>
-        <input type="email" id="email" th:field="*{newEmail}" placeholder="Wprowadź nowy adres e-mail" required />
-    </div>
-    <div>
-        <label for="currentPasswordForEmail"><strong>Hasło:</strong></label>
-        <input type="password" id="currentPasswordForEmail" th:field="*{currentPassword}" placeholder="Wprowadź hasło" required />
-    </div>
-    <div>
-        <button type="submit">Zmień e-mail</button>
-    </div>
-</form>
-
-<form th:action="@{/profile/change-password}" method="post" th:object="${passwordChangeDto}">
-    <input type="hidden" name="userId" th:field="*{userId}" th:value="${userDetails.id}"/>
-    <div>
-        <label for="password"><strong>Nowe hasło:</strong></label>
-        <input type="password" id="password" th:field="*{newPassword}" placeholder="Wprowadź nowe hasło" required />
-    </div>
-    <div>
-        <label for="confirmNewPassword"><strong>Potwierdź nowe hasło</strong></label>
-        <input type="password" id="confirmNewPassword" th:field="*{confirmedNewPassword}" placeholder="Wprowadź ponownie nowe hasło" required />
-    </div>
-    <div>
-        <label for="currentPassword"><strong>Obecne hasło</strong></label>
-        <input type="password" id="currentPassword" th:field="*{currentPassword}" placeholder="Wprowadź obecne hasło" required />
-    </div>
-    <div>
-        <button type="submit">Zmień hasło</button>
-    </div>
-</form>
-
-
+<div th:replace="~{fragments/footer :: footerFragment}"></div>
 
 </body>
 </html>
