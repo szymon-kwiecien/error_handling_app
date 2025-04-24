@@ -81,7 +81,7 @@
                     <td class="p-2" th:text="${#temporals.format(report.dateAdded, 'dd-MM-yyyy HH:mm')}"></td>
                     <td class="p-2" th:text="${report.assignedEmployee}"></td>
                     <td class="p-2" th:text="${report.reportingUser}"></td>
-                    <td class="p-2" th:text="${#temporals.format(report.lastMessageTime, 'dd-MM-yyyy HH:mm')}"></td>
+                    <td class="p-2" th:text="${report.lastMessageTime != null} ? ${#temporals.format(report.lastMessageTime, 'dd-MM-yyyy HH:mm')} : 'brak'"></td>
                     <td class="p-2">
                         <a th:href="@{/report(id=${report.id})}"
                            class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 transition">

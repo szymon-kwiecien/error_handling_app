@@ -122,17 +122,19 @@ public class ReportDto {
         return addedToFirstReactionDuration;
     }
 
-    public void setAddedToFirstReactionDuration() {
-        this.addedToFirstReactionDuration = (double) Duration.between(dateAdded, LocalDateTime.now()).toMinutes() / 60.0;
+    public void setAddedToFirstReactionDuration(Double addedToFirstReactionDuration) {
+        this.addedToFirstReactionDuration = addedToFirstReactionDuration;
+    }
+
+    public void setAddedToCompleteDuration(Double addedToCompleteDuration) {
+        this.addedToCompleteDuration = addedToCompleteDuration;
     }
 
     public Double getAddedToCompleteDuration() {
         return addedToCompleteDuration;
     }
 
-    public void setAddedToCompleteDuration() {
-        this.addedToCompleteDuration = (double) Duration.between(dateAdded, LocalDateTime.now()).toMinutes() / 60.0;
-    }
+
 
 
     public RemainingTime getRemainingTime(boolean forFirstRespond) {

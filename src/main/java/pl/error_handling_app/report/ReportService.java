@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.attachment.AttachmentDto;
+import pl.error_handling_app.chat.ChatService;
 import pl.error_handling_app.exception.UserNotFoundException;
 import pl.error_handling_app.file.FileService;
 import pl.error_handling_app.user.User;
@@ -41,13 +42,15 @@ public class ReportService {
     private final ReportCategoryService reportCategoryService;
     private final UserRepository userRepository;
     private final FileService fileService;
+    private final ChatService chatService;
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ReportService(ReportRepository reportRepository, ReportCategoryService reportCategoryService, UserRepository userRepository, FileService fileService) {
+    public ReportService(ReportRepository reportRepository, ReportCategoryService reportCategoryService, UserRepository userRepository, FileService fileService, ChatService chatService) {
         this.reportRepository = reportRepository;
         this.reportCategoryService = reportCategoryService;
         this.userRepository = userRepository;
         this.fileService = fileService;
+        this.chatService = chatService;
     }
 
     public Optional<ReportDetailsDto> findReportById(Long reportId) {
@@ -183,7 +186,9 @@ public class ReportService {
         reportDto.setAssignedEmployee(assignedEmployee);
         String reportingUser = report.getReportingUser() != null ? report.getReportingUser().getEmail() : "-";
         reportDto.setReportingUser(reportingUser);
-        reportDto.setLastMessageTime(LocalDateTime.MAX); //tymczasowo (póki nie wprowadziłem modułu czatu)
+        reportDto.setLastMessageTime(chatService.getLastMessageTimeByReportId(report.getId()));
+        reportDto.setAddedToFirstReactionDuration(report.getAddedToFirstReactionDuration());
+        reportDto.setAddedToCompleteDuration(report.getAddedToCompleteDuration());
         return reportDto;
     }
 
@@ -374,6 +379,7 @@ public class ReportService {
                 .forEach(report -> {
                     LocalDate month = report.getDateAdded().toLocalDate().with(TemporalAdjusters.firstDayOfMonth());
                     Double duration = timeExtractor.apply(report);
+
                     if (duration != null) {
                         groupedTimes.get(month).add(duration);
                     }

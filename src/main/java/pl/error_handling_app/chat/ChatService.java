@@ -49,4 +49,8 @@ public class ChatService {
         message.setReport(report);
         chatMessageRepository.save(message);
     }
+
+    public LocalDateTime getLastMessageTimeByReportId(Long reportId) {
+        return chatMessageRepository.findLastMessageTimeByReportId(reportId);
+    }
 }

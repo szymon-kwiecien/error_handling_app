@@ -140,6 +140,7 @@ public class SummaryController {
             String avgTimesChartData = null;
             Map<LocalDate, Double> firstReactionTimes = reportService.getAverageFirstReactionTimesForReports(reports, dateFrom, dateTo);
             Map<LocalDate, Double> completionTimes = reportService.getAverageCompletionTimesForReports(reports, dateFrom, dateTo);
+
             //Jeśli generujemy raport pojedynczego pracownika to na wykresie średnich czasów reakcji,obslugi zamiast
             //średnich czasów pierwszej reakcji na zgłoszenie w danym miesiącu będzie średni czas obsłużenia zgloszen
             //przez wszystkich pracownikow
@@ -147,6 +148,7 @@ public class SummaryController {
             if(singleEmployee) {
                 firstReactionTimes = reportService.getAverageCompletionTimesForReports(allFoundReports, dateFrom, dateTo);
             }
+
             try {
                 categoryChart = chartService.generateDistributionChart(reports, dateFrom, dateTo, true);
                 statusChart = chartService.generateDistributionChart(reports, dateFrom, dateTo, false);
