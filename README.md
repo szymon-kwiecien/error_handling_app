@@ -30,19 +30,40 @@ Its standout capabilities include automated email notifications, real-time commu
 ## ✨ Features
 
 ### 🔐 User Management
-- User registration with email verification  
-- Role-based access (Admin, Employee, Standard User)  
-- Password reset with email token support  
+
+- **User registration with email verification**  
+  Only users with the `ADMIN` role can create new user accounts.  
+  Upon creation, new users receive an activation email allowing them to set their password and complete the registration process.
+  
+- **Role-based access control**  
+  The system supports three user roles:
+  - `ADMIN` – Full access to the system, including user and company management.
+  - `EMPLOYEE` – Handles assigned tickets, creates PDF summaries, and communicates with users.
+  - `STANDARD USER` – Can report issues and track the status of their tickets.
+
+- **Password reset with email token support**  
+  Users can reset their password using a secure token sent to their registered email address.
+
 
 ### 📝 Ticket Management
+
 - Creating, editing, and deleting issue reports  
 - Assigning reports to employees  
 - Tracking issue statuses and categories  
 - Uploading attachments to reports  
+- **Three status levels:**
+  - `PENDING` – Default status when a ticket is submitted by a user.
+  - `UNDER_REVIEW` – Automatically set once an admin assigns an employee to the ticket.
+  - `COMPLETED` – Set manually by the assigned employee after resolving the issue.
+- **Each ticket has two time thresholds:**
+  - **First Response Time** – Time allowed for the admin to assign an employee.
+  - **Resolution Time** – Time allowed for the employee to resolve the reported issue.
+
 
 ### 🏢 Company Management
 - Admins can create, update, and delete company records  
-- Association of users with specific companies  
+- Association of users with specific companies
+- Each company has its own configurable First Response Time and Resolution Time for handling tickets
 
 ### 🗂 Category Management
 - Creation and management of issue categories for better classification  
@@ -129,4 +150,10 @@ You can log in with the following demo credentials:
 | Administrator | admin@example.com            | tajneHaslo1      |
 | Regular User  | jan.kowalski@example.com      | haslo123         |
 | Employee      | anna.nowak@example.com        | bezpieczneHaslo! |
+
+
+
+> 🚧 **Note:** This application is under active development.  
+> The core functionalities have already been implemented.  
+> Validation and tests will be added in the near future.
 
