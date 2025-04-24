@@ -18,6 +18,11 @@ public class HomeController {
         this.userService = userService;
     }
 
+    @GetMapping("/")
+        String name() {
+            return "redirect:/home";
+        }
+
     @GetMapping("/home")
     String userPanel(Model model) {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();

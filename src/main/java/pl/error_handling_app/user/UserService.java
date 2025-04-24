@@ -21,14 +21,18 @@ public class UserService {
     private final UserDtoMapper mapper;
     private final ReportRepository reportRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserPasswordChangeOrActiveService userPasswordChangeOrActiveService;
+    private final VeryficationTokenRepository veryficationTokenRepository;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VeryficationTokenRepository veryficationTokenRepository) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.userRoleRepository = userRoleRepository;
         this.mapper = mapper;
         this.reportRepository = reportRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userPasswordChangeOrActiveService = userPasswordChangeOrActiveService;
+        this.veryficationTokenRepository = veryficationTokenRepository;
     }
 
     public List<UserInReportDto> findUsersByRoleName(String roleName) {
@@ -58,6 +62,7 @@ public class UserService {
             checkUserAlreadyExists(newUser.getEmail());
             User userToSave = mapper.map(newUser);
             userRepository.save(userToSave);
+            userPasswordChangeOrActiveService.NewVerification(userToSave);
     }
 
     @Transactional
@@ -86,6 +91,8 @@ public class UserService {
         public void deleteUser(Long userId) {
             User userToDelete = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
             detachUserFromReports(userToDelete);
+            Optional<VeryficationToken> veryficationToken = veryficationTokenRepository.findByUser(userToDelete);
+            veryficationToken.ifPresent(veryficationTokenRepository::delete);
             userRepository.deleteById(userId);
         }
 

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${pageTitle}">Subject</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Segoe UI, sans-serif;
+      background-color: #f0f0f0;
+    }
+
+    .frame1 {
+      width: 600px;
+      background-color: #f8f2f2;
+      margin: 0 auto;
+      text-align: center;
+      border-radius: 10px;
+    }
+
+    .header, .mbody, .content {
+      width: 100%;
+      padding: 0 40px;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 48px;
+      margin-top: 0;
+    }
+
+    .mbody {
+      font-size: 20px;
+      color: #666666;
+      font-weight: 500;
+    }
+
+    .button {
+      text-align: center;
+      padding: 8px 0;
+      color: white;
+      font-weight: 600;
+      font-size: 21px;
+      background-color: #0055ff;
+      border-radius: 10px;
+      text-decoration: none;
+      display: block;
+      width: 60%;
+      margin: 20px auto;
+    }
+
+    .content {
+      font-size: 18px;
+      color: #a2a2a7;
+      font-weight: 400;
+      padding-bottom: 50px;
+    }
+
+    img {
+      max-height: 80px;
+      max-width: 100%;
+      height: auto;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="frame1">
+  <img src="https://drive.google.com/uc?export=view&id=1B744NteAa-CTpl_uAJfp1_syBe2roTo2" alt="Logo">
+
+  <div class="header">
+    <h1 th:text="|Witaj ${UserName}|">Witaj Szymon</h1>
+  </div>
+
+  <div class="mbody">
+    <p><b>Twoje konto zostało utworzone!</b></p>
+    <p>Aby mieć możliwość korzystania z naszego serwisu musisz aktywować konto</p>
+    <a class="button" href="#" th:href="${uriLink}" style="color: #ffffff; text-decoration: none;">Aktywuj Konto</a>
+  </div>
+
+  <div class="content">
+    <p>Konto zostanie aktywowane po ustawieniu hasła do konta</p>
+    <p>Podany link aktywacyjny jest ważny do: <b th:text="${ExpirationDate}">10.11.2024 10:16</b></p>
+  </div>
+
+  <div></div>
+
+</div>
+</body>
+</html>

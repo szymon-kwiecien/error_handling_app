@@ -24,6 +24,9 @@
             <column name="company_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
+            <column name="is_active" type="boolean">
+                <constraints nullable="false" />
+            </column>
         </createTable>
 
         <addForeignKeyConstraint

@@ -22,7 +22,7 @@ public class UserDtoMapper {
         this.roleRepository = roleRepository;
     }
 
-    User map(UserDto userDto) {
+     User map(UserDto userDto) {
 
         User user = new User();
         user.setId(userDto.getId());
@@ -35,6 +35,7 @@ public class UserDtoMapper {
                 new NoSuchElementException("Rola nie została znaleziona"));
         user.setCompany(company);
         user.getRoles().add(userRole);
+        user.setActive(userDto.isActive());
         return user;
     }
 
@@ -43,7 +44,7 @@ public class UserDtoMapper {
         Long userRole = user.getRoles().stream().map(UserRole::getId).toList().get(0);
         List<String> rolesNames = user.getRoles().stream().map(UserRole::getName).toList();
         return new UserDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(),
-                user.getCompany().getId(), userRole);
+                user.getCompany().getId(), userRole, user.isActive());
     }
 
     static UserCredentialsDto mapToCredentials(User user) {

@@ -24,8 +24,10 @@ public class CustomSecurityConfig implements WebMvcConfigurer {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         PathRequest.H2ConsoleRequestMatcher h2ConsoleRequestMatcher = PathRequest.toH2Console();
         http.authorizeHttpRequests(request -> request
-                .requestMatchers("/img/**", "/styles/**", "/scripts/**").permitAll()
+                .requestMatchers("/img/**", "/styles/**", "/scripts/**", "/account/**").permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
+                .requestMatchers("/summaries", "/generate-summary").hasAnyRole(ADMIN_ROLE, EMPLOYEE_ROLE)
+                .requestMatchers("/admin/**", "/reports/assign").hasRole(ADMIN_ROLE)
                 .anyRequest().authenticated()
         );
         http.formLogin(login -> login.loginPage("/login")

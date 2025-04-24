@@ -25,6 +25,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<UserRole> roles = new HashSet<>();
+    private boolean isActive = false;
 
 
 
@@ -84,4 +85,11 @@ public class User {
         this.lastName = lastName;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
 }
