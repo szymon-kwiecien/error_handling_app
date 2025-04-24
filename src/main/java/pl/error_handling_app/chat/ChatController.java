@@ -10,9 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import pl.error_handling_app.report.ReportDetailsDto;
+import pl.error_handling_app.report.dto.ReportDetailsDto;
 import pl.error_handling_app.report.ReportService;
-import pl.error_handling_app.user.UserDetailsDto;
+import pl.error_handling_app.user.dto.UserDetailsDto;
 import pl.error_handling_app.user.UserService;
 
 import java.time.Duration;

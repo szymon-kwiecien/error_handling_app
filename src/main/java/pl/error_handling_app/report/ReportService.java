@@ -16,6 +16,9 @@ import pl.error_handling_app.attachment.AttachmentDto;
 import pl.error_handling_app.chat.ChatService;
 import pl.error_handling_app.exception.UserNotFoundException;
 import pl.error_handling_app.file.FileService;
+import pl.error_handling_app.report.dto.NewReportDto;
+import pl.error_handling_app.report.dto.ReportDetailsDto;
+import pl.error_handling_app.report.dto.ReportDto;
 import pl.error_handling_app.user.User;
 import pl.error_handling_app.user.UserRepository;
 import pl.error_handling_app.user.UserRole;
@@ -353,6 +356,19 @@ public class ReportService {
             }
             default -> "Brak";
         };
+    }
+
+    public String[] calculateRemainingTime(List<ReportDto> reports) {
+        String[] remainingTime = new String[reports.size()];
+        for (int i = 0; i < reports.size(); i++) {
+            boolean forFirstRespond = reports.get(i).getStatusName().equals(ReportService.PENDING_STATUS_POLISH_NAME);
+            String remainingTimeTemplate = reports.get(i).getRemainingTime(forFirstRespond).getDays() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getDays() + "d ") : "";
+            remainingTimeTemplate += reports.get(i).getRemainingTime(forFirstRespond).getHours() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getHours() + "godz. ") : "";
+            remainingTimeTemplate += reports.get(i).getRemainingTime(forFirstRespond).getMinutes() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getMinutes() + "min.") : "";
+            remainingTime[i] = (reports.get(i).getStatusName().equals(ReportService.COMPLETED_STATUS_POLISH_NAME)|| (reports.get(i).getRemainingTime(forFirstRespond).getDays() <= 0  &&
+                    reports.get(i).getRemainingTime(forFirstRespond).getHours() <= 0 && reports.get(i).getRemainingTime(forFirstRespond).getMinutes() <= 0))? "-": remainingTimeTemplate;
+        }
+        return remainingTime;
     }
 
     public Map<LocalDate, Double> getAverageFirstReactionTimesForReports(List<ReportDto> reports, LocalDate startDate, LocalDate endDate) {

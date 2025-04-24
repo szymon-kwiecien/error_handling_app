@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.error_handling_app.exception.InvalidEmailException;
 import pl.error_handling_app.exception.InvalidPasswordException;
+import pl.error_handling_app.user.dto.ChangeEmailDto;
+import pl.error_handling_app.user.dto.ChangePasswordDto;
+import pl.error_handling_app.user.dto.UserProfileDetailsDto;
 
 import java.util.Optional;
 

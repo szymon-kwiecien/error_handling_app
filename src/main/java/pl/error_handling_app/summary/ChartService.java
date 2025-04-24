@@ -9,6 +9,8 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.springframework.stereotype.Service;
 import pl.error_handling_app.report.*;
+import pl.error_handling_app.report.dto.ReportCategoryDto;
+import pl.error_handling_app.report.dto.ReportDto;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;

@@ -1,4 +1,4 @@
-package pl.error_handling_app.report;
+package pl.error_handling_app.report.dto;
 
 import org.springframework.web.multipart.MultipartFile;
 

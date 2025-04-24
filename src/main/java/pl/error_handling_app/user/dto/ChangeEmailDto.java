@@ -1,4 +1,4 @@
-package pl.error_handling_app.user;
+package pl.error_handling_app.user.dto;
 
 public class ChangeEmailDto {
 

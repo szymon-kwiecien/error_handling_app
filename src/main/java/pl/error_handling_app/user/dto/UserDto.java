@@ -1,13 +1,35 @@
-package pl.error_handling_app.user;
+package pl.error_handling_app.user.dto;
 
-public class UserEditDto {
+public class UserDto {
 
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
     private Long companyId;
     private Long roleId;
+    private boolean isActive;
+
+    public UserDto(Long id, String firstName, String lastName, String email, Long companyId, Long roleId, boolean isActive) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.companyId = companyId;
+        this.roleId = roleId;
+        this.isActive = isActive;
+    }
+
+    public UserDto() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -33,14 +55,6 @@ public class UserEditDto {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public Long getCompanyId() {
         return companyId;
     }
@@ -55,5 +69,13 @@ public class UserEditDto {
 
     public void setRoleId(Long roleId) {
         this.roleId = roleId;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

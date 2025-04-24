@@ -93,14 +93,24 @@
                 <tr>
                     <td colspan="9" class="px-4 py-2">
                         <div class="w-full bg-gray-700 rounded h-3 overflow-hidden">
-                            <div th:style="'width: ' + ${report.leftTimePercentage} + '%; background-color: ' +
-                                        (${report.leftTimePercentage} >= 70 ? 'green' :
-                                        (${report.leftTimePercentage} >= 25 ? 'yellow' : 'red')) +
-                                        '; height: 100%;'" class="transition-all"></div>
+                            <div th:if="${report.statusName == 'Zakończone'}"
+                                 style="width: 100%; background-color: #3B82F6; height: 100%;" class="transition-all"></div>
+                            <div th:unless="${report.statusName == 'Zakończone'}"
+                                 th:style="'width: ' + ${report.leftTimePercentage} + '%; background-color: ' +
+                           (${report.leftTimePercentage} >= 70 ? 'green' :
+                           (${report.leftTimePercentage} >= 25 ? 'yellow' : 'red')) +
+                           '; height: 100%;'" class="transition-all"></div>
                         </div>
-                        <span th:text="${report.leftTimePercentage == 0} ? 'Czas minął' : ${report.leftTimePercentage} + '%'"></span>
+
+                        <span th:if="${report.statusName == 'Zakończone'}">Zamknięte</span>
+                        <span th:unless="${report.statusName == 'Zakończone'}"
+                              th:if="${report.leftTimePercentage == 0}">Czas minął</span>
+                        <span th:unless="${report.statusName == 'Zakończone' or report.leftTimePercentage == 0}"
+                              th:text="|${report.leftTimePercentage}% (Pozostało ${reportsRemainingTimes[status.index]})|">
+        </span>
                     </td>
                 </tr>
+
             </th:block>
             </tbody>
         </table>

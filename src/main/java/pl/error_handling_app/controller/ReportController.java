@@ -1,4 +1,4 @@
-package pl.error_handling_app;
+package pl.error_handling_app.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.error_handling_app.report.*;
+import pl.error_handling_app.report.dto.NewReportDto;
+import pl.error_handling_app.report.dto.ReportDto;
 
 import java.util.List;
 
@@ -46,6 +48,7 @@ public class ReportController {
         Page<ReportDto> reports = reportService.findReports(search, reportStatus, pageable);
         reports.forEach(report -> report.setLeftTimePercentage(reportService.calculateTimeLeftPercentage(report)));
         model.addAttribute("reports", reports);
+        model.addAttribute("reportsRemainingTimes", reportService.calculateRemainingTime(reports.stream().toList()));
         model.addAttribute("currentPage", ++page);
         model.addAttribute("pageSize", size);
         model.addAttribute("totalPages", reports.getTotalPages());
@@ -142,6 +145,7 @@ public class ReportController {
             case "remainingTimeDesc" -> Sort.by("dueDate").descending();
             default -> Sort.by("datedAdded").descending(); //domyslnie sortuje wg daty dodania (od najnowszych)
         };
+    }
 
-}
+
 }

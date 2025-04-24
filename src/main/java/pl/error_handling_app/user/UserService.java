@@ -8,6 +8,7 @@ import pl.error_handling_app.company.CompanyRepository;
 import pl.error_handling_app.exception.UserAlreadyExistsException;
 import pl.error_handling_app.report.Report;
 import pl.error_handling_app.report.ReportRepository;
+import pl.error_handling_app.user.dto.*;
 
 import java.util.*;
 import java.util.stream.Collectors;

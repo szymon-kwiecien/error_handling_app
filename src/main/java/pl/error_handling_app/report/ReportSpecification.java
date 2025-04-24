@@ -31,4 +31,3 @@ public class ReportSpecification {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("reportingUser"), user);
     }
 }
-

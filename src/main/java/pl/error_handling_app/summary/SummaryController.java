@@ -15,6 +15,8 @@ import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import pl.error_handling_app.report.*;
+import pl.error_handling_app.report.dto.ReportCategoryDto;
+import pl.error_handling_app.report.dto.ReportDto;
 import pl.error_handling_app.user.User;
 import pl.error_handling_app.user.UserRepository;
 import pl.error_handling_app.user.UserService;
@@ -125,7 +127,7 @@ public class SummaryController {
 
         Context context = getContext(dateFrom, dateTo, status, user, reports, category, sortedBy);
         if(showReportsTable) {
-            String[] remainingTime = calculateRemainingTime(reports);
+            String[] remainingTime = reportService.calculateRemainingTime(reports);
             context.setVariable("remainingTime", remainingTime);
             context.setVariable("reportingUserEmailLocalPart", reportingUserEmailLocalPart);
             context.setVariable("reportingUserEmailDomain", reportingUserEmailDomain);
@@ -203,18 +205,7 @@ public class SummaryController {
         return context;
     }
 
-    private String[] calculateRemainingTime(List<ReportDto> reports) {
-        String[] remainingTime = new String[reports.size()];
-        for (int i = 0; i < reports.size(); i++) {
-            boolean forFirstRespond = reports.get(i).getStatusName().equals(ReportService.PENDING_STATUS_POLISH_NAME);
-            String remainingTimeTemplate = reports.get(i).getRemainingTime(forFirstRespond).getDays() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getDays() + "d ") : "";
-            remainingTimeTemplate += reports.get(i).getRemainingTime(forFirstRespond).getHours() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getHours() + "godz. ") : "";
-            remainingTimeTemplate += reports.get(i).getRemainingTime(forFirstRespond).getMinutes() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getMinutes() + "min.") : "";
-            remainingTime[i] = (reports.get(i).getStatusName().equals(ReportService.COMPLETED_STATUS_POLISH_NAME)|| (reports.get(i).getRemainingTime(forFirstRespond).getDays() <= 0  &&
-                    reports.get(i).getRemainingTime(forFirstRespond).getHours() <= 0 && reports.get(i).getRemainingTime(forFirstRespond).getMinutes() <= 0))? "-": remainingTimeTemplate;
-        }
-        return remainingTime;
-    }
+
 
     private LocalDate[] checkAnyDateIsNull(LocalDate dateFrom, LocalDate dateTo) {
         if (dateFrom == null) {

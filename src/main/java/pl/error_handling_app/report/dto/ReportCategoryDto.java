@@ -1,6 +1,4 @@
-package pl.error_handling_app.report;
-
-import java.util.Objects;
+package pl.error_handling_app.report.dto;
 
 public class ReportCategoryDto {
 

@@ -1,10 +1,12 @@
-package pl.error_handling_app.user;
+package pl.error_handling_app.user.dto;
 
 
-import jdk.dynalink.NoSuchDynamicMethodException;
 import org.springframework.stereotype.Service;
 import pl.error_handling_app.company.Company;
 import pl.error_handling_app.company.CompanyRepository;
+import pl.error_handling_app.user.User;
+import pl.error_handling_app.user.UserRole;
+import pl.error_handling_app.user.UserRoleRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,7 +24,7 @@ public class UserDtoMapper {
         this.roleRepository = roleRepository;
     }
 
-     User map(UserDto userDto) {
+     public User map(UserDto userDto) {
 
         User user = new User();
         user.setId(userDto.getId());
@@ -39,7 +41,7 @@ public class UserDtoMapper {
         return user;
     }
 
-    static UserDto map(User user) {
+    public static UserDto map(User user) {
 
         Long userRole = user.getRoles().stream().map(UserRole::getId).toList().get(0);
         List<String> rolesNames = user.getRoles().stream().map(UserRole::getName).toList();
@@ -47,7 +49,7 @@ public class UserDtoMapper {
                 user.getCompany().getId(), userRole, user.isActive());
     }
 
-    static UserCredentialsDto mapToCredentials(User user) {
+    public static UserCredentialsDto mapToCredentials(User user) {
         String email = user.getEmail();
         String password = user.getPassword();
         Set<String> roles = user.getRoles()
@@ -57,7 +59,7 @@ public class UserDtoMapper {
         return new UserCredentialsDto(email, password, roles);
     }
 
-    static UserInReportDto mapToUserInReportDto(User user) {
+    public static UserInReportDto mapToUserInReportDto(User user) {
         return new UserInReportDto(user.getId(), user.getEmail(), user.getCompany().getName());
     }
 

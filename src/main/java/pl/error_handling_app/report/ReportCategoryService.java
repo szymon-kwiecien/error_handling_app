@@ -2,6 +2,7 @@ package pl.error_handling_app.report;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.error_handling_app.report.dto.ReportCategoryDto;
 
 import java.util.List;
 import java.util.NoSuchElementException;

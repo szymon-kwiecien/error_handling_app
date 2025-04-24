@@ -1,4 +1,4 @@
-package pl.error_handling_app;
+package pl.error_handling_app.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import pl.error_handling_app.company.Company;
 import pl.error_handling_app.company.CompanyDto;
 import pl.error_handling_app.company.CompanyService;
 

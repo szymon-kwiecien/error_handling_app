@@ -1,4 +1,4 @@
-package pl.error_handling_app;
+package pl.error_handling_app.controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.error_handling_app.exception.InvalidEmailException;
 import pl.error_handling_app.exception.InvalidPasswordException;
-import pl.error_handling_app.user.ChangeEmailDto;
-import pl.error_handling_app.user.ChangePasswordDto;
+import pl.error_handling_app.user.dto.ChangeEmailDto;
+import pl.error_handling_app.user.dto.ChangePasswordDto;
 import pl.error_handling_app.user.UserProfileService;
 
 @Controller
