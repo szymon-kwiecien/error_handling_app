@@ -76,9 +76,52 @@
             <div class="font-medium">Firma:</div>
             <div th:text="${report.reportingUserCompanyName}">New Techologies SA</div>
         </div>
-    </div>
 
-    <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
+        <div th:unless="${report.status.name() == 'COMPLETED'}" class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
+            <h2 class="text-2xl font-semibold mb-4">Czas realizacji</h2>
+
+            <div th:if="${report.status.name() == 'PENDING'}" class="space-y-4">
+                <div>
+                    <div class="mb-1 text-sm font-medium text-gray-300">Czas do pierwszej odpowiedzi</div>
+                    <div class="w-full bg-gray-700 rounded-full h-4">
+                        <div class="h-4 rounded-full transition-all"
+                             th:style="'width: ' + ${timeToRespondProgress} + '%; background-color: ' + ${timeToRespondColor}">
+                        </div>
+                    </div>
+                    <div class="text-right text-xs text-gray-400 mt-1" th:text="${timeToRespondProgress} + '%'"></div>
+                    <div class="text-center text-xs text-gray-400 italic mt-1"
+                         th:text="'Pozostało: ' + ${remainingTimeToFirstRespond}"></div>
+                </div>
+
+                <div>
+                    <div class="mb-1 text-sm font-medium text-gray-300">Czas do rozwiązania</div>
+                    <div class="w-full bg-gray-700 rounded-full h-4">
+                        <div class="h-4 rounded-full transition-all"
+                             th:style="'width: ' + ${timeToResolveProgress} + '%; background-color: ' + ${timeToResolveColor}">
+                        </div>
+                    </div>
+                    <div class="text-right text-xs text-gray-400 mt-1" th:text="${timeToResolveProgress} + '%'"></div>
+                    <div class="text-center text-xs text-gray-400 italic mt-1"
+                         th:text="'Pozostało: ' + ${remainingTimeToComplete}"></div>
+                </div>
+            </div>
+
+            <div th:if="${report.status.name() == 'UNDER_REVIEW'}" class="space-y-4">
+                <div>
+                    <div class="mb-1 text-sm font-medium text-gray-300">Czas do rozwiązania</div>
+                    <div class="w-full bg-gray-700 rounded-full h-4">
+                        <div class="h-4 rounded-full transition-all"
+                             th:style="'width: ' + ${timeToResolveProgress} + '%; background-color: ' + ${timeToResolveColor}">
+                        </div>
+                    </div>
+                    <div class="text-right text-xs text-gray-400 mt-1" th:text="${timeToResolveProgress} + '%'"></div>
+                    <div class="text-center text-xs text-gray-400 italic mt-1"
+                         th:text="'Pozostało: ' + ${remainingTimeToComplete}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
         <h2 class="text-2xl font-semibold mb-4">Czat</h2>
         <div id="chat-container" th:data-report-id="${reportId}" th:data-username="${username}" class="border border-gray-700 p-4 max-h-96 overflow-y-auto mb-4">
             <div id="chat-messages"></div>
@@ -119,6 +162,7 @@
             </div>
             <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded" th:disabled="${report.status.description == 'Zakończone'}">Dodaj załączniki</button>
         </form>
+    </div>
     </div>
 
 </main>

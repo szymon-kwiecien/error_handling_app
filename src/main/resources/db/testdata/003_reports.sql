@@ -9,7 +9,7 @@ INSERT INTO report_category(name) VALUES
 ('Inne');
 
 INSERT INTO report (title, description, dated_added, due_date, time_to_respond, category_id, status, reporting_user_id, assigned_employee_id) VALUES
-('Aplikacja nie uruchamia się', 'Po aktualizacji systemu aplikacja przestała działać.', '2025-04-20 10:30:00', '2025-05-01 15:00:00', '2025-04-25 20:30:00', 1, 'PENDING', 1, NULL),
+('Aplikacja nie uruchamia się', 'Po aktualizacji systemu aplikacja przestała działać.', '2025-04-28 10:30:00', '2025-05-07 15:00:00', '2025-05-01 20:30:00', 1, 'PENDING', 1, NULL),
 ('Błąd podczas logowania', 'Użytkownicy zgłaszają problemy z logowaniem do systemu.', '2025-04-20 09:00:00', '2025-05-02 12:00:00', '2025-04-25 10:00:00', 2, 'UNDER_REVIEW', 1, 2),
 ('Wolne ładowanie strony', 'Główna strona aplikacji ładuje się ponad 10 sekund.', '2025-04-21 14:45:00', '2025-05-03 18:00:00', '2025-04-27 16:00:00', 3, 'PENDING', 4, NULL),
 ('Nowa funkcja - eksport danych', 'Potrzebna funkcja eksportu raportów do plików CSV.', '2025-04-21 11:15:00', '2025-05-04 20:30:00', '2025-04-28 13:15:00', 4, 'PENDING', 4, NULL),

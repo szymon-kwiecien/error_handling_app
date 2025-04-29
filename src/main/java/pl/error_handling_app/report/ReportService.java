@@ -413,8 +413,6 @@ public class ReportService {
         return report.getStatusName().equals(PENDING_STATUS_POLISH_NAME);
     }
 
-
-
     private boolean hasPermissionToAddAttachments(Report report, User user) {
         boolean isAdmin = user.getRoles().stream()
                 .map(UserRole::getName).anyMatch("ADMINISTRATOR"::equals);
@@ -422,5 +420,4 @@ public class ReportService {
         boolean isAssignedEmployee = report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user);
         return isReportingUser || isAssignedEmployee || isAdmin;
     }
-
 }

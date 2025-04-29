@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.report.dto.ReportDetailsDto;
 import pl.error_handling_app.report.ReportService;
+import pl.error_handling_app.report.dto.ReportDto;
 import pl.error_handling_app.user.dto.UserDetailsDto;
 import pl.error_handling_app.user.UserService;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,20 +40,27 @@ public class ChatController {
         UserDetailsDto user = userService.findUserDetailsByEmail(username).orElseThrow();
         Set<String> currentUserRoles = authentication.getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
-        if(hasAccessToChat(user, report)) {
+        if (hasAccessToChat(user, report)) {
             model.addAttribute("report", report);
             model.addAttribute("reportId", reportId);
             model.addAttribute("attachments", report.getAttachments());
             model.addAttribute("username", username);
 
-            switch (report.getStatus()){
+            switch (report.getStatus()) {
                 case COMPLETED -> model.addAttribute("statusColor", "green");
-                case PENDING -> model.addAttribute("statusColor", "red");
-                case UNDER_REVIEW -> model.addAttribute("statusColor", "yellow");
+                case PENDING -> {
+                    model.addAttribute("statusColor", "red");
+                    model.addAttribute("remainingTimeToFirstRespond", getRemainingTime(report, true));
+                    model.addAttribute("remainingTimeToComplete", getRemainingTime(report, false));
+                }
+                case UNDER_REVIEW -> {
+                    model.addAttribute("statusColor", "yellow");
+                    model.addAttribute("remainingTimeToComplete", getRemainingTime(report, false));
+                }
             }
 
-            int timeToRespondProgress = calculateProgress(report.getDateAdded(), report.getTimeToRespond());
-            int timeToResolveProgress = calculateProgress(report.getDateAdded(), report.getDueDate());
+            int timeToRespondProgress = calculateLeftTimePercentage(report, true);
+            int timeToResolveProgress = calculateLeftTimePercentage(report, false);
             model.addAttribute("timeToRespondProgress", timeToRespondProgress);
             model.addAttribute("timeToResolveProgress", timeToResolveProgress);
             model.addAttribute("timeToRespondColor", getProgressColor(timeToRespondProgress));
@@ -71,7 +78,6 @@ public class ChatController {
     @PostMapping("api/chat/send")
     @ResponseBody
     public ResponseEntity<?> sendMessage(@RequestBody ChatMessageDto dto) {
-
         try {
             chatService.sendMessage(dto);
             return ResponseEntity.ok().build();
@@ -84,44 +90,48 @@ public class ChatController {
     @GetMapping("/api/chat/history/{reportId}")
     @ResponseBody
     public Page<ChatMessageDto> getMessages(@PathVariable Long reportId,
-                                         @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "20") int size) {
+                                            @RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "20") int size) {
         return chatService.getMessagesForReport(reportId, page, size);
     }
 
 
     private boolean hasAccessToChat(UserDetailsDto user, ReportDetailsDto report) {
-        if(user.getRoles().contains("ADMINISTRATOR") || report.getReportingUser().equals(user.getEmail())) {
+        if (user.getRoles().contains("ADMINISTRATOR") || report.getReportingUser().equals(user.getEmail())) {
             return true;
         }
         return report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user.getEmail());
     }
 
-    private int calculateProgress(LocalDateTime startTime, LocalDateTime endTime) {
-
-        LocalDateTime now = LocalDateTime.now();
-        long totalDuration = Duration.between(startTime, endTime).toSeconds();
-        long elapseDuration = Duration.between(startTime, now).toSeconds();
-
-        if (elapseDuration <= 0){
-            return 1;
-        }
-        if (elapseDuration >= totalDuration){
-            return 100;
-        }
-
-        double progress = ((double) elapseDuration / totalDuration) * 100;
-        return (int) Math.round(progress);
-    }
-
     private String getProgressColor(int progress) {
-        if (progress >= 75) {
-            return "red";
-        } else if (progress >= 50) {
+        if (progress >= 70) {
+            return "green";
+        } else if (progress >= 25) {
             return "yellow";
         } else {
-            return "green";
+            return "red";
         }
+    }
+
+    private int calculateLeftTimePercentage(ReportDetailsDto report, boolean forFirstRespond) {
+        return reportService.calculateTimeLeftPercentage(buildReportDto(report, forFirstRespond));
+    }
+
+    private String getRemainingTime(ReportDetailsDto report, boolean forFirstRespond) {
+        return reportService.calculateRemainingTime(List.of(buildReportDto(report, forFirstRespond)))[0];
+    }
+
+    private ReportDto buildReportDto(ReportDetailsDto report, boolean forFirstRespond) {
+        ReportDto reportDto = new ReportDto();
+        reportDto.setDateAdded(report.getDateAdded());
+        reportDto.setToRespondDate(report.getTimeToRespond());
+        reportDto.setDueDate(report.getDueDate());
+        reportDto.setStatusName(forFirstRespond
+                ? report.getStatus().description
+                : "W trakcie"); //ustawiam taki status aby dla zgłoszeń oczekujących również móc wyświetlić
+        //czas pozostały na rozwiązanie (poza pozostałym czasem na pierwszą reakcję) oraz obliczyć procentowo pozostałą ilość czasu na rozwiązanie
+        // (poza procentem pozostałego czasu na pierwszą reakcję)
+        return reportDto;
     }
 
 }
