@@ -127,8 +127,10 @@
             <div id="chat-messages"></div>
         </div>
         <form id="chat-form" class="flex space-x-2">
-            <input type="text" id="chat-input" placeholder="Wpisz wiadomość..." class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded">Wyślij</button>
+            <input type="text" id="chat-input" placeholder="Wpisz wiadomość..."
+                   th:disabled="${report.status.description == 'Zakończone'}" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded"
+                    th:disabled="${report.status.description == 'Zakończone'}">Wyślij</button>
         </form>
     </div>
 

@@ -141,7 +141,9 @@ public class ReportController {
     private Sort getSort(String sort) {
         return switch (sort) {
             case "addedDateAsc" -> Sort.by("datedAdded").ascending();
+            case "remainingTimeAscForFirstRespond" -> Sort.by("timeToRespond").ascending();
             case "remainingTimeAsc" -> Sort.by("dueDate").ascending();
+            case "remainingTimeDescForFirstRespond" -> Sort.by("timeToRespond").descending();
             case "remainingTimeDesc" -> Sort.by("dueDate").descending();
             default -> Sort.by("datedAdded").descending(); //domyslnie sortuje wg daty dodania (od najnowszych)
         };

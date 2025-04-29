@@ -48,10 +48,14 @@
                     class="w-full p-2 rounded bg-gray-700 border border-gray-600">
                 <option value="addedDateDesc" th:selected="${sort == 'addedDateDesc'}">Data dodania (od najnowszych)</option>
                 <option value="addedDateAsc" th:selected="${sort == 'addedDateAsc'}">Data dodania (od najstarszych)</option>
-                <option value="remainingTimeAsc" th:selected="${sort == 'remainingTimeAscForFirstRespond'}">Pozostały czas (rosnąco)</option>
-                <option value="remainingTimeAsc" th:selected="${sort == 'remainingTimeAsc'}">Pozostały czas (rosnąco)</option>
-                <option value="remainingTimeDesc" th:selected="${sort == 'remainingTimeDescForFirstRespond'}">Pozostały czas (malejąco)</option>
-                <option value="remainingTimeDesc" th:selected="${sort == 'remainingTimeDesc'}">Pozostały czas (malejąco)</option>
+                <option th:if="${status == 'PENDING'}" value="remainingTimeAscForFirstRespond"
+                        th:selected="${sort == 'remainingTimeAscForFirstRespond'}">Pozostały czas (rosnąco)</option>
+                <option th:if="${status == 'UNDER_REVIEW'}" value="remainingTimeAsc"
+                        th:selected="${sort == 'remainingTimeAsc'}">Pozostały czas (rosnąco)</option>
+                <option th:if="${status == 'PENDING'}" value="remainingTimeDescForFirstRespond"
+                        th:selected="${sort == 'remainingTimeDescForFirstRespond'}">Pozostały czas (malejąco)</option>
+                <option th:if="${status == 'UNDER_REVIEW'}" value="remainingTimeDesc"
+                        th:selected="${sort == 'remainingTimeDesc'}">Pozostały czas (malejąco)</option>
             </select>
         </form>
     </div>
