@@ -40,17 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function createMessageElement(msg) {
+    function createMessageElement(msg, fromWebSocket = false) {
         const div = document.createElement('div');
+        const date = new Date(msg.timestamp);
 
-        let date = new Date(msg.timestamp);
-
-        if (typeof msg.timestamp === 'string' && !msg.timestamp.endsWith('Z')) {
-            date = new Date(msg.timestamp + 'Z');
-            date.setHours(date.getHours() - 2)
-        } else {
-            date = new Date(msg.timestamp);
-            date.setHours(date.getHours() + 2)
+        if (fromWebSocket) {
+            date.setHours(date.getHours() + 2);
         }
 
         const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -59,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function appendMessage(msg, scrollToBottom = false) {
-        const div = createMessageElement(msg);
+        const div = createMessageElement(msg, true); //wiadomosc z webSocket
         chatMessages.appendChild(div);
         if (scrollToBottom) {
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -67,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function prependMessage(msg) {
-        const div = createMessageElement(msg);
+        const div = createMessageElement(msg, false); //wiadmosc z bazy danych
         chatMessages.insertBefore(div, chatMessages.firstChild);
     }
 
@@ -115,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
             chatInput.value = '';
 
             disableScrollLoading = true;
-
         });
     }
 
