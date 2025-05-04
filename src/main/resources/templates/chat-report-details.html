@@ -28,7 +28,8 @@
                     <input type="hidden" name="reportId" th:value="${reportId}" />
                     <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded">Usuń</button>
                 </form>
-                <form th:if="${report.getStatus().description != 'Zakończone'}" sec:authorize="hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_EMPLOYEE')" th:action="@{'/reports/close'}" method="post">
+                <form th:unless="${report.status.name() == 'COMPLETED'} or ${report.status.name() == 'OVERDUE'}"
+                      sec:authorize="hasAnyRole('ROLE_ADMINISTRATOR', 'ROLE_EMPLOYEE')" th:action="@{'/reports/close'}" method="post">
                     <input type="hidden" name="reportId" th:value="${reportId}" />
                     <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded">Zamknij zgłoszenie</button>
                 </form>
@@ -54,7 +55,8 @@
             <div class="font-medium">Przydzielony pracownik:</div>
             <div>
                 <span th:text="${report.assignedEmployee ?: 'Brak'}">employee@test.pl</span>
-                <form th:unless="${report.getStatus().description == 'Zakończone'}" sec:authorize="hasRole('ROLE_ADMINISTRATOR')" th:action="@{/reports/assign}" method="post">
+                <form th:unless="${report.status.name() == 'COMPLETED'} or ${report.status.name() == 'OVERDUE'} "
+                      sec:authorize="hasRole('ROLE_ADMINISTRATOR')" th:action="@{/reports/assign}" method="post">
                     <input type="hidden" name="reportId" th:value="${reportId}">
                     <select name="employeeId" class="bg-gray-700 text-white p-2 rounded">
                         <option value="" disabled selected>Wybierz pracownika</option>
@@ -77,7 +79,7 @@
             <div th:text="${report.reportingUserCompanyName}">New Techologies SA</div>
         </div>
 
-        <div th:unless="${report.status.name() == 'COMPLETED'}" class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
+        <div th:unless="${report.status.name() == 'COMPLETED'} or ${report.status.name() == 'OVERDUE'}" class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
             <h2 class="text-2xl font-semibold mb-4">Czas realizacji</h2>
 
             <div th:if="${report.status.name() == 'PENDING'}" class="space-y-4">
@@ -128,9 +130,10 @@
         </div>
         <form id="chat-form" class="flex space-x-2">
             <input type="text" id="chat-input" placeholder="Wpisz wiadomość..."
-                   th:disabled="${report.status.description == 'Zakończone'}" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
+                   th:disabled="${report.status.name() == 'COMPLETED'} or ${report.status.name() == 'OVERDUE'}"
+                   class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
             <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded"
-                    th:disabled="${report.status.description == 'Zakończone'}">Wyślij</button>
+                    th:disabled="${report.status.name() == 'COMPLETED'} or ${report.status.name() == 'OVERDUE'}">Wyślij</button>
         </form>
     </div>
 
@@ -160,9 +163,12 @@
             <input type="hidden" name="reportId" th:value="${reportId}" />
             <div class="mb-4">
                 <label for="attachmentFiles" class="block text-lg">Wybierz załączniki:</label>
-                <input type="file" id="attachmentFiles" name="files" multiple th:disabled="${report.status.description == 'Zakończone'}" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
+                <input type="file" id="attachmentFiles" name="files" multiple
+                       th:disabled="${report.status.name() == 'COMPLETED'} or ${report.status.name() == 'OVERDUE'}"
+                       class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
             </div>
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded" th:disabled="${report.status.description == 'Zakończone'}">Dodaj załączniki</button>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded"
+                    th:disabled="${report.status.name() == 'COMPLETED'} or ${report.status.name() == 'OVERDUE'}">Dodaj załączniki</button>
         </form>
     </div>
     </div>

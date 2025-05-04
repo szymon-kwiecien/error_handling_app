@@ -4,7 +4,8 @@ public enum ReportStatus {
 
     PENDING("Oczekujące"),
     UNDER_REVIEW("W trakcie"),
-    COMPLETED("Zakończone");
+    COMPLETED("Zakończone"),
+    OVERDUE("Nieobsłużone w terminie");
 
     public final String description;
 

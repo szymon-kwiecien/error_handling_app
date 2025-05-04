@@ -47,9 +47,8 @@ public class ChatController {
             model.addAttribute("username", username);
 
             switch (report.getStatus()) {
-                case COMPLETED -> model.addAttribute("statusColor", "green");
                 case PENDING -> {
-                    model.addAttribute("statusColor", "red");
+                    model.addAttribute("statusColor", "orange");
                     model.addAttribute("remainingTimeToFirstRespond", getRemainingTime(report, true));
                     model.addAttribute("remainingTimeToComplete", getRemainingTime(report, false));
                 }
@@ -57,6 +56,8 @@ public class ChatController {
                     model.addAttribute("statusColor", "yellow");
                     model.addAttribute("remainingTimeToComplete", getRemainingTime(report, false));
                 }
+                case COMPLETED -> model.addAttribute("statusColor", "green");
+                case OVERDUE -> model.addAttribute("statusColor", "red");
             }
 
             int timeToRespondProgress = calculateLeftTimePercentage(report, true);

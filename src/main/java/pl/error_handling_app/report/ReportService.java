@@ -75,6 +75,9 @@ public class ReportService {
     }
 
     public int calculateTimeLeftPercentage(ReportDto report) {
+        if(report.getStatusName().equals("Nieobsłużone w terminie")) {
+            return 0;
+        }
         Instant now = Instant.now();
         Instant dateAdded = report.getDateAdded().atZone(ZoneId.systemDefault()).toInstant();
         Instant toFirstRespondDate = report.getToRespondDate().atZone(ZoneId.systemDefault()).toInstant(); //gdy zgloszenie ma status PENDING(oczekujace)
@@ -90,7 +93,7 @@ public class ReportService {
         if (remainingDuration <= 0) return 0; //gdy minął termin to zwracamy 0
         if (remainingDuration >= totalDuration) return 100; //gdy pozostały czas jest wiekszy lub równy całkowitemu to zwracam 100
 
-        return (int) ((remainingDuration * 100) / totalDuration); //ilosc pozostalego czasu wzgledem calkowitego czasu (w procentach)
+        return (int) Math.ceil((remainingDuration * 100.0) / totalDuration); //ilosc pozostalego czasu wzgledem calkowitego czasu (w procentach)
     }
 
     @Transactional
@@ -221,6 +224,9 @@ public class ReportService {
     @Transactional
     public void closeReport(Long reportId, String currentUserName) {
         Report report = getAuthorizedReport(reportId, currentUserName);
+        if(report.getStatus() == ReportStatus.COMPLETED || report.getStatus() == ReportStatus.OVERDUE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zgłoszenie jest już zakończone/po terminie.");
+        }
         report.setStatus(ReportStatus.COMPLETED);
         report.setAddedToCompleteDuration(); //po zamknięciu zgłoszenia ustawiam ilość czasu między dodaniem zgłoszenia a jego zamknięciem, która będzie
         //wykorzystana do utworzenia statystyk w raportach
