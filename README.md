@@ -4,6 +4,10 @@ FIXARO is a comprehensive web application built to streamline the process of err
 
 Its standout capabilities include automated email notifications, real-time communication via chat, attachment handling for issue reports, and on-demand PDF report generation. This makes it an ideal solution for organizations looking to manage support tickets and IT errors efficiently.
 
+> 🚧 **Note:** This application is under active development.  
+> The core functionalities have already been implemented.  
+> Validation and tests will be added in the near future.
+
 ---
 
 ## 🛠 Used Technologies
@@ -51,14 +55,14 @@ Its standout capabilities include automated email notifications, real-time commu
 - Assigning reports to employees  
 - Tracking issue statuses and categories  
 - Uploading attachments to reports  
-- **Three status levels:**
+- **Four status levels:**
   - `PENDING` – Default status when a ticket is submitted by a user.
   - `UNDER_REVIEW` – Automatically set once an admin assigns an employee to the ticket.
   - `COMPLETED` – Set manually by the assigned employee after resolving the issue.
+  - `OVERDUE` – This status is automatically assigned when a ticket exceeds its response or resolution time. The system uses scheduled tasks to check for overdue tickets every minute.
 - **Each ticket has two time thresholds:**
   - **First Response Time** – Time allowed for the admin to assign an employee.
   - **Resolution Time** – Time allowed for the employee to resolve the reported issue.
-
 
 ### 🏢 Company Management
 - Admins can create, update, and delete company records  
@@ -70,7 +74,8 @@ Its standout capabilities include automated email notifications, real-time commu
 
 ### 💬 Real-time Chat
 - Chat system built on WebSocket protocol  
-- Enables users to discuss issues in real time with support staff  
+- Enables users to discuss issues in real time with support staff
+- Backed by RabbitMQ for message brokering and reliable communication
 
 ### 📎 Attachment Uploading
 - Users can upload files (screenshots, documents) with their reports  
@@ -148,12 +153,8 @@ You can log in with the following demo credentials:
 | Role          | Email                        | Password         |
 | ------------- | ---------------------------- | ---------------- |
 | Administrator | admin@example.com            | tajneHaslo1      |
-| Regular User  | jan.kowalski@example.com      | haslo123         |
-| Employee      | anna.nowak@example.com        | bezpieczneHaslo! |
+| Regular User  | jan.kowalski@example.com     | haslo123         |
+| Employee      | anna.nowak@example.com       | bezpieczneHaslo! |
 
 
-
-> 🚧 **Note:** This application is under active development.  
-> The core functionalities have already been implemented.  
-> Validation and tests will be added in the near future.
 
