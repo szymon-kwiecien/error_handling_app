@@ -29,7 +29,8 @@
                 baseColumnNames="report_id"
                 constraintName="fk_chat_message_report"
                 referencedTableName="report"
-                referencedColumnNames="id"/>
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
     </changeSet>
 
 </databaseChangeLog>

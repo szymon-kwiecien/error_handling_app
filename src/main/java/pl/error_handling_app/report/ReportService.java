@@ -136,7 +136,7 @@ public class ReportService {
         report.setTitle(newReportDto.getTitle());
         report.setDescription(newReportDto.getDescription());
         report.setDatedAdded(now);
-        report.setDueDate(now.plusDays(user.getCompany().getTimeToResolve()));
+        report.setDueDate(now.plusHours(user.getCompany().getTimeToResolve()));
         report.setTimeToRespond(now.plusHours(user.getCompany().getTimeToFirstRespond()));
         report.setCategory(category);
         report.setStatus(ReportStatus.PENDING);
