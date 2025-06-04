@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.attachment.AttachmentDto;
 import pl.error_handling_app.chat.ChatService;
-import pl.error_handling_app.exception.UserNotFoundException;
+import pl.error_handling_app.exception.*;
 import pl.error_handling_app.file.FileService;
 import pl.error_handling_app.report.dto.NewReportDto;
 import pl.error_handling_app.report.dto.ReportDetailsDto;
@@ -119,7 +119,7 @@ public class ReportService {
 
     private ReportCategory getCategory(Long categoryId) {
         return reportCategoryService.getCategoryById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono kategorii o ID: " + categoryId));
+                .orElseThrow(() -> new CategoryNotFoundException("Nie znaleziono kategorii o ID: " + categoryId));
     }
 
     private User getCurrentUser() {
@@ -169,7 +169,7 @@ public class ReportService {
 
             } catch (IOException e) {
                 logger.error("Wystąpil błąd podczas zapisywania pliku {}: {}", filePath, e.getMessage(), e);
-                throw new RuntimeException("Wystąpił błąd podczas zapisywania plików. Spróbuj ponownie.");
+                throw new FileStorageException("Wystąpił błąd podczas zapisywania plików. Spróbuj ponownie.");
             }
         }
         return attachments;
@@ -225,7 +225,7 @@ public class ReportService {
     public void closeReport(Long reportId, String currentUserName) {
         Report report = getAuthorizedReport(reportId, currentUserName);
         if(report.getStatus() == ReportStatus.COMPLETED || report.getStatus() == ReportStatus.OVERDUE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Zgłoszenie jest już zakończone/po terminie.");
+            throw new ReportAlreadyCompletedException("Zgłoszenie jest już zakończone/po terminie.");
         }
         report.setStatus(ReportStatus.COMPLETED);
         report.setAddedToCompleteDuration(); //po zamknięciu zgłoszenia ustawiam ilość czasu między dodaniem zgłoszenia a jego zamknięciem, która będzie
@@ -234,13 +234,13 @@ public class ReportService {
 
     private Report getAuthorizedReport(Long reportId, String currentUserName) {
         Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zgłoszenie nie zostało znalezione."));
+                .orElseThrow(() -> new ReportNotFoundException("Zgłoszenie nie zostało znalezione."));
 
         User user = userRepository.findByEmail(currentUserName)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Błąd uwierzytelnienia."));
+                .orElseThrow(() -> new UnauthorizedOperationException("Błąd uwierzytelnienia."));
 
         if (!hasPermissionToCloseOrDeleteReport(report, user)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Brak uprawnień do wykonania tej operacji.");
+            throw new UnauthorizedOperationException("Brak uprawnień do wykonania tej operacji.");
         }
         return report;
     }
@@ -255,12 +255,12 @@ public class ReportService {
     @Transactional
     public void assignEmployeeToReport(Long reportId, Long employeeId) {
         Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("Zgłoszenie nie zostało znalezione"));
+                .orElseThrow(() -> new ReportNotFoundException("Zgłoszenie nie zostało znalezione"));
         User employee = userRepository.findById(employeeId)
-                .orElseThrow(() -> new IllegalArgumentException("Wybrany pracownik nie został znaleziony"));
+                .orElseThrow(() -> new UserNotFoundException("Wybrany pracownik nie został znaleziony"));
 
         if (employee.getRoles().stream().noneMatch(role -> role.getName().equals("EMPLOYEE"))) {
-            throw new IllegalArgumentException("Wybrany użytkownik nie jest pracownikiem!");
+            throw new UserLacksRequiredRoleException("Wybrany użytkownik nie jest pracownikiem!");
         }
         if(report.getAssignedEmployee() == null) {
             report.setAddedToFirstReactionDuration(); //przy pierwszym przypisaniu pracownika do zgłoszenia zmienia się status na "UNDER_REVIEW"
@@ -274,16 +274,16 @@ public class ReportService {
     public void addAttachmentsToExistingReport(Long reportId, List<MultipartFile> files) {
 
         if (!areFilesValid(files)) {
-            throw new IllegalArgumentException("Pliki są niepoprawne. Spróbuj jeszcze raz");
+            throw new InvalidAttachmentException("Pliki są niepoprawne. Spróbuj jeszcze raz");
         }
 
         Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Zgłoszenie nie istnieje"));
+                .orElseThrow(() -> new ReportNotFoundException("Zgłoszenie nie istnieje"));
 
         User currentUser = getCurrentUser();
 
         if (!hasPermissionToAddAttachments(report, currentUser)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Nie masz uprawnień aby dodać załączniki do tego zgłoszenia");
+            throw new UnauthorizedOperationException("Nie masz uprawnień aby dodać załączniki do tego zgłoszenia");
         }
         List<Attachment> newAttachments = saveAttachments(files, currentUser);
         if (report.getAttachments() == null) {
