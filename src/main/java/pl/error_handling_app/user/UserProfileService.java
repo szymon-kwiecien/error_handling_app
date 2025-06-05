@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.error_handling_app.exception.InvalidEmailException;
 import pl.error_handling_app.exception.InvalidPasswordException;
+import pl.error_handling_app.exception.UnauthorizedOperationException;
 import pl.error_handling_app.user.dto.ChangeEmailDto;
 import pl.error_handling_app.user.dto.ChangePasswordDto;
 import pl.error_handling_app.user.dto.UserProfileDetailsDto;
@@ -42,10 +43,6 @@ public class UserProfileService {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         String newUserEmail = changeEmailDto.getNewEmail();
 
-        if (newUserEmail == null || newUserEmail.isEmpty()) {
-            throw new InvalidEmailException("Wprowadzony nowy e-mail jest za krótki!");
-        }
-
         if (newUserEmail.equalsIgnoreCase(currentUserEmail)) {
             throw new InvalidEmailException("Próbujesz zmienić adres e-mail na taki sam jaki obecnie posiadasz!");
         }
@@ -55,9 +52,11 @@ public class UserProfileService {
             throw new InvalidEmailException("Podany adres e-mail posiada już inny użytkownik!");
         }
 
-        User currentUser = userRepository.findByEmail(currentUserEmail).orElseThrow();
-        if (changeEmailDto.getCurrentPassword() == null || userService.isPasswordInvalid(changeEmailDto.getCurrentPassword(), currentUser.getPassword())) {
-            throw new InvalidEmailException("Obecne hasło jest nieprawidłowe!");
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new UnauthorizedOperationException("Błąd uwierzytelnienia. Spróbuj jeszcze raz."));
+        if (changeEmailDto.getCurrentPassword() == null || userService.isPasswordInvalid(changeEmailDto.getCurrentPassword(),
+                currentUser.getPassword())) {
+                throw new InvalidEmailException("Obecne hasło jest nieprawidłowe!");
         }
         currentUser.setEmail(changeEmailDto.getNewEmail());
         updateAuthentication(changeEmailDto.getNewEmail());
@@ -69,9 +68,10 @@ public class UserProfileService {
         if (changePasswordDto.getNewPassword() == null || changePasswordDto.getConfirmedNewPassword() == null
                 || changePasswordDto.getNewPassword().isEmpty() || changePasswordDto.getConfirmedNewPassword().isEmpty()
                 || !changePasswordDto.getNewPassword().equals(changePasswordDto.getConfirmedNewPassword())) {
-            throw new InvalidPasswordException("Hasła nie są takie same lub są za krótkie!");
+            throw new InvalidPasswordException("Hasła nie są takie same!");
         }
-        User currentUser = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName()).orElseThrow();
+        User currentUser = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(() -> new UnauthorizedOperationException("Błąd uwierzytelnienia. Spróbuj jeszcze raz."));
         if (changePasswordDto.getCurrentPassword() == null || userService.isPasswordInvalid(changePasswordDto.getCurrentPassword(), currentUser.getPassword())) {
             throw new InvalidPasswordException("Obecne hasło jest nieprawidłowe!");
         }

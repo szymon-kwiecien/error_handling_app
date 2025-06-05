@@ -10,10 +10,10 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="first_name" type="varchar(80)">
+            <column name="first_name" type="varchar(30)">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_name" type="varchar(80)">
+            <column name="last_name" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="email" type="varchar(255)">

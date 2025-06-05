@@ -31,7 +31,7 @@ public class ReportControllerExceptionHandler {
         String reportId = request.getParameter("reportId");
 
         logger.error("Wystąpił wyjatek podczas obsługi żądania: {}, dla zgłoszenia o id {},typ wyjątku: {}, treść: {}",
-                uri, reportId, e.getClass().getSimpleName(), e.getMessage(), e);
+                uri, reportId, e.getClass().getSimpleName(), e.getMessage());
 
         String message;
         String redirect;
