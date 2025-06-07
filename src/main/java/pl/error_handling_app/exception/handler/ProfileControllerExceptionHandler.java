@@ -14,7 +14,7 @@ import pl.error_handling_app.exception.UnauthorizedOperationException;
 @ControllerAdvice(assignableTypes = ProfileController.class)
 public class ProfileControllerExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReportControllerExceptionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProfileControllerExceptionHandler.class);
 
     @ExceptionHandler({InvalidEmailException.class, InvalidPasswordException.class, UnauthorizedOperationException.class})
     public String handleProfileUpdateExceptions(RuntimeException e, RedirectAttributes redirectAttributes, HttpServletRequest request) {

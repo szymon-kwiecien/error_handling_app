@@ -16,33 +16,48 @@
         <p th:text="${error}">Wystąpił błąd podczas dodawania użytkownika</p>
     </div>
 
+    <div th:if="${editErrors}" class="bg-red-600 text-white p-4 rounded mb-4">
+        <p>Podczas edycji danych użytkownika wystąpił błąd: </p>
+        <ul class="list-disc pl-5">
+            <li th:each="e : ${editErrors}" th:text="${e}"></li>
+        </ul>
+    </div>
+
+
     <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
         <h2 class="text-2xl font-semibold mb-4">Dodaj użytkownika</h2>
-        <form th:action="@{/admin/add-user}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form th:action="@{/admin/add-user}" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6" th:object="${newUser}">
             <div>
                 <label for="firstName" class="block mb-1">Imię</label>
-                <input type="text" id="firstName" name="firstName" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <input type="text" id="firstName" name="firstName" th:field="*{firstName}"
+                       required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <p th:errors="*{firstName}" class="text-sm text-red-400 mt-1">Błędy związane z imieniem</p>
             </div>
             <div>
                 <label for="lastName" class="block mb-1">Nazwisko</label>
-                <input type="text" id="lastName" name="lastName" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <input type="text" id="lastName" name="lastName" th:field="*{lastName}"
+                       required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <p th:errors="*{lastName}" class="text-sm text-red-400 mt-1">Błędy związane z nazwiskiem</p>
             </div>
             <div>
                 <label for="email" class="block mb-1">Email</label>
-                <input type="email" id="email" name="email" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <input type="email" id="email" name="email" th:field="*{email}" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <p th:errors="*{email}" class="text-sm text-red-400 mt-1">Błędy związane z adresem email</p>
             </div>
             <div>
                 <label for="companyId" class="block mb-1">Firma</label>
-                <select id="companyId" name="companyId" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
-                    <option disabled selected>Wybierz firmę</option>
+                <select id="companyId" name="companyId" th:field="*{companyId}" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                    <option value="" disabled selected>Wybierz firmę</option>
                     <option th:each="company : ${companies}" th:value="${company.id}" th:text="${company.name}"></option>
                 </select>
+                <p th:errors="*{companyId}" class="text-sm text-red-400 mt-1">Błędy związane z firmą</p>
             </div>
             <div>
                 <label for="roleId" class="block mb-1">Rola</label>
-                <select id="roleId" name="roleId" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <select id="roleId" name="roleId" th:field="*{roleId}" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
                     <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
                 </select>
+                <p th:errors="*{roleId}" class="text-sm text-red-400 mt-1">Błędy związane z rolą</p>
             </div>
             <div class="md:col-span-2">
                 <button type="submit" class="mt-2 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded transition">
@@ -68,7 +83,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="user : ${users}" class="border-t border-gray-700">
-                    <form th:action="@{/admin/edit-user/{id}(id=${user.id})}" method="post">
+                    <form th:action="@{/admin/edit-user/{id}(id=${user.id})}" th:object="${user}" method="post">
                         <td class="py-2 px-4"><input type="text" name="firstName" th:value="${user.firstName}" class="bg-gray-700 text-white p-1 rounded w-full"/></td>
                         <td class="py-2 px-4"><input type="text" name="lastName" th:value="${user.lastName}" class="bg-gray-700 text-white p-1 rounded w-full"/></td>
                         <td class="py-2 px-4"><input type="email" name="email" th:value="${user.email}" class="bg-gray-700 text-white p-1 rounded w-full"/></td>

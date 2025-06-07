@@ -1,19 +1,17 @@
 package pl.error_handling_app.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.error_handling_app.company.CompanyService;
-import pl.error_handling_app.exception.UserAlreadyExistsException;
 import pl.error_handling_app.user.*;
 import pl.error_handling_app.user.dto.UserDto;
-import pl.error_handling_app.user.dto.UserEditDto;
 
-import java.util.NoSuchElementException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -31,45 +29,66 @@ public class UserManagementController {
 
     @GetMapping("/manage-users")
     String manageUsers(Model model) {
-        model.addAttribute("users", userService.findAllUsers());
-        model.addAttribute("companies", companyService.findALlCompanies());
-        model.addAttribute("roles", userRoleRepository.findAll());
+        if (!model.containsAttribute("newUser")) {
+            model.addAttribute("newUser", new UserDto());
+        }
+        prepareUserManagementData(model);
         return "manage-users";
     }
 
-
     @PostMapping("/add-user")
-    String addUser(UserDto newUser, RedirectAttributes redirectAttributes) {
-        try {
-            userService.addUser(newUser);
-            redirectAttributes.addFlashAttribute("success", "Użytkownik został dodany");
+    String addUser(@Valid @ModelAttribute("newUser") UserDto newUser,
+                   BindingResult bindingResult,
+                   Model model,
+                   RedirectAttributes redirectAttributes) {
 
-        } catch(UserAlreadyExistsException | NoSuchElementException e) {
-            redirectAttributes.addFlashAttribute("error", "Podczas dodawania użytkownika wystąpił błąd: " + e.getMessage());
+        if (bindingResult.hasErrors()) {
+            prepareUserManagementData(model);
+            return "manage-users";
         }
-        return "redirect:manage-users";
+
+        userService.addUser(newUser);
+        addSuccessMessage(redirectAttributes, "Użytkownik został dodany");
+        return redirectToUserManagementPage();
     }
 
     @PostMapping("/edit-user/{id}")
-    String editUser(@PathVariable Long id, UserEditDto user, RedirectAttributes redirectAttributes) {
-        try {
-            userService.updateUser(id, user);
-            redirectAttributes.addFlashAttribute("success", "Edycja danych użytkownika przebiegła pomyślnie.");
-        } catch(IllegalArgumentException | NoSuchElementException e) {
-            redirectAttributes.addFlashAttribute("error", "Podczas edycji użytkownika wystąpił błąd: " + e.getMessage());
+    String editUser(@PathVariable Long id,
+                    @Valid @ModelAttribute("user") UserDto user,
+                    BindingResult bindingResult,
+                    RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList();
+            redirectAttributes.addFlashAttribute("editErrors", errors);
+            return redirectToUserManagementPage();
         }
-        return "redirect:/admin/manage-users";
+
+        userService.updateUser(id, user);
+        addSuccessMessage(redirectAttributes, "Edycja danych użytkownika przebiegła pomyślnie.");
+        return redirectToUserManagementPage();
     }
 
     @PostMapping("/delete-user/{id}")
     String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            userService.deleteUser(id);
-            redirectAttributes.addFlashAttribute("success", "Użytkownik został usunięty.");
-        } catch(NoSuchElementException e) {
-            redirectAttributes.addFlashAttribute("error", "Wystąpił błąd podczas usuwania użytkownika.");
-        }
-            return "redirect:/admin/manage-users";
-        }
+        userService.deleteUser(id);
+        addSuccessMessage(redirectAttributes, "Użytkownik został usunięty.");
+        return redirectToUserManagementPage();
     }
 
+    private void prepareUserManagementData(Model model) {
+        model.addAttribute("users", userService.findAllUsers());
+        model.addAttribute("companies", companyService.findALlCompanies());
+        model.addAttribute("roles", userRoleRepository.findAll());
+    }
+
+    private void addSuccessMessage(RedirectAttributes redirectAttributes, String message) {
+        redirectAttributes.addFlashAttribute("success", message);
+    }
+
+    private String redirectToUserManagementPage() {
+        return "redirect:/admin/manage-users";
+    }
+}

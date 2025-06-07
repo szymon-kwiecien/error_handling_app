@@ -1,12 +1,24 @@
 package pl.error_handling_app.user.dto;
 
+import jakarta.validation.constraints.*;
+
 public class UserDto {
 
     private Long id;
+    @NotBlank(message = "Imię jest wymagane")
+    @Size(min = 3, max = 30, message = "Imię musi mieć długość między 3 a 30 znaków")
+    @Pattern(regexp = "^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+$", message = "Imię może zawierać tylko litery alfabetu polskiego")
     private String firstName;
+    @NotBlank(message = "Nazwisko jest wymagane")
+    @Size(min = 3, max = 50, message = "Nazwisko musi mieć długość między 3 a 50 znaków")
+    @Pattern(regexp = "^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+$", message = "Nazwisko może zawierać tylko litery alfabetu polskiego")
     private String lastName;
+    @NotBlank(message = "Email jest wymagany")
+    @Email(message = "Niepoprawny format adresu email")
     private String email;
+    @NotNull(message = "Firma jest wymagana")
     private Long companyId;
+    @NotNull(message = "Rola użytkownika jest wymagana")
     private Long roleId;
     private boolean isActive;
 

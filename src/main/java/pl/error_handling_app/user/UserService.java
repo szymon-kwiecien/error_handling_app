@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.error_handling_app.company.Company;
 import pl.error_handling_app.company.CompanyRepository;
-import pl.error_handling_app.exception.UserAlreadyExistsException;
+import pl.error_handling_app.exception.*;
 import pl.error_handling_app.report.Report;
 import pl.error_handling_app.report.ReportRepository;
 import pl.error_handling_app.user.dto.*;
@@ -67,17 +67,17 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(Long userId, UserEditDto userDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("Nie znaleziono użytkownika."));
+    public void updateUser(Long userId, UserDto userDto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Nie znaleziono użytkownika."));
         userRepository.findByEmail(userDto.getEmail()).ifPresent(foundUser -> {
             if(!foundUser.getId().equals(userId))
-                throw new IllegalArgumentException("Taki adres e-mail posiada już inny użytkownik.");
+                throw new InvalidEmailException("Taki adres e-mail posiada już inny użytkownik.");
         });
 
         Company company = companyRepository.findById(userDto.getCompanyId())
-                .orElseThrow(() -> new NoSuchElementException("Wybrana firma nie została znaleziona."));
+                .orElseThrow(() -> new CompanyNotFoundException("Wybrana firma nie została znaleziona."));
         UserRole role = userRoleRepository.findById(userDto.getRoleId())
-                .orElseThrow(() -> new NoSuchElementException("Wybrana rola nie została znaleziona"));
+                .orElseThrow(() -> new RoleNotFoundException("Wybrana rola nie została znaleziona"));
 
         user.setEmail(userDto.getEmail());
         user.setFirstName(userDto.getFirstName());
@@ -90,7 +90,8 @@ public class UserService {
 
         @Transactional
         public void deleteUser(Long userId) {
-            User userToDelete = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
+            User userToDelete = userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("Użytkownik nie został znaleziony"));
             detachUserFromReports(userToDelete);
             Optional<VeryficationToken> veryficationToken = veryficationTokenRepository.findByUser(userToDelete);
             veryficationToken.ifPresent(veryficationTokenRepository::delete);

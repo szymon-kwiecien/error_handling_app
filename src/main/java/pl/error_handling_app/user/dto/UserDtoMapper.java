@@ -4,6 +4,8 @@ package pl.error_handling_app.user.dto;
 import org.springframework.stereotype.Service;
 import pl.error_handling_app.company.Company;
 import pl.error_handling_app.company.CompanyRepository;
+import pl.error_handling_app.exception.CompanyNotFoundException;
+import pl.error_handling_app.exception.RoleNotFoundException;
 import pl.error_handling_app.user.User;
 import pl.error_handling_app.user.UserRole;
 import pl.error_handling_app.user.UserRoleRepository;
@@ -32,9 +34,9 @@ public class UserDtoMapper {
         user.setLastName(userDto.getLastName());
         user.setEmail(userDto.getEmail());
         Company company = companyRepository.findById(userDto.getCompanyId()).orElseThrow(() ->
-                new NoSuchElementException("Firma nie została znaleziona."));
+                new CompanyNotFoundException("Firma nie została znaleziona."));
         UserRole userRole = roleRepository.findById(userDto.getRoleId()).orElseThrow(() ->
-                new NoSuchElementException("Rola nie została znaleziona"));
+                new RoleNotFoundException("Rola nie została znaleziona"));
         user.setCompany(company);
         user.getRoles().add(userRole);
         user.setActive(userDto.isActive());
