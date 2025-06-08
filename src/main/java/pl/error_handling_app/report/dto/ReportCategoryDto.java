@@ -1,8 +1,11 @@
 package pl.error_handling_app.report.dto;
 
+import jakarta.validation.constraints.Size;
+
 public class ReportCategoryDto {
 
     private Long id;
+    @Size(min = 3, max = 50, message = "Nazwa musi mieć długość między 3 a 50 znaków")
     private String name;
 
     public ReportCategoryDto() {

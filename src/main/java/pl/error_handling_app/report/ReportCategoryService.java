@@ -2,6 +2,9 @@ package pl.error_handling_app.report;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.error_handling_app.exception.CategoryAlreadyExistsException;
+import pl.error_handling_app.exception.CategoryNotFoundException;
+import pl.error_handling_app.exception.CompanyAlreadyExistsException;
 import pl.error_handling_app.report.dto.ReportCategoryDto;
 
 import java.util.List;
@@ -30,30 +33,33 @@ public class ReportCategoryService {
     }
 
     public void addCategory(ReportCategoryDto categoryDto) {
-        isCategoryNameTaken(categoryDto.getName());
+        isCategoryNameTaken(categoryDto.getName(), null);
         ReportCategory reportCategory = new ReportCategory();
         reportCategory.setName(categoryDto.getName());
         reportCategoryRepository.save(reportCategory);
     }
 
     @Transactional
-    public void editCategory(Long id, String newCategoryName) {
-        isCategoryNameTaken(newCategoryName);
+    public void editCategory(Long id, ReportCategoryDto categoryDto) {
+        String newCategoryName = categoryDto.getName();
+        isCategoryNameTaken(newCategoryName, id);
         ReportCategory reportCategory = reportCategoryRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Kategoria nie została znaleziona."));
+                .orElseThrow(() -> new CategoryNotFoundException("Kategoria nie została znaleziona."));
         reportCategory.setName(newCategoryName);
     }
 
     public void deleteCategory(Long id) {
         ReportCategory reportCategory = reportCategoryRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Kategoria nie istnieje."));
+                .orElseThrow(() -> new CategoryNotFoundException("Kategoria nie istnieje."));
         reportCategoryRepository.delete(reportCategory);
     }
 
-    private void isCategoryNameTaken(String categoryName) {
-        if(reportCategoryRepository.existsByName(categoryName)) {
-            throw new IllegalArgumentException("Kategoria o takiej nazwie już istnieje.");
-        }
+    private void isCategoryNameTaken(String categoryName, Long currentCategoryId) {
+        reportCategoryRepository.findByName(categoryName).ifPresent(existingCategory -> {
+            if (!existingCategory.getId().equals(currentCategoryId)) {
+                throw new CategoryAlreadyExistsException("Kategoria o takiej nazwie już istnieje");
+            }
+        });
     }
 
     private ReportCategoryDto map(ReportCategory reportCategory) {
