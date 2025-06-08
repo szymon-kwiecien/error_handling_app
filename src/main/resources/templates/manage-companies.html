@@ -14,22 +14,39 @@
     <div th:if="${success}" class="mb-4 p-4 bg-green-700 text-white rounded">
         <p th:text="${success}">Pomyślnie dodano firmę</p>
     </div>
+    <div th:if="${editErrors}" class="bg-red-600 text-white p-4 rounded mb-4">
+        <p>Podczas edycji danych firmy wystąpił błąd: </p>
+        <ul class="list-disc pl-5">
+            <li th:each="e : ${editErrors}" th:text="${e}"></li>
+        </ul>
+    </div>
 
     <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
         <h2 class="text-2xl font-semibold mb-4">Dodaj firmę</h2>
-        <form th:action="@{/admin/add-company}" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <form th:action="@{/admin/add-company}" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-6" th:object="${newCompany}">
             <div>
                 <label for="name" class="block mb-1">Nazwa</label>
-                <input type="text" id="name" name="name" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <input type="text" id="name" name="name" th:field="*{name}" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <p th:errors="*{name}" class="text-sm text-red-400 mt-1">Błędy związane z nazwą firmy</p>
             </div>
             <div>
                 <label for="timeToFirstRespond" class="block mb-1">Czas na pierwszą reakcję (h)</label>
-                <input type="number" id="timeToFirstRespond" name="timeToFirstRespond" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <input type="number" id="timeToFirstRespond" name="timeToFirstRespond" required th:field="*{timeToFirstRespond}"
+                       placeholder="Wpisz ilość godzin z zakresu od 1 do 48" class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <p th:errors="*{timeToFirstRespond}" class="text-sm text-red-400 mt-1">Błędy związane z czasem na pierwszą reakcję</p>
             </div>
             <div>
                 <label for="timeToResolve" class="block mb-1">Czas na rozwiązanie (h)</label>
-                <input type="number" id="timeToResolve" name="timeToResolve" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <input type="number" id="timeToResolve" name="timeToResolve" required th:field="*{timeToResolve}"
+                       placeholder="Wpisz ilość godzin z zakresu od 3 do 168"
+                       class="w-full p-2 rounded bg-gray-700 border border-gray-600">
+                <p th:errors="*{timeToResolve}" class="text-sm text-red-400 mt-1">Błędy związane z czasem na rozwiązanie</p>
+                <div th:if="${#fields.hasGlobalErrors()}" class="text-red-400 text-sm mb-4">
+                    <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                </div>
+
             </div>
+
             <div class="md:col-span-3">
                 <button type="submit" class="mt-2 w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded transition">
                     Dodaj firmę
@@ -53,7 +70,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="company : ${companies}" class="border-t border-gray-700">
-                    <form th:action="@{/admin/edit-company/{id}(id=${company.id})}" method="post">
+                    <form th:action="@{/admin/edit-company/{id}(id=${company.id})}" th:object="${company}" method="post">
                         <td class="py-2 px-4">
                             <input type="text" name="name" th:value="${company.name}" class="bg-gray-700 text-white p-1 rounded w-full"/>
                         </td>
