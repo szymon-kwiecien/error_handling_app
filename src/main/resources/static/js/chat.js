@@ -47,14 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createMessageElement(msg, fromWebSocket = false) {
         const div = document.createElement('div');
-        const date = new Date(msg.timestamp);
-
-        if (fromWebSocket) {
-            date.setHours(date.getHours() + 2);
-        }
-
-        const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        div.innerHTML = `<strong>${msg.sender}</strong> <small>${time}</small><br>${msg.content}`;
+        div.className = 'chat-message mb-2';
+        const header = document.createElement('span');
+        header.innerHTML = `<strong>${msg.sender}</strong> <small>${new Date(msg.timestamp).toLocaleTimeString()}</small><br>`;
+        const content = document.createElement('span');
+        content.textContent = msg.content;
+        div.appendChild(header);
+        div.appendChild(content);
         return div;
     }
 
