@@ -133,8 +133,8 @@ spring.rabbitmq.virtual-host=/
 
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=noreply.fixaro@gmail.com
-spring.mail.password=dled eldt yvqk udlb
+spring.mail.username=noreply.fixaroapp@gmail.com
+spring.mail.password=gqqz iemz aijx fcnz
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
