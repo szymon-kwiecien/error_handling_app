@@ -5,12 +5,18 @@
 
 <div th:replace="~{fragments/header :: headerFragment}"></div>
 
-<main class="container mx-auto px-6 py-20 flex-grow text-center">
-    <h1 class="text-4xl font-bold text-red-500 mb-6">Brak uprawnień</h1>
-    <p class="text-lg mb-8">Niestety nie masz uprawnień, aby odwiedzić tę stronę.</p>
-    <a href="#" th:href="@{/home}" class="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded text-lg transition">
-        Powrót do panelu użytkownika
-    </a>
+<main class="container mx-auto px-6 py-20 flex-grow flex items-center justify-center">
+    <div class="bg-gray-800 p-10 rounded-lg shadow-md text-center max-w-lg w-full border-t-4 border-red-600">
+        <h1 class="text-5xl font-bold text-red-500 mb-4">403</h1>
+        <h2 class="text-2xl font-bold mb-6">Dostęp zabroniony</h2>
+        <p class="text-gray-400 mb-8 text-lg">
+            Niestety nie masz wystarczających uprawnień, aby wyświetlić tę zawartość. Jeśli uważasz, że to błąd, skontaktuj się z administratorem.
+        </p>
+        <a href="#" th:href="@{/home}"
+           class="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded font-semibold transition duration-300">
+            Powrót do panelu głównego
+        </a>
+    </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footerFragment}"></div>

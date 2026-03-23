@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<html lang="pl">
-<head th:replace="~{fragments/head :: headFragment(pageTitle='Strona nie została znaleziona')}"></head>
-<body class="bg-gray-800 text-white font-sans">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Strona nie znaleziona')}"></head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-<nav class="bg-gray-900 p-4 shadow-md">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="space-x-6">
-            <a href="#" th:href="@{/home}" class="text-white hover:text-indigo-500">Strona Główna</a>
-            <a href="/logout" th:href="@{/logout}" class="text-white hover:text-indigo-500">Wyloguj się</a>
-        </div>
-    </div>
-</nav>
+<div th:replace="~{fragments/header :: headerFragment}"></div>
 
-<div class="flex justify-center items-center h-screen">
-    <div class="text-center">
-        <h1 class="text-5xl font-bold text-indigo-500 mb-6">Strona nie została znaleziona</h1>
-        <p class="text-xl text-gray-300 mb-8">Ups! Wygląda na to, że ta strona nie istnieje.</p>
-        <a href="#" th:href="@{/home}" class="bg-indigo-600 text-white px-8 py-4 rounded-lg text-lg hover:bg-indigo-700 transition duration-300">Powrót do panelu użytkownika</a>
+<main class="container mx-auto px-6 py-20 flex-grow flex items-center justify-center">
+    <div class="bg-gray-800 p-10 rounded-lg shadow-md text-center max-w-lg w-full">
+        <h1 class="text-6xl font-bold text-indigo-500 mb-4">404</h1>
+        <h2 class="text-2xl font-bold mb-6">Strona nie została znaleziona</h2>
+        <p class="text-gray-400 mb-8 text-lg">
+             Niestety, ale adres pod który próbujesz się dostać nie istnieje
+        </p>
+        <a href="#" th:href="@{/home}"
+           class="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded font-semibold transition duration-300">
+            Powrót do panelu głównego
+        </a>
     </div>
-</div>
+</main>
+
+<div th:replace="~{fragments/footer :: footerFragment}"></div>
 
 </body>
 </html>
