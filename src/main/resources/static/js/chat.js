@@ -45,20 +45,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function createMessageElement(msg, fromWebSocket = false) {
+    function createMessageElement(msg) {
         const div = document.createElement('div');
-        div.className = 'chat-message mb-2';
-        const header = document.createElement('span');
-        header.innerHTML = `<strong>${msg.sender}</strong> <small>${new Date(msg.timestamp).toLocaleTimeString()}</small><br>`;
-        const content = document.createElement('span');
+        const isMe = msg.sender === currentUsername;
+        const borderColor = isMe ? 'border-yellow-500' : 'border-indigo-500';
+        const bgColor = isMe ? 'bg-gray-800/80' : 'bg-gray-800/40';
+        div.className = `chat-message mb-4 p-3 rounded border-l-4 ${borderColor} ${bgColor}`;
+
+        let date;
+        if (Array.isArray(msg.timestamp)) {
+            date = new Date(msg.timestamp[0], msg.timestamp[1] - 1, msg.timestamp[2], msg.timestamp[3], msg.timestamp[4]);
+        } else {
+            date = new Date(msg.timestamp);
+        }
+
+        const dateTimeStr = date.toLocaleString('pl-PL', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+
+        const header = document.createElement('div');
+        header.className = 'flex justify-between items-center mb-2';
+
+        const nameNode = document.createElement('strong');
+        nameNode.className = isMe ? 'text-yellow-400 text-sm' : 'text-indigo-300 text-sm';
+        nameNode.textContent = isMe ? 'Ty' : msg.sender;
+
+        const timeNode = document.createElement('small');
+        timeNode.className = 'text-gray-500 text-xs';
+        timeNode.textContent = dateTimeStr;
+
+        header.appendChild(nameNode);
+        header.appendChild(timeNode);
+
+        const content = document.createElement('div');
+        content.className = 'text-base text-gray-100 break-words leading-relaxed font-medium';
         content.textContent = msg.content;
+
         div.appendChild(header);
         div.appendChild(content);
         return div;
     }
 
     function appendMessage(msg, scrollToBottom = false) {
-        const div = createMessageElement(msg, true); //wiadomosc z webSocket
+        const div = createMessageElement(msg); //wiadomosc z webSocket
         chatMessages.appendChild(div);
         if (scrollToBottom) {
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -66,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function prependMessage(msg) {
-        const div = createMessageElement(msg, false); //wiadmosc z bazy danych
+        const div = createMessageElement(msg); //wiadmosc z bazy danych
         chatMessages.insertBefore(div, chatMessages.firstChild);
     }
 
@@ -106,8 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const message = {
                 reportId: reportId,
                 content: content,
-                sender: currentUsername,
-                timestamp: new Date().toISOString()
+                sender: currentUsername
             };
 
             stompClient.send("/app/chat", {}, JSON.stringify(message));
@@ -125,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     connectWebSocket();
     loadMessages().then(() => {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        requestAnimationFrame(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
     });
 });

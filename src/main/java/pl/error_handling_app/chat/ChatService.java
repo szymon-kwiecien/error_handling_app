@@ -35,17 +35,18 @@ public class ChatService {
 
     @Transactional
     public void sendMessage(ChatMessageDto dto) {
+        LocalDateTime now = LocalDateTime.now();
+        dto.setTimestamp(now);
+        saveMessage(dto, now);
         chatProducer.send(dto);
-        saveMessage(dto);
     }
 
-    public void saveMessage(ChatMessageDto dto) {
-        Report report = reportRepository.findById(dto.getReportId())
-                .orElseThrow(() -> new IllegalArgumentException("Zgłoszenie nie zostało znalezione."));
+    private void saveMessage(ChatMessageDto dto, LocalDateTime time) {
+        Report report = reportRepository.getReferenceById(dto.getReportId());
         ChatMessage message = new ChatMessage();
         message.setContent(dto.getContent());
         message.setSender(dto.getSender());
-        message.setTimestamp(LocalDateTime.now());
+        message.setTimestamp(time);
         message.setReport(report);
         chatMessageRepository.save(message);
     }
