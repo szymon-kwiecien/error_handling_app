@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import pl.error_handling_app.report.ReportStatus;
 import pl.error_handling_app.report.dto.ReportDetailsDto;
 import pl.error_handling_app.report.ReportService;
 import pl.error_handling_app.report.dto.ReportDto;
@@ -35,44 +36,14 @@ public class ChatController {
 
     @GetMapping("/report")
     public String showChatPage(@RequestParam("id") Long reportId, Authentication authentication, Model model) {
-        ReportDetailsDto report = reportService.findReportById(reportId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        String username = SecurityContextHolder.getContext().getAuthentication().getName(); //w mojej aplikacji jest to adres e-mail
-        UserDetailsDto user = userService.findUserDetailsByEmail(username).orElseThrow();
-        Set<String> currentUserRoles = authentication.getAuthorities()
-                .stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
-        if (hasAccessToChat(user, report)) {
-            model.addAttribute("report", report);
-            model.addAttribute("reportId", reportId);
-            model.addAttribute("attachments", report.getAttachments());
-            model.addAttribute("username", username);
+        ReportDetailsDto report = reportService.getReportForChat(reportId, authentication.getName());
+        model.addAttribute("report", report);
+        model.addAttribute("reportId", reportId);
+        model.addAttribute("attachments", report.getAttachments());
+        model.addAttribute("username", authentication.getName());
+        prepareChatModel(model, report, authentication);
 
-            switch (report.getStatus()) {
-                case PENDING -> {
-                    model.addAttribute("statusColor", "orange");
-                    model.addAttribute("remainingTimeToFirstRespond", getRemainingTime(report, true));
-                    model.addAttribute("remainingTimeToComplete", getRemainingTime(report, false));
-                }
-                case UNDER_REVIEW -> {
-                    model.addAttribute("statusColor", "yellow");
-                    model.addAttribute("remainingTimeToComplete", getRemainingTime(report, false));
-                }
-                case COMPLETED -> model.addAttribute("statusColor", "green");
-                case OVERDUE -> model.addAttribute("statusColor", "red");
-            }
-
-            int timeToRespondProgress = calculateLeftTimePercentage(report, true);
-            int timeToResolveProgress = calculateLeftTimePercentage(report, false);
-            model.addAttribute("timeToRespondProgress", timeToRespondProgress);
-            model.addAttribute("timeToResolveProgress", timeToResolveProgress);
-            model.addAttribute("timeToRespondColor", getProgressColor(timeToRespondProgress));
-            model.addAttribute("timeToResolveColor", getProgressColor(timeToResolveProgress));
-
-            if (currentUserRoles.contains("ROLE_ADMINISTRATOR")) {
-                model.addAttribute("employees", userService.findUsersByRoleName("EMPLOYEE"));
-            }
-            return "chat-report-details";
-        }
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        return "chat-report-details";
     }
 
 
@@ -92,16 +63,44 @@ public class ChatController {
     @ResponseBody
     public Page<ChatMessageDto> getMessages(@PathVariable Long reportId,
                                             @RequestParam(defaultValue = "0") int page,
-                                            @RequestParam(defaultValue = "20") int size) {
+                                            @RequestParam(defaultValue = "20") int size,
+                                            Authentication authentication) {
+
+        reportService.getReportForChat(reportId, authentication.getName());
         return chatService.getMessagesForReport(reportId, page, size);
     }
 
 
-    private boolean hasAccessToChat(UserDetailsDto user, ReportDetailsDto report) {
-        if (user.getRoles().contains("ADMINISTRATOR") || report.getReportingUser().equals(user.getEmail())) {
-            return true;
+    private void prepareChatModel(Model model, ReportDetailsDto report, Authentication authentication) {
+        model.addAttribute("statusColor", getStatusColor(report.getStatus()));
+
+        if (report.getStatus() == ReportStatus.PENDING) {
+            model.addAttribute("remainingTimeToFirstRespond", getRemainingTime(report, true));
+            model.addAttribute("remainingTimeToComplete", getRemainingTime(report, false));
+        } else if (report.getStatus() == ReportStatus.UNDER_REVIEW) {
+            model.addAttribute("remainingTimeToComplete", getRemainingTime(report, false));
         }
-        return report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user.getEmail());
+
+        int respondProgress = calculateLeftTimePercentage(report, true);
+        int resolveProgress = calculateLeftTimePercentage(report, false);
+
+        model.addAttribute("timeToRespondProgress", respondProgress);
+        model.addAttribute("timeToResolveProgress", resolveProgress);
+        model.addAttribute("timeToRespondColor", getProgressColor(respondProgress));
+        model.addAttribute("timeToResolveColor", getProgressColor(resolveProgress));
+
+        if (hasRole(authentication, "ROLE_ADMINISTRATOR")) {
+            model.addAttribute("employees", userService.findUsersByRoleName("EMPLOYEE"));
+        }
+    }
+
+    private String getStatusColor(ReportStatus status) {
+        return switch (status) {
+            case PENDING -> "orange";
+            case UNDER_REVIEW -> "yellow";
+            case COMPLETED -> "green";
+            case OVERDUE -> "red";
+        };
     }
 
     private String getProgressColor(int progress) {
@@ -120,6 +119,12 @@ public class ChatController {
 
     private String getRemainingTime(ReportDetailsDto report, boolean forFirstRespond) {
         return reportService.calculateRemainingTime(List.of(buildReportDto(report, forFirstRespond)))[0];
+    }
+
+    private boolean hasRole(Authentication authentication, String roleName) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(roleName::equals);
     }
 
     private ReportDto buildReportDto(ReportDetailsDto report, boolean forFirstRespond) {

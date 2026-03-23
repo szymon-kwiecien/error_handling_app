@@ -32,6 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 appendMessage(msg, true);
             });
 
+            stompClient.subscribe('/user/queue/errors', (message) => {
+                const error = JSON.parse(message.body);
+                alert("Błąd: " + error.errorMessage);
+            });
+
             webSocketConnected = true;
             connecting = false;
         }, (error) => {

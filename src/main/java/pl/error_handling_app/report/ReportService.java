@@ -5,12 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import pl.error_handling_app.attachment.Attachment;
 import pl.error_handling_app.attachment.AttachmentDto;
 import pl.error_handling_app.chat.ChatService;
@@ -68,14 +66,14 @@ public class ReportService {
         if (isAdmin) {
             return reportRepository.findAll(reportSpecification, pageable).map(this::mapToDto);
         } else if (isEmployee) {
-            return reportRepository.findAll(Specification.where(reportSpecification).and(ReportSpecification.filterByAssignedEmployee(user)),pageable).map(this::mapToDto);
+            return reportRepository.findAll(Specification.where(reportSpecification).and(ReportSpecification.filterByAssignedEmployee(user)), pageable).map(this::mapToDto);
         } else {
-            return reportRepository.findAll(Specification.where(reportSpecification).and(ReportSpecification.filterByReportingUser(user)),pageable).map(this::mapToDto);
+            return reportRepository.findAll(Specification.where(reportSpecification).and(ReportSpecification.filterByReportingUser(user)), pageable).map(this::mapToDto);
         }
     }
 
     public int calculateTimeLeftPercentage(ReportDto report) {
-        if(report.getStatusName().equals("Nieobsłużone w terminie")) {
+        if (report.getStatusName().equals("Nieobsłużone w terminie")) {
             return 0;
         }
         Instant now = Instant.now();
@@ -91,7 +89,8 @@ public class ReportService {
                 Duration.between(now, toFirstRespondDate).toSeconds() : Duration.between(now, dueDate).toSeconds();
 
         if (remainingDuration <= 0) return 0; //gdy minął termin to zwracamy 0
-        if (remainingDuration >= totalDuration) return 100; //gdy pozostały czas jest wiekszy lub równy całkowitemu to zwracam 100
+        if (remainingDuration >= totalDuration)
+            return 100; //gdy pozostały czas jest wiekszy lub równy całkowitemu to zwracam 100
 
         return (int) Math.ceil((remainingDuration * 100.0) / totalDuration); //ilosc pozostalego czasu wzgledem calkowitego czasu (w procentach)
     }
@@ -224,7 +223,7 @@ public class ReportService {
     @Transactional
     public void closeReport(Long reportId, String currentUserName) {
         Report report = getAuthorizedReport(reportId, currentUserName);
-        if(report.getStatus() == ReportStatus.COMPLETED || report.getStatus() == ReportStatus.OVERDUE) {
+        if (report.getStatus() == ReportStatus.COMPLETED || report.getStatus() == ReportStatus.OVERDUE) {
             throw new ReportAlreadyCompletedException("Zgłoszenie jest już zakończone/po terminie.");
         }
         report.setStatus(ReportStatus.COMPLETED);
@@ -262,7 +261,7 @@ public class ReportService {
         if (employee.getRoles().stream().noneMatch(role -> role.getName().equals("EMPLOYEE"))) {
             throw new UserLacksRequiredRoleException("Wybrany użytkownik nie jest pracownikiem!");
         }
-        if(report.getAssignedEmployee() == null) {
+        if (report.getAssignedEmployee() == null) {
             report.setAddedToFirstReactionDuration(); //przy pierwszym przypisaniu pracownika do zgłoszenia zmienia się status na "UNDER_REVIEW"
             // a więc czas między dodaniem zgłoszenia a pierwszym przypisaniem pracownika do zgłoszenia to czas pierwszej reakcji na zgłoszenie
         }
@@ -282,7 +281,7 @@ public class ReportService {
 
         User currentUser = getCurrentUser();
 
-        if (!hasPermissionToAddAttachments(report, currentUser)) {
+        if (!isUserAuthorizedForReport(report, currentUser)) {
             throw new UnauthorizedOperationException("Nie masz uprawnień aby dodać załączniki do tego zgłoszenia");
         }
         List<Attachment> newAttachments = saveAttachments(files, currentUser);
@@ -371,8 +370,8 @@ public class ReportService {
             String remainingTimeTemplate = reports.get(i).getRemainingTime(forFirstRespond).getDays() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getDays() + "d ") : "";
             remainingTimeTemplate += reports.get(i).getRemainingTime(forFirstRespond).getHours() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getHours() + "godz. ") : "";
             remainingTimeTemplate += reports.get(i).getRemainingTime(forFirstRespond).getMinutes() > 0 ? (reports.get(i).getRemainingTime(forFirstRespond).getMinutes() + "min.") : "";
-            remainingTime[i] = (reports.get(i).getStatusName().equals(ReportService.COMPLETED_STATUS_POLISH_NAME)|| (reports.get(i).getRemainingTime(forFirstRespond).getDays() <= 0  &&
-                    reports.get(i).getRemainingTime(forFirstRespond).getHours() <= 0 && reports.get(i).getRemainingTime(forFirstRespond).getMinutes() <= 0))? "-": remainingTimeTemplate;
+            remainingTime[i] = (reports.get(i).getStatusName().equals(ReportService.COMPLETED_STATUS_POLISH_NAME) || (reports.get(i).getRemainingTime(forFirstRespond).getDays() <= 0 &&
+                    reports.get(i).getRemainingTime(forFirstRespond).getHours() <= 0 && reports.get(i).getRemainingTime(forFirstRespond).getMinutes() <= 0)) ? "-" : remainingTimeTemplate;
         }
         return remainingTime;
     }
@@ -419,11 +418,23 @@ public class ReportService {
         return report.getStatusName().equals(PENDING_STATUS_POLISH_NAME);
     }
 
-    private boolean hasPermissionToAddAttachments(Report report, User user) {
+    public boolean isUserAuthorizedForReport(Report report, User user) {
         boolean isAdmin = user.getRoles().stream()
                 .map(UserRole::getName).anyMatch("ADMINISTRATOR"::equals);
         boolean isReportingUser = report.getReportingUser().equals(user);
         boolean isAssignedEmployee = report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user);
         return isReportingUser || isAssignedEmployee || isAdmin;
+    }
+
+    @Transactional(readOnly = true)
+    public ReportDetailsDto getReportForChat(Long reportId, String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("Użytkownik %s nie został znaleziony.".formatted(userEmail)));
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new ReportNotFoundException("Zgłoszenie o ID " + reportId + " nie istnieje"));
+        if (!isUserAuthorizedForReport(report, user)) {
+            throw new UnauthorizedOperationException("Nie masz uprawnień do tego zgłoszenia");
+        }
+        return mapToReportDetailsDto(report);
     }
 }
