@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head th:replace="~{fragments/head :: headFragment(pageTitle='Edycja profilu')}"></head>
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
@@ -28,6 +28,14 @@
             <div>
                 <label class="text-gray-400 text-sm">Firma:</label>
                 <p id="company" class="text-lg font-medium" th:text="${userDetails.companyName}">NewTechnologiesComp</p>
+                <div class="mt-2 text-sm text-gray-400 space-y-1" sec:authorize="hasRole('USER')" >
+                    <p>⏱️ Czas pierwszej reakcji:
+                        <span class="text-gray-200 font-medium" th:text="|${userDetails.companyTimeToFirstRespond} godz.|">-</span>
+                    </p>
+                    <p>✅ Czas rozwiązania:
+                        <span class="text-gray-200 font-medium" th:text="|${userDetails.companyTimeToResolve} godz.|">-</span>
+                    </p>
+                </div>
             </div>
             <div>
                 <label class="text-gray-400 text-sm">Typ konta:</label>

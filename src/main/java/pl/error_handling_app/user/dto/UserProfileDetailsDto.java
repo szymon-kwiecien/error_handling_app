@@ -8,14 +8,18 @@ public class UserProfileDetailsDto {
     private String email;
     private String role;
     private String companyName;
+    private String companyTimeToFirstRespond;
+    private String companyTimeToResolve;
 
-    public UserProfileDetailsDto(Long id, String firstName, String lastName, String email, String role, String companyName) {
+    public UserProfileDetailsDto(Long id, String firstName, String lastName, String email, String role, String companyName, String companyTimeToFirstRespond, String companyTimeToResolve) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.role = role;
         this.companyName = companyName;
+        this.companyTimeToFirstRespond = companyTimeToFirstRespond;
+        this.companyTimeToResolve = companyTimeToResolve;
     }
 
     public Long getId() {
@@ -64,5 +68,22 @@ public class UserProfileDetailsDto {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+
+    public String getCompanyTimeToFirstRespond() {
+        return companyTimeToFirstRespond;
+    }
+
+    public void setCompanyTimeToFirstRespond(String companyTimeToFirstRespond) {
+        this.companyTimeToFirstRespond = companyTimeToFirstRespond;
+    }
+
+    public String getCompanyTimeToResolve() {
+        return companyTimeToResolve;
+    }
+
+    public void setCompanyTimeToResolve(String companyTimeToResolve) {
+        this.companyTimeToResolve = companyTimeToResolve;
     }
 }

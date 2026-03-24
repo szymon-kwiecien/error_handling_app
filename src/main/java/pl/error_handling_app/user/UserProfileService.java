@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.error_handling_app.company.Company;
 import pl.error_handling_app.exception.InvalidEmailException;
 import pl.error_handling_app.exception.InvalidPasswordException;
 import pl.error_handling_app.exception.UnauthorizedOperationException;
@@ -15,6 +16,7 @@ import pl.error_handling_app.user.dto.ChangePasswordDto;
 import pl.error_handling_app.user.dto.UserProfileDetailsDto;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class UserProfileService {
@@ -31,10 +33,18 @@ public class UserProfileService {
 
 
     public UserProfileDetailsDto findUserProfileDetailsByEmail(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Użytkownik %s nie został znaleziony.".formatted(email)));
-        String roleName = user.getRoles().iterator().next().getName();
-        String companyName = user.getCompany() != null ? user.getCompany().getName() : "-";
-        return new UserProfileDetailsDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), roleName, companyName);
+        User user = userRepository.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException("Użytkownik %s nie został znaleziony.".formatted(email)));
+        String roleName = user.getRoles().stream()
+                .findFirst()
+                .map(UserRole::getName)
+                .orElse("-");
+        Company company = user.getCompany();
+        String companyName = getCompanyName(company);
+        String companyTimeToFirstRespond = getCompanyTime(company, Company::getTimeToFirstRespond);
+        String companyTimeToResolve = getCompanyTime(company, Company::getTimeToResolve);
+        return new UserProfileDetailsDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(),
+                roleName, companyName, companyTimeToFirstRespond, companyTimeToResolve);
     }
 
     @Transactional
@@ -81,6 +91,13 @@ public class UserProfileService {
         currentUser.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
     }
 
+    private String getCompanyName(Company company) {
+        return company != null ? company.getName() : "-";
+    }
+
+    private String getCompanyTime(Company company, Function<Company, Integer> extractor) {
+        return company != null ? String.valueOf(extractor.apply(company)) : "-";
+    }
 
     private void updateAuthentication(String newEmail) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
