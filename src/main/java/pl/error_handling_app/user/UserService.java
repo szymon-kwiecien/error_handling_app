@@ -67,19 +67,34 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(Long userId, UserDto userDto) {
+    public void updateUser(Long userId, UserDto userDto, String currentUserEmail) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Nie znaleziono użytkownika."));
-        userRepository.findByEmail(userDto.getEmail()).ifPresent(foundUser -> {
-            if(!foundUser.getId().equals(userId))
-                throw new InvalidEmailException("Taki adres e-mail posiada już inny użytkownik.");
-        });
+        boolean isSelfUpdate = user.getEmail().equalsIgnoreCase(currentUserEmail);
+
+        if (isSelfUpdate && !user.getEmail().equalsIgnoreCase(userDto.getEmail())) {
+            throw new UnauthorizedOperationException("Nie możesz zmienić własnego adresu e-mail w tym panelu!");
+        }
+
+        if (!isSelfUpdate) {
+            userRepository.findByEmail(userDto.getEmail()).ifPresent(foundUser -> {
+                if (!foundUser.getId().equals(userId))
+                    throw new InvalidEmailException("Taki adres e-mail posiada już inny użytkownik.");
+            });
+            user.setEmail(userDto.getEmail());
+        }
 
         Company company = companyRepository.findById(userDto.getCompanyId())
                 .orElseThrow(() -> new CompanyNotFoundException("Wybrana firma nie została znaleziona."));
         UserRole role = userRoleRepository.findById(userDto.getRoleId())
                 .orElseThrow(() -> new RoleNotFoundException("Wybrana rola nie została znaleziona"));
 
-        user.setEmail(userDto.getEmail());
+        if (isSelfUpdate) {
+                boolean currentlyAdmin = user.getRoles().stream()
+                        .anyMatch(r -> r.getName().equals("ADMINISTRATOR"));
+                if (currentlyAdmin && !role.getName().equals("ADMINISTRATOR")) {
+                    throw new UnauthorizedOperationException("Nie możesz odebrać sobie uprawnień administratora.");
+                }
+        }
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setCompany(company);
@@ -89,12 +104,20 @@ public class UserService {
     }
 
         @Transactional
-        public void deleteUser(Long userId) {
+        public void deleteUser(Long userId, String currentUserEmail) {
             User userToDelete = userRepository.findById(userId)
                     .orElseThrow(() -> new UserNotFoundException("Użytkownik nie został znaleziony"));
+            if (userToDelete.getEmail().equals(currentUserEmail)) {
+                throw new UnauthorizedOperationException("Nie możesz usunąć własnego konta.");
+            }
+            boolean isTargetAdmin = userToDelete.getRoles().stream()
+                    .anyMatch(role -> role.getName().equals("ADMINISTRATOR"));
+            if (isTargetAdmin) {
+                throw new UnauthorizedOperationException("Nie można usunąć innego administratora");
+            }
             detachUserFromReports(userToDelete);
-            Optional<VeryficationToken> veryficationToken = veryficationTokenRepository.findByUser(userToDelete);
-            veryficationToken.ifPresent(veryficationTokenRepository::delete);
+            veryficationTokenRepository.findByUser(userToDelete)
+                    .ifPresent(veryficationTokenRepository::delete);
             userRepository.deleteById(userId);
         }
 

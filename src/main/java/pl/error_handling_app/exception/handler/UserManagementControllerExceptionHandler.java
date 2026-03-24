@@ -17,7 +17,7 @@ public class UserManagementControllerExceptionHandler {
 
 
     @ExceptionHandler({UserAlreadyExistsException.class, UserNotFoundException.class, InvalidEmailException.class,
-            CompanyNotFoundException.class, RoleNotFoundException.class})
+            CompanyNotFoundException.class, RoleNotFoundException.class, UnauthorizedOperationException.class})
     public String handleUserManagementExceptions(RuntimeException e, RedirectAttributes redirectAttributes,
                                                  HttpServletRequest request) {
         String uri = request.getRequestURI();

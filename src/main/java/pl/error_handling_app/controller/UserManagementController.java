@@ -2,6 +2,7 @@ package pl.error_handling_app.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -56,6 +57,7 @@ public class UserManagementController {
     String editUser(@PathVariable Long id,
                     @Valid @ModelAttribute("user") UserDto user,
                     BindingResult bindingResult,
+                    Authentication authentication,
                     RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
@@ -66,14 +68,14 @@ public class UserManagementController {
             return redirectToUserManagementPage();
         }
 
-        userService.updateUser(id, user);
+        userService.updateUser(id, user, authentication.getName());
         addSuccessMessage(redirectAttributes, "Edycja danych użytkownika przebiegła pomyślnie.");
         return redirectToUserManagementPage();
     }
 
     @PostMapping("/delete-user/{id}")
-    String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        userService.deleteUser(id);
+    String deleteUser(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes) {
+        userService.deleteUser(id, authentication.getName());
         addSuccessMessage(redirectAttributes, "Użytkownik został usunięty.");
         return redirectToUserManagementPage();
     }
