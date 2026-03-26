@@ -1,5 +1,7 @@
 package pl.error_handling_app.user;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,8 +57,8 @@ public class UserService {
         return userRepository.findByEmail(email).map(UserDtoMapper::mapToCredentials);
     }
 
-    public List<UserDto> findAllUsers() {
-        return userRepository.findAll().stream().map(UserDtoMapper::map).toList();
+    public Page<UserDto> findPagedUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(UserDtoMapper::map);
     }
 
     public void addUser(UserDto newUser) {
