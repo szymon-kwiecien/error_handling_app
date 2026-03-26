@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.error_handling_app.report.*;
 import pl.error_handling_app.report.dto.NewReportDto;
 import pl.error_handling_app.report.dto.ReportDto;
+import pl.error_handling_app.utils.PaginationUtils;
 
 import java.util.List;
 
@@ -32,7 +33,6 @@ public class ReportController {
         this.reportCategoryService = reportCategoryService;
     }
 
-
     @GetMapping()
     public String listReports(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "5") int size,
                               @RequestParam(defaultValue = "all") String status,
@@ -40,14 +40,14 @@ public class ReportController {
                               @RequestParam(defaultValue = "addedDateDesc")String sort,Model model) {
 
         Sort sorting = getSort(sort);
-        Pageable pageable = PageRequest.of(--page, size, sorting);
-        ReportStatus reportStatus = status.equals("all") ? null : ReportStatus.valueOf(status);
+        Pageable pageable = PaginationUtils.createPageable(page, size, sorting);
+        ReportStatus reportStatus = ReportStatus.getStatusFromString(status);
         Page<ReportDto> reports = reportService.findReports(search, reportStatus, pageable);
         reports.forEach(report -> report.setLeftTimePercentage(reportService.calculateTimeLeftPercentage(report)));
         model.addAttribute("reports", reports);
         model.addAttribute("reportsRemainingTimes", reportService.calculateRemainingTime(reports.stream().toList()));
-        model.addAttribute("currentPage", ++page);
-        model.addAttribute("pageSize", size);
+        model.addAttribute("currentPage", pageable.getPageNumber() + 1);
+        model.addAttribute("pageSize", pageable.getPageSize());
         model.addAttribute("totalPages", reports.getTotalPages());
         model.addAttribute("status", status);
         model.addAttribute("search",search);
@@ -125,6 +125,5 @@ public class ReportController {
             default -> Sort.by("datedAdded").descending(); //domyslnie sortuje wg daty dodania (od najnowszych)
         };
     }
-
 
 }

@@ -61,4 +61,5 @@ public class ReportControllerExceptionHandler {
         redirectAttributes.addFlashAttribute("errorMessage", message + e.getMessage());
         return "redirect:" + redirect;
     }
+
 }

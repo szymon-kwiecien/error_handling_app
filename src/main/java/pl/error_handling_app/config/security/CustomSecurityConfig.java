@@ -26,6 +26,7 @@ public class CustomSecurityConfig implements WebMvcConfigurer {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/img/**", "/styles/**", "/scripts/**", "/account/**").permitAll()
                 .requestMatchers(PathRequest.toH2Console()).permitAll()
+                .requestMatchers("/error-attachment-max-size").permitAll()
                 .requestMatchers("/summaries", "/generate-summary").hasAnyRole(ADMIN_ROLE, EMPLOYEE_ROLE)
                 .requestMatchers("/admin/**", "/reports/assign").hasRole(ADMIN_ROLE)
                 .anyRequest().authenticated()
@@ -54,4 +55,5 @@ public class CustomSecurityConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:uploads/");
     }
+
 }

@@ -9,6 +9,15 @@ public enum ReportStatus {
 
     public final String description;
 
+    public static ReportStatus getStatusFromString(String status) {
+        for (ReportStatus rs : ReportStatus.values()) {
+            if (rs.name().equalsIgnoreCase(status)) {
+                return rs;
+            }
+        }
+        return null;
+    }
+
     ReportStatus(String description) {
         this.description = description;
     }
