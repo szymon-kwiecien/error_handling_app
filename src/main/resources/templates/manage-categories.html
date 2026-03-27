@@ -24,6 +24,8 @@
     <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-10">
         <h2 class="text-2xl font-semibold mb-4">Dodaj kategorię</h2>
         <form th:action="@{/admin/add-category}" method="post" class="grid grid-cols-1 md:grid-cols-3 gap-4" th:object="${newCategory}">
+            <input type="hidden" name="page" th:value="${currentPage}">
+            <input type="hidden" name="size" th:value="${pageSize}">
             <div class="md:col-span-2">
                 <label for="name" class="block mb-1">Nazwa</label>
                 <input id="name" name="name" type="text" th:field="*{name}" required class="w-full p-2 rounded bg-gray-700 border border-gray-600">
@@ -51,6 +53,8 @@
                 <tbody>
                 <tr th:each="category : ${categories}" class="border-t border-gray-700">
                     <form th:action="@{/admin/edit-category/{id}(id=${category.id})}" method="post" th:object="${category}">
+                        <input type="hidden" name="page" th:value="${currentPage}">
+                        <input type="hidden" name="size" th:value="${pageSize}">
                         <td class="py-2 px-4">
                             <input type="text" name="name" th:value="${category.name}" class="bg-gray-700 text-white p-1 rounded w-full"/>
                         </td>
@@ -60,12 +64,38 @@
                     </form>
                     <td class="py-2 px-4">
                         <form th:action="@{/admin/delete-category/{id}(id=${category.id})}" method="post">
+                            <input type="hidden" name="page" th:value="${currentPage}">
+                            <input type="hidden" name="size" th:value="${pageSize}">
                             <button type="submit" class="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-white">Usuń</button>
                         </form>
                     </td>
                 </tr>
                 </tbody>
             </table>
+        </div>
+        <div class="mt-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <form th:action="@{/admin/manage-categories}" method="get" class="flex items-center gap-2">
+                <input type="hidden" name="page" th:value="1">
+                <label for="size">Ilość na stronę:</label>
+                <select name="size" id="size" onchange="this.form.submit()"
+                        class="p-2 rounded bg-gray-700 border border-gray-600">
+                    <option value="10" th:selected="${pageSize == 10}">10</option>
+                    <option value="15" th:selected="${pageSize == 15}">15</option>
+                    <option value="20" th:selected="${pageSize == 20}">20</option>
+                </select>
+            </form>
+
+            <div class="flex items-center gap-4">
+                <a th:if="${currentPage > 1}"
+                   th:href="@{/admin/manage-categories(page=${currentPage - 1}, size=${pageSize})}"
+                   class="text-indigo-400 hover:underline">Poprzednia</a>
+
+                <span th:text="${currentPage} + ' / ' + ${totalPages}">1 / 5</span>
+
+                <a th:if="${currentPage < totalPages}"
+                   th:href="@{/admin/manage-categories(page=${currentPage + 1}, size=${pageSize})}"
+                   class="text-indigo-400 hover:underline">Następna</a>
+            </div>
         </div>
     </div>
 </main>

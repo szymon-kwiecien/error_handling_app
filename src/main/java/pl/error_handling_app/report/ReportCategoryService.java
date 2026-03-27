@@ -1,5 +1,7 @@
 package pl.error_handling_app.report;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.error_handling_app.exception.CategoryAlreadyExistsException;
@@ -22,6 +24,10 @@ public class ReportCategoryService {
 
     public List<ReportCategoryDto> getAllCategories() {
         return reportCategoryRepository.findAll().stream().map(this::map).toList();
+    }
+
+    public Page<ReportCategoryDto> getPagedCategories(Pageable pageable) {
+        return reportCategoryRepository.findAll(pageable).map(this::map);
     }
 
     public Optional<ReportCategory> getCategoryById(Long id) {
