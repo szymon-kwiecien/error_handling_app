@@ -1,5 +1,7 @@
 package pl.error_handling_app.company;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.error_handling_app.exception.CompanyAlreadyExistsException;
@@ -22,6 +24,10 @@ public class CompanyService {
 
     public List<CompanyDto> findALlCompanies() {
         return companyRepository.findAll().stream().map(CompanyDtoMapper::map).toList();
+    }
+
+    public Page<CompanyDto> findPagedCompanies(Pageable pageable) {
+        return companyRepository.findAll(pageable).map(CompanyDtoMapper::map);
     }
 
     public void saveCompany(CompanyDto companyToSave) {
@@ -50,7 +56,6 @@ public class CompanyService {
     }
 
     private void validateCompany(CompanyDto companyDto, Long companyToUpdateId) {
-
         if (companyRepository.findByName(companyDto.getName()).isPresent()) {
             Long existingCompanyId = companyRepository.findByName(companyDto.getName()).get().getId();
             if (companyToUpdateId == null || !existingCompanyId.equals(companyToUpdateId)) {
