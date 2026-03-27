@@ -6,7 +6,15 @@ INSERT INTO report_category(name) VALUES
 ('Bezpieczeństwo'),
 ('Problemy z interfejsem'),
 ('Awaria systemu'),
-('Inne');
+('Inne'),
+('Problem z logowaniem'),
+('Błąd integracji'),
+('Problem z bazą danych'),
+('Błąd API'),
+('Problem z siecią'),
+('Utrata danych'),
+('Błąd konfiguracji'),
+('Problem z uprawnieniami');
 
 INSERT INTO report (title, description, dated_added, due_date, time_to_respond, category_id, status, reporting_user_id, assigned_employee_id) VALUES
 ('Aplikacja nie uruchamia się', 'Po aktualizacji systemu aplikacja przestała działać.', '2025-06-04 11:30:00', '2025-06-15 15:00:00', '2025-06-11 13:30:00', 1, 'PENDING', 1, NULL),
