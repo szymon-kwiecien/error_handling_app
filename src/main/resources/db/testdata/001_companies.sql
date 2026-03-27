@@ -3,4 +3,15 @@ INSERT INTO company (name, time_to_first_respond, time_to_resolve) VALUES
     ('CodeWave', 5, 30),
     ('FutureSolutions', 8, 50),
     ('HealthSys', 10, 60),
-    ('EcoPower', 6, 40);
+    ('EcoPower', 6, 40),
+    ('TechNova', 4, 20),
+    ('InnoSoft', 6, 35),
+    ('DataBridge', 7, 45),
+    ('Cloudify', 5, 25),
+    ('SmartLogics', 9, 55),
+    ('AlphaSystems', 3, 18),
+    ('BetaWare', 4, 22),
+    ('CyberNet', 6, 38),
+    ('GreenTech', 8, 48),
+    ('MediCore', 10, 65),
+    ('AutoFlow', 5, 28);

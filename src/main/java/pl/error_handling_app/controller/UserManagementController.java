@@ -92,7 +92,7 @@ public class UserManagementController {
     }
 
     private void prepareUserManagementModel(Model model, int page, int size) {
-        Pageable pageable = PaginationUtils.createPageable(page, size, Sort.by("lastName").ascending());
+        Pageable pageable = PaginationUtils.createPageable(page, size, Sort.unsorted());
         Page<UserDto> usersPage = userService.findPagedUsers(pageable);
 
         model.addAttribute("users", usersPage);
