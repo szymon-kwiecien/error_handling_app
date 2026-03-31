@@ -2,94 +2,77 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title th:text="${pageTitle}">Subject</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Segoe UI, sans-serif;
-      background-color: #f0f0f0;
-    }
-
-    .frame1 {
-      width: 600px;
-      background-color: #f8f2f2;
-      margin: 0 auto;
-      text-align: center;
-      border-radius: 10px;
-    }
-
-    .header, .mbody, .content {
-      width: 100%;
-      padding: 0 40px;
-    }
-
-    h1 {
-      font-weight: 700;
-      font-size: 48px;
-      margin-top: 0;
-    }
-
-    .mbody {
-      font-size: 20px;
-      color: #666666;
-      font-weight: 500;
-    }
-
-    .button {
-      text-align: center;
-      padding: 8px 0;
-      color: white;
-      font-weight: 600;
-      font-size: 21px;
-      background-color: #0055ff;
-      border-radius: 10px;
-      text-decoration: none;
-      display: block;
-      width: 60%;
-      margin: 20px auto;
-    }
-
-    .content {
-      font-size: 18px;
-      color: #a2a2a7;
-      font-weight: 400;
-      padding-bottom: 50px;
-    }
-
-    img {
-      max-height: 80px;
-      max-width: 100%;
-      height: auto;
-      margin-top: 20px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle}">Aktywacja konta</title>
 </head>
-<body>
-<div class="frame1">
-  <img src="https://drive.google.com/uc?export=view&id=1B744NteAa-CTpl_uAJfp1_syBe2roTo2" alt="Logo">
+<body style="margin: 0; padding: 0; background-color: #0f172a; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0f172a;">
+  <tr>
+    <td align="center" style="padding: 60px 0;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #1e293b; border-radius: 16px; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);">
 
-  <div class="header">
-    <h1 th:text="|Witaj ${UserName}|">Witaj Szymon</h1>
-  </div>
+        <tr>
+          <td style="background-color: #4f46e5; height: 6px; border-radius: 16px 16px 0 0;"></td>
+        </tr>
 
-  <div class="mbody">
-    <p><b>Twoje konto zostało utworzone!</b></p>
-    <p>Aby mieć możliwość korzystania z naszego serwisu musisz aktywować konto</p>
-    <a class="button" href="#" th:href="${uriLink}" style="color: #ffffff; text-decoration: none;">Aktywuj Konto</a>
-  </div>
+        <tr>
+          <td style="padding: 48px 40px;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center" style="padding-bottom: 24px;">
+                  <div style="background-color: rgba(79, 70, 229, 0.1); width: 64px; height: 64px; line-height: 64px; border-radius: 50%; color: #818cf8; font-size: 32px;">
+                    &#10024;
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding-bottom: 16px;">
+                  <h1 style="color: #f8fafc; font-size: 30px; font-weight: 800; margin: 0; letter-spacing: -0.025em;" th:text="|Witaj, ${UserName}!|">Witaj, Szymon!</h1>
+                </td>
+              </tr>
+              <tr>
+                <td align="center" style="padding-bottom: 32px;">
+                  <p style="color: #94a3b8; font-size: 16px; line-height: 26px; margin: 0;">
+                    Twoje konto w aplikacji <strong>Fixaro</strong> zostało utworzone. Aby uzyskać dostęp do serwisu, prosimy o potwierdzenie adresu e-mail i aktywację konta.
+                  </p>
+                </td>
+              </tr>
 
-  <div class="content">
-    <p>Konto zostanie aktywowane po ustawieniu hasła do konta</p>
-    <p>Podany link aktywacyjny jest ważny do: <b th:text="${ExpirationDate}">10.11.2024 10:16</b></p>
-  </div>
+              <tr>
+                <td align="center" style="padding-bottom: 40px;">
+                  <a th:href="${uriLink}" style="background-color: #4f46e5; color: #ffffff; padding: 16px 36px; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    Aktywuj moje konto
+                  </a>
+                </td>
+              </tr>
 
-  <div></div>
+              <tr>
+                <td style="padding: 24px; background-color: #0f172a; border-radius: 12px; border: 1px solid #334155;">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                      <td style="color: #94a3b8; font-size: 14px; line-height: 22px;">
+                        <strong style="color: #cbd5e1; display: block; margin-bottom: 4px;">Ważna informacja:</strong>
+                        Konto zostanie aktywowane po ustawieniu hasła. Link aktywacyjny wygaśnie: <span style="color: #f1f5f9; font-weight: 600;" th:text="${ExpirationDate}">10.11.2024 10:16</span>.
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-</div>
+        <tr>
+          <td align="center" style="padding: 0 40px 40px 40px;">
+            <p style="color: #64748b; font-size: 13px; margin: 0;">
+              Dziękujemy, że jesteś z nami!<br>
+              <strong>Zespół FixaroApp</strong>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>
