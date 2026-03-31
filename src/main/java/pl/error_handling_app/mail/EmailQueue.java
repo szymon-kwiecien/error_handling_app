@@ -1,29 +1,23 @@
 package pl.error_handling_app.mail;
 
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 public class EmailQueue {
-    private final Queue<MimeMessageHelper> emailQueue = new LinkedList<>();
 
-    public void addEmailToQueue(MimeMessageHelper email) {
-        synchronized (emailQueue) {
-            emailQueue.add(email);
-        }
+    private final Queue<EmailData> emailQueue = new ConcurrentLinkedQueue<>();
+
+    public void addEmailToQueue(EmailData email) {
+        emailQueue.add(email);
     }
 
-    public MimeMessageHelper getNextEmail() {
-        synchronized (emailQueue) {
-            return emailQueue.poll();
-        }
+    public EmailData getNextEmail() {
+        return emailQueue.poll();
     }
+
     public boolean isEmpty() {
-        synchronized (emailQueue) {
-            return emailQueue.isEmpty();
-        }
+        return emailQueue.isEmpty();
     }
 }
