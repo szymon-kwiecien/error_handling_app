@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Entity
-public class VeryficationToken {
+public class VerificationToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,9 +17,9 @@ public class VeryficationToken {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public VeryficationToken(){}
+    public VerificationToken(){}
 
-    public VeryficationToken(String token, int expirationTimeInMinute, User user) {
+    public VerificationToken(String token, int expirationTimeInMinute, User user) {
         this.token = token;
         this.expirationTime = getTokenExpirationTime(expirationTimeInMinute);
         this.user = user;

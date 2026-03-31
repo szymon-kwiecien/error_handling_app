@@ -1,6 +1,9 @@
 package pl.error_handling_app.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,102 +12,108 @@ import pl.error_handling_app.mail.MailService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class UserPasswordChangeOrActiveService {
 
-    private final VeryficationTokenRepository veryficationTokenRepository;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+    private final VerificationTokenRepository tokenRepository;
     private final MailService mailService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private static final Logger log = LoggerFactory.getLogger(UserPasswordChangeOrActiveService.class);
 
+    @Value("${app.token.verification-expiry-minutes:10080}") // 7 dni
+    private int verificationExpiry;
 
-    @Autowired
-    public UserPasswordChangeOrActiveService(VeryficationTokenRepository veryficationTokenRepository, MailService mailService
-            , UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.veryficationTokenRepository = veryficationTokenRepository;
+    @Value("${app.token.reset-expiry-minutes:60}")
+    private int resetExpiry;
+
+    public UserPasswordChangeOrActiveService(VerificationTokenRepository tokenRepository,
+                                             MailService mailService,
+                                             UserRepository userRepository,
+                                             PasswordEncoder passwordEncoder) {
+        this.tokenRepository = tokenRepository;
         this.mailService = mailService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    private final int VERIFICATION_ACCOUNT_EXPIRATION_TIME = 60 * 24 * 7; // 7 dni
-    private final int PASSWORD_RESET_EXPIRATION_TIME = 60; //60 min
+    @Transactional
+    public void createVerificationToken(User user) {
+        VerificationToken token = new VerificationToken(UUID.randomUUID().toString(), verificationExpiry, user);
+        tokenRepository.save(token);
+
+        String url = buildUrl("account/verification/", token.getToken());
+        mailService.newUserWelcomeMessage(user.getEmail(), user.getFirstName(), url, token.getExpirationTime().format(FORMATTER));
+    }
 
     @Transactional
-    public void NewVerification(User user) {
-        VeryficationToken veryficationToken = new VeryficationToken(UUID.randomUUID().toString(), VERIFICATION_ACCOUNT_EXPIRATION_TIME, user);
-        veryficationTokenRepository.save(veryficationToken);
-        String verifUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("account/verification/" + veryficationToken.getToken()).build().toUriString();
+    public boolean sendResetPasswordMail(String email) {
+        return userRepository.findByEmailAndIsActiveIsTrue(email).map(user -> {
+            VerificationToken token = getOrCreateResetToken(user);
+            tokenRepository.save(token);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-
-        mailService.NewUserWelcomeMessage(user.getEmail(), user.getFirstName(), verifUrl, veryficationToken.getExpirationTime().format(formatter));
-
+            String url = buildUrl("account/forgot-password/", token.getToken());
+            mailService.forgotPasswordMessage(user.getEmail(), user.getFirstName(), url, token.getExpirationTime().format(FORMATTER));
+            return true;
+        }).orElse(false);
     }
 
-    public Boolean NewResetPasswordMail(String username) {
-        Optional<User> OptionalUser = userRepository.findByEmailAndIsActiveIsTrue(username);
-        if (OptionalUser.isEmpty()) {
-            return false;
-        }
-        User user = OptionalUser.get();
-        VeryficationToken veryficationToken = getOrCreateVeryficationTokenByToken(user);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-
-        veryficationTokenRepository.save(veryficationToken);
-
-        String verifUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("account/forgot-password/" + veryficationToken.getToken()).build().toUriString();
-        mailService.ForgotPasswordMessage(user.getEmail(), user.getFirstName()
-                , verifUrl, veryficationToken.getExpirationTime().format(formatter));
-
-        return true;
+    public TokenStatus validateToken(String token, boolean userIsAlreadyActive) {
+        return tokenRepository.findByToken(token)
+                .map(t -> {
+                    if (!userIsAlreadyActive && t.getUser().isActive()) {
+                        return TokenStatus.USER_ALREADY_ACTIVE;
+                    }
+                    if (t.getExpirationTime().isBefore(LocalDateTime.now())) {
+                        return TokenStatus.EXPIRED;
+                    }
+                    return TokenStatus.VALID;
+                })
+                .orElse(TokenStatus.INVALID);
     }
 
-    public String validateToken(String token, boolean cheackIfActive) {
+    @Transactional
+    public void setNewPassword(String token, String password) {
+        VerificationToken vToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
 
-        Optional<VeryficationToken> byToken = veryficationTokenRepository.findByToken(token);
-        if (byToken.isPresent()) {
-            if (byToken.get().getExpirationTime().isAfter(LocalDateTime.now())) {
-                if (!cheackIfActive) {
-                    return "OK";
-                } else if (!byToken.get().getUser().isActive()) {
-                    return "OK";
-                } else {
-                    return "alreadyAactive";
-                }
-            } else {
-                return "tokenExpired";
-            }
-        } else {
-            return "error";
-        }
-
-    }
-
-    public void SetNewPassword(String token, String password) {
-        Optional<VeryficationToken> byToken = veryficationTokenRepository.findByToken(token);
-        User user = byToken.get().getUser();
+        User user = vToken.getUser();
         user.setPassword(passwordEncoder.encode(password));
         user.setActive(true);
         userRepository.save(user);
-
-        byToken.get().setExpirationTime(LocalDateTime.now().minusMinutes(1));
-        veryficationTokenRepository.save(byToken.get());
+        vToken.setExpirationTime(LocalDateTime.now().minusSeconds(1));
+        tokenRepository.save(vToken);
     }
 
-    private VeryficationToken getOrCreateVeryficationTokenByToken(User user) {
-        Optional<VeryficationToken> byToken = veryficationTokenRepository.findByUser(user);
-        if (byToken.isPresent()) {
-            byToken.get().setExpirationTime(byToken.get().getTokenExpirationTime(PASSWORD_RESET_EXPIRATION_TIME));
-            byToken.get().setToken(UUID.randomUUID().toString());
-            return byToken.get();
-        } else {
-            return new VeryficationToken(UUID.randomUUID().toString(), PASSWORD_RESET_EXPIRATION_TIME, user);
-        }
+    @Scheduled(cron = "0 0 2 * * ?")
+    @Transactional
+    public void cleanupOldTokens() {
+        LocalDateTime threshold = LocalDateTime.now().minusDays(30);
+
+        tokenRepository.deleteAllByExpirationTimeBefore(threshold);
+
+        log.info("Scheduled - Usunięto tokeny wygasłe przed {}", threshold);
+    }
+
+    private VerificationToken getOrCreateResetToken(User user) {
+        return tokenRepository.findByUser(user)
+                .map(existingToken -> {
+                    existingToken.setToken(UUID.randomUUID().toString());
+                    existingToken.setExpirationTime(LocalDateTime.now().plusMinutes(resetExpiry));
+                    return existingToken;
+                })
+                .orElseGet(() -> new VerificationToken(UUID.randomUUID().toString(), resetExpiry, user));
+    }
+
+    private String buildUrl(String path, String token) {
+        return ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(path + token)
+                .build()
+                .toUriString();
     }
 }
-

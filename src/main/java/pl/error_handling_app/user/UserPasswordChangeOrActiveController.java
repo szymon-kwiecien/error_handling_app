@@ -1,100 +1,113 @@
 package pl.error_handling_app.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.error_handling_app.user.dto.PasswordsDto;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/account")
 public class UserPasswordChangeOrActiveController {
 
-    private final UserPasswordChangeOrActiveService userPasswordChangeOrActiveService;
+    private final UserPasswordChangeOrActiveService service;
 
-    @Autowired
-    public UserPasswordChangeOrActiveController(UserPasswordChangeOrActiveService userPasswordChangeOrActiveService) {
-        this.userPasswordChangeOrActiveService = userPasswordChangeOrActiveService;
-
+    public UserPasswordChangeOrActiveController(UserPasswordChangeOrActiveService service) {
+        this.service = service;
     }
+
     @GetMapping("/verification")
     public String verificationStatus() {
-        return "verification-error-page";
-    }
-    @GetMapping("/verificationError")
-    public String verificationError() {
-        return "verification-error-page";
+        return "verification-status-page";
     }
 
     @GetMapping("/verification/{token}")
-    public String VerifiAccount(@PathVariable(required = true) String token, Model model) {
-        String Validation = userPasswordChangeOrActiveService.validateToken(token, true);
-        if (!Validation.equals("OK")) {
-            return "redirect:/account/verificationError?" + Validation;
+    public String verifyAccount(@PathVariable String token, Model model) {
+        TokenStatus status = service.validateToken(token, false);
+        if (status != TokenStatus.VALID) {
+            return redirectToStatusPage(model, status);
         }
-        model.addAttribute("verification", true);
-        model.addAttribute("token", token);
-        model.addAttribute("formAction", "/account/verification/" + token);
-        return "user_new_password";
+        preparePasswordForm(model, token, true, "/account/verification/");
+        return "activate-account-reset-password";
     }
+
     @PostMapping("/verification/{token}")
-    public String AssignPassword(@PathVariable String token, PasswordsDto passwords, BindingResult bindingResult) {
-
+    public String processActivation(@PathVariable String token, @Valid @ModelAttribute("passwords") PasswordsDto passwords,
+                                    BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            return "redirect:/account/verification/" + token + "?wrongPassword";
+            return handleValidationError(redirectAttributes, bindingResult, "/account/verification/" + token);
         }
 
-        String Validation = userPasswordChangeOrActiveService.validateToken(token, true);
-        if (!Validation.equals("OK")) {
-            return "redirect:/account/verificationError?" + Validation;
-        } else if (!passwords.getPassword().equals(passwords.getConfirmPassword())) {
-            return "redirect:/account/verification/" + token + "?diffrentPassword";
+        TokenStatus status = service.validateToken(token, false);
+        if (status == TokenStatus.VALID) {
+            service.setNewPassword(token, passwords.getPassword());
+            return "redirect:/account/verification?success";
         }
 
-        userPasswordChangeOrActiveService.SetNewPassword(token, passwords.getPassword());
-        return "redirect:/account/verification?success";
+        redirectAttributes.addFlashAttribute("tokenStatus", status);
+        return "redirect:/account/verification";
     }
 
     @GetMapping("/forgot-password")
-    public String forgotPassword() {
+    public String forgotPasswordForm() {
         return "forgot-password";
     }
 
     @PostMapping("/forgot-password")
-    public String forgotPasswordEmail(@RequestParam String email) {
-        if (userPasswordChangeOrActiveService.NewResetPasswordMail(email)){
-            return "redirect:/account/forgot-password?ok";
-        }
-        return "redirect:/account/forgot-password?wrong";
+    public String handleForgotPassword(@RequestParam String email) {
+        service.sendResetPasswordMail(email);
+        return "redirect:/account/forgot-password?ok";
     }
+
     @GetMapping("/forgot-password/{token}")
-    public String changePassword(@PathVariable(required = true) String token, Model model) {
-        String Validation = userPasswordChangeOrActiveService.validateToken(token, false);
-        if (!Validation.equals("OK")) {
-            return "redirect:/account/verificationError?" + Validation;
+    public String changePasswordForm(@PathVariable String token, Model model) {
+        TokenStatus status = service.validateToken(token, true);
+        if (status != TokenStatus.VALID) {
+            return redirectToStatusPage(model, status);
         }
-        model.addAttribute("verification", false);
-        model.addAttribute("token", token);
-        model.addAttribute("formAction", "/account/forgot-password/" + token);
-        return "user_new_password";
+        preparePasswordForm(model, token, false, "/account/forgot-password/");
+        return "activate-account-reset-password";
     }
 
     @PostMapping("/forgot-password/{token}")
-    public String changePasswordWithValues(@PathVariable String token, PasswordsDto passwords, BindingResult bindingResult) {
+    public String processPasswordReset(@PathVariable String token, @Valid @ModelAttribute("passwords") PasswordsDto passwords,
+                                       BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            return "redirect:/account/forgot-password/" + token + "?wrongPassword";
+            return handleValidationError(redirectAttributes, bindingResult, "/account/forgot-password/" + token);
         }
 
-        String Validation = userPasswordChangeOrActiveService.validateToken(token, false);
-        if (!Validation.equals("OK")) {
-            return "redirect:/account/verificationError?" + Validation;
-        } else if (!passwords.getPassword().equals(passwords.getConfirmPassword())) {
-            return "redirect:/account/forgot-password/" + token + "?differentPassword";
+        TokenStatus status = service.validateToken(token, true);
+        if (status == TokenStatus.VALID) {
+            service.setNewPassword(token, passwords.getPassword());
+            return "redirect:/account/verification?success";
         }
-        userPasswordChangeOrActiveService.SetNewPassword(token, passwords.getPassword());
-        return "redirect:/account/verification?success";
+
+        redirectAttributes.addFlashAttribute("tokenStatus", status);
+        return "redirect:/account/verification";
     }
 
-}
+    private String redirectToStatusPage(Model model, TokenStatus status) {
+        model.addAttribute("tokenStatus", status);
+        return "verification-status-page";
+    }
 
+    private void preparePasswordForm(Model model, String token, boolean isActivation, String actionPath) {
+        model.addAttribute("activateAccount", isActivation);
+        model.addAttribute("token", token);
+        model.addAttribute("formAction", actionPath + token);
+    }
+
+    private String handleValidationError(RedirectAttributes redirectAttributes, BindingResult bindingResult,
+                                         String path) {
+        List<String> errors = bindingResult.getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList();
+        redirectAttributes.addFlashAttribute("passwordErrors", errors);
+        return "redirect:" + path;
+    }
+}

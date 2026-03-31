@@ -25,9 +25,9 @@ public class UserService {
     private final ReportRepository reportRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserPasswordChangeOrActiveService userPasswordChangeOrActiveService;
-    private final VeryficationTokenRepository veryficationTokenRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VeryficationTokenRepository veryficationTokenRepository) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VerificationTokenRepository verificationTokenRepository) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.userRoleRepository = userRoleRepository;
@@ -35,7 +35,7 @@ public class UserService {
         this.reportRepository = reportRepository;
         this.passwordEncoder = passwordEncoder;
         this.userPasswordChangeOrActiveService = userPasswordChangeOrActiveService;
-        this.veryficationTokenRepository = veryficationTokenRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
     }
 
     public List<UserInReportDto> findUsersByRoleName(String roleName) {
@@ -65,7 +65,7 @@ public class UserService {
             checkUserAlreadyExists(newUser.getEmail());
             User userToSave = mapper.map(newUser);
             userRepository.save(userToSave);
-            userPasswordChangeOrActiveService.NewVerification(userToSave);
+            userPasswordChangeOrActiveService.createVerificationToken(userToSave);
     }
 
     @Transactional
@@ -118,8 +118,8 @@ public class UserService {
                 throw new UnauthorizedOperationException("Nie można usunąć innego administratora");
             }
             detachUserFromReports(userToDelete);
-            veryficationTokenRepository.findByUser(userToDelete)
-                    .ifPresent(veryficationTokenRepository::delete);
+            verificationTokenRepository.findByUser(userToDelete)
+                    .ifPresent(verificationTokenRepository::delete);
             userRepository.deleteById(userId);
         }
 

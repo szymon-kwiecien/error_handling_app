@@ -7,7 +7,7 @@
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
 
     <changeSet id="006-1" author="szymon-kw">
-        <createTable tableName="veryfication_token">
+        <createTable tableName="verification_token">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -17,8 +17,8 @@
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="user_id"
-                                 baseTableName="veryfication_token"
-                                 constraintName="FK_VERYFICATIONTOKEN_ON_USER" referencedColumnNames="id"
+                                 baseTableName="verification_token"
+                                 constraintName="FK_VERIFICATIONTOKEN_ON_USER" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
 

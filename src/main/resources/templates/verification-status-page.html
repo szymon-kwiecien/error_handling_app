@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: headFragment(pageTitle='Status operacji')}"></head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex items-center justify-center px-4">
+
+<div class="w-full max-w-2xl bg-gray-800 p-10 rounded-xl shadow-lg text-center space-y-6">
+
+    <div th:if="${param.success}">
+        <h1 class="text-3xl font-bold text-green-500 mb-4">
+            <i class="fas fa-check-circle mr-2"></i>Operacja powiodła się
+        </h1>
+
+        <p class="text-lg text-gray-300">
+            Twoje hasło zostało pomyślnie ustawione. Możesz się teraz zalogować do swojego konta.
+        </p>
+
+        <a th:href="@{/login}"
+           class="inline-block mt-6 px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition duration-300 shadow-md">
+            <i class="fas fa-sign-in-alt mr-2"></i>Zaloguj się
+        </a>
+    </div>
+
+    <div th:if="${param.success == null and tokenStatus != null}">
+        <h1 class="text-3xl font-bold text-red-500 mb-4">
+            <i class="fas fa-exclamation-triangle mr-2"></i>Coś poszło nie tak
+        </h1>
+
+        <div th:switch="${tokenStatus}" class="text-lg text-gray-300">
+            <p th:case="${T(pl.error_handling_app.user.TokenStatus).INVALID}">
+                Podany link jest nieprawidłowy lub został uszkodzony.
+            </p>
+            <p th:case="${T(pl.error_handling_app.user.TokenStatus).EXPIRED}">
+                Link weryfikacyjny wygasł. Proszę wygenerować nowy link.
+            </p>
+            <p th:case="${T(pl.error_handling_app.user.TokenStatus).USER_ALREADY_ACTIVE}">
+                To konto zostało już wcześniej aktywowane. Możesz się bezpośrednio zalogować.
+            </p>
+            <p th:case="*">
+                Wystąpił nieoczekiwany błąd podczas weryfikacji tokena.
+            </p>
+        </div>
+
+        <a th:href="@{/home}"
+           class="inline-block mt-6 px-8 py-3 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white font-bold rounded-lg transition duration-300">
+            <i class="fas fa-arrow-left mr-2"></i>Powrót do strony głównej
+        </a>
+    </div>
+
+    <div th:if="${param.success == null and tokenStatus == null}">
+        <h1 class="text-3xl font-bold text-gray-500 mb-4">
+            <i class="fas fa-search mr-2"></i>Brak danych
+        </h1>
+        <p class="text-lg text-gray-400">
+            Nie określono statusu weryfikacji. Upewnij się, że używasz poprawnego linku z wiadomości e-mail.
+        </p>
+        <a th:href="@{/home}" class="inline-block mt-4 text-indigo-400 hover:text-indigo-300 underline transition">
+            Wróć na stronę główną
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>
