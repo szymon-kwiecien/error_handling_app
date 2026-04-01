@@ -41,7 +41,6 @@ public class ReportFilterService {
 
         Optional<User> userOpt = userService.findUserByEmail(request.getUser());
         userOpt.ifPresent(user -> reports.retainAll(reportService.filterReportsByAssignedEmployee(reports, user)));
-
         return reports;
     }
 }

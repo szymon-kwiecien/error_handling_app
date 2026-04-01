@@ -1,11 +1,13 @@
 package pl.error_handling_app.controller;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import pl.error_handling_app.user.User;
+import pl.error_handling_app.exception.UserNotFoundException;
 import pl.error_handling_app.user.UserService;
+
+import java.security.Principal;
 
 @Controller
 public class HomeController {
@@ -23,10 +25,14 @@ public class HomeController {
         }
 
     @GetMapping("/home")
-    String userPanel(Model model) {
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findUserByEmail(currentUserEmail).orElseThrow();
-        model.addAttribute("userName", user.getFirstName());
+    public String userPanel(Model model, Principal principal) {
+        String name = userService.getUserFirstName(principal.getName());
+        model.addAttribute("userName", name);
         return "user-panel";
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public String handleUserNotFound() {
+        return "redirect:/logout";
     }
 }

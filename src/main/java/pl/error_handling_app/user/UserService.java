@@ -46,11 +46,9 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public Optional<UserDetailsDto> findUserDetailsByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .map(user -> new UserDetailsDto(user.getEmail(), user.getRoles().stream()
-                        .map(UserRole::getName)
-                        .collect(Collectors.toSet())));
+    public String getUserFirstName(String email) {
+        return userRepository.findFirstNameByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Użytkownik nie został znaleziony"));
     }
 
     public Optional<UserCredentialsDto> findCredentialsByEmail(String email) {
@@ -129,8 +127,6 @@ public class UserService {
         List<Report> reportsToDelete = reportRepository.findAllByReportingUser(userToDelete); //Gdy usuwamy użytkownika to jego zgłoszenia również usuwamy
         reportRepository.deleteAll(reportsToDelete);
     }
-
-
 
     private void checkUserAlreadyExists(String email) {
         if(userRepository.findByEmail(email).isPresent()) {
