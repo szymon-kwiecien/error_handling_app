@@ -1,5 +1,6 @@
 package pl.error_handling_app.config.security;
 
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,6 +26,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private UserDetails createUserDetails(UserCredentialsDto userCredentialsDto) {
+
+        if (userCredentialsDto.getPassword() == null) {
+            throw new DisabledException("Konto nie zostało jeszcze aktywowane. Najpierw aktywuj konto.");
+        }
+
         return User.builder()
                 .username(userCredentialsDto.getEmail())
                 .password(userCredentialsDto.getPassword())
@@ -32,3 +38,5 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .build();
     }
 }
+
+

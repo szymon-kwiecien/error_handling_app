@@ -26,14 +26,14 @@
         </h1>
 
         <div th:switch="${tokenStatus}" class="text-lg text-gray-300">
-            <p th:case="${T(pl.error_handling_app.user.TokenStatus).INVALID}">
-                Podany link jest nieprawidłowy lub został uszkodzony.
+            <p th:case="${T(pl.error_handling_app.user.TokenStatus).USER_ALREADY_ACTIVE}">
+                To konto zostało już wcześniej aktywowane. Możesz się bezpośrednio zalogować.
             </p>
             <p th:case="${T(pl.error_handling_app.user.TokenStatus).EXPIRED}">
                 Link weryfikacyjny wygasł. Proszę wygenerować nowy link.
             </p>
-            <p th:case="${T(pl.error_handling_app.user.TokenStatus).USER_ALREADY_ACTIVE}">
-                To konto zostało już wcześniej aktywowane. Możesz się bezpośrednio zalogować.
+            <p th:case="${T(pl.error_handling_app.user.TokenStatus).INVALID}">
+                Podany link jest nieprawidłowy lub został uszkodzony.
             </p>
             <p th:case="*">
                 Wystąpił nieoczekiwany błąd podczas weryfikacji tokena.

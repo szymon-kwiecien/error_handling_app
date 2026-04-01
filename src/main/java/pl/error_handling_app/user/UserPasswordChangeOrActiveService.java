@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import pl.error_handling_app.exception.TokenNotFoundException;
 import pl.error_handling_app.mail.MailService;
 
 import java.time.LocalDateTime;
@@ -80,7 +81,7 @@ public class UserPasswordChangeOrActiveService {
     @Transactional
     public void setNewPassword(String token, String password) {
         VerificationToken vToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
+                .orElseThrow(() -> new TokenNotFoundException("Token nie został znaleziony"));
 
         User user = vToken.getUser();
         user.setPassword(passwordEncoder.encode(password));

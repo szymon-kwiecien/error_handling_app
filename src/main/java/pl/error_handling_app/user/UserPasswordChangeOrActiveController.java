@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import pl.error_handling_app.exception.TokenNotFoundException;
 import pl.error_handling_app.user.dto.PasswordsDto;
 
 import java.util.List;
@@ -28,29 +29,15 @@ public class UserPasswordChangeOrActiveController {
 
     @GetMapping("/verification/{token}")
     public String verifyAccount(@PathVariable String token, Model model) {
-        TokenStatus status = service.validateToken(token, false);
-        if (status != TokenStatus.VALID) {
-            return redirectToStatusPage(model, status);
-        }
-        preparePasswordForm(model, token, true, "/account/verification/");
-        return "activate-account-reset-password";
+        return handleGetTokenRequest(token, model, true, "/account/verification/");
     }
 
     @PostMapping("/verification/{token}")
-    public String processActivation(@PathVariable String token, @Valid @ModelAttribute("passwords") PasswordsDto passwords,
-                                    BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
-            return handleValidationError(redirectAttributes, bindingResult, "/account/verification/" + token);
-        }
-
-        TokenStatus status = service.validateToken(token, false);
-        if (status == TokenStatus.VALID) {
-            service.setNewPassword(token, passwords.getPassword());
-            return "redirect:/account/verification?success";
-        }
-
-        redirectAttributes.addFlashAttribute("tokenStatus", status);
-        return "redirect:/account/verification";
+    public String processActivation(@PathVariable String token,
+                                    @Valid @ModelAttribute("passwords") PasswordsDto passwords,
+                                    BindingResult bindingResult,
+                                    RedirectAttributes redirectAttributes) {
+        return handlePostTokenRequest(token, passwords, bindingResult, redirectAttributes, false, "/account/verification/");
     }
 
     @GetMapping("/forgot-password")
@@ -66,22 +53,39 @@ public class UserPasswordChangeOrActiveController {
 
     @GetMapping("/forgot-password/{token}")
     public String changePasswordForm(@PathVariable String token, Model model) {
-        TokenStatus status = service.validateToken(token, true);
-        if (status != TokenStatus.VALID) {
-            return redirectToStatusPage(model, status);
-        }
-        preparePasswordForm(model, token, false, "/account/forgot-password/");
-        return "activate-account-reset-password";
+        return handleGetTokenRequest(token, model, false, "/account/forgot-password/");
     }
 
     @PostMapping("/forgot-password/{token}")
-    public String processPasswordReset(@PathVariable String token, @Valid @ModelAttribute("passwords") PasswordsDto passwords,
-                                       BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String processPasswordReset(@PathVariable String token,
+                                       @Valid @ModelAttribute("passwords") PasswordsDto passwords,
+                                       BindingResult bindingResult,
+                                       RedirectAttributes redirectAttributes) {
+        return handlePostTokenRequest(token, passwords, bindingResult, redirectAttributes, true, "/account/forgot-password/");
+    }
+
+    @ExceptionHandler(TokenNotFoundException.class)
+    public String handleTokenNotFound(TokenNotFoundException exception, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("tokenStatus", TokenStatus.INVALID);
+        return "redirect:/account/verification";
+    }
+
+    private String handleGetTokenRequest(String token, Model model, boolean isActivation, String path) {
+        TokenStatus status = service.validateToken(token, !isActivation);
+        if (status != TokenStatus.VALID) {
+            return showStatusPage(model, status);
+        }
+        preparePasswordForm(model, token, isActivation, path);
+        return "activate-account-reset-password";
+    }
+
+    private String handlePostTokenRequest(String token, PasswordsDto passwords, BindingResult bindingResult,
+                                          RedirectAttributes redirectAttributes, boolean isReset, String path) {
         if (bindingResult.hasErrors()) {
-            return handleValidationError(redirectAttributes, bindingResult, "/account/forgot-password/" + token);
+            return handleValidationError(redirectAttributes, bindingResult, path + token);
         }
 
-        TokenStatus status = service.validateToken(token, true);
+        TokenStatus status = service.validateToken(token, isReset);
         if (status == TokenStatus.VALID) {
             service.setNewPassword(token, passwords.getPassword());
             return "redirect:/account/verification?success";
@@ -91,7 +95,7 @@ public class UserPasswordChangeOrActiveController {
         return "redirect:/account/verification";
     }
 
-    private String redirectToStatusPage(Model model, TokenStatus status) {
+    private String showStatusPage(Model model, TokenStatus status) {
         model.addAttribute("tokenStatus", status);
         return "verification-status-page";
     }
@@ -102,8 +106,7 @@ public class UserPasswordChangeOrActiveController {
         model.addAttribute("formAction", actionPath + token);
     }
 
-    private String handleValidationError(RedirectAttributes redirectAttributes, BindingResult bindingResult,
-                                         String path) {
+    private String handleValidationError(RedirectAttributes redirectAttributes, BindingResult bindingResult, String path) {
         List<String> errors = bindingResult.getAllErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
