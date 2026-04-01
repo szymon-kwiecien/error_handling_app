@@ -55,7 +55,7 @@ public class UserPasswordChangeOrActiveService {
     @Transactional
     public boolean sendResetPasswordMail(String email) {
         return userRepository.findByEmailAndIsActiveIsTrue(email).map(user -> {
-            VerificationToken token = getOrCreateResetToken(user);
+            VerificationToken token = new VerificationToken(UUID.randomUUID().toString(), resetExpiry, user);
             tokenRepository.save(token);
 
             String url = buildUrl("account/forgot-password/", token.getToken());
@@ -94,21 +94,11 @@ public class UserPasswordChangeOrActiveService {
     @Scheduled(cron = "0 0 2 * * ?")
     @Transactional
     public void cleanupOldTokens() {
-        LocalDateTime threshold = LocalDateTime.now().minusDays(30);
+        LocalDateTime threshold = LocalDateTime.now().minusDays(14);
 
         tokenRepository.deleteAllByExpirationTimeBefore(threshold);
 
         log.info("Scheduled - Usunięto tokeny wygasłe przed {}", threshold);
-    }
-
-    private VerificationToken getOrCreateResetToken(User user) {
-        return tokenRepository.findByUser(user)
-                .map(existingToken -> {
-                    existingToken.setToken(UUID.randomUUID().toString());
-                    existingToken.setExpirationTime(LocalDateTime.now().plusMinutes(resetExpiry));
-                    return existingToken;
-                })
-                .orElseGet(() -> new VerificationToken(UUID.randomUUID().toString(), resetExpiry, user));
     }
 
     private String buildUrl(String path, String token) {
