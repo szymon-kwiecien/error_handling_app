@@ -1,7 +1,6 @@
 package pl.error_handling_app.report.dto;
 
-import pl.error_handling_app.attachment.AttachmentDto;
-import pl.error_handling_app.report.RemainingTime;
+import pl.error_handling_app.attachment.dto.AttachmentDto;
 import pl.error_handling_app.report.ReportStatus;
 
 import java.time.Duration;

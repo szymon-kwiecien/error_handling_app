@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import pl.error_handling_app.controller.ProfileController;
+import pl.error_handling_app.user.controller.ProfileController;
 import pl.error_handling_app.exception.InvalidEmailException;
 import pl.error_handling_app.exception.InvalidPasswordException;
 import pl.error_handling_app.exception.UnauthorizedOperationException;

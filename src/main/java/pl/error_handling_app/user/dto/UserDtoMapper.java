@@ -2,16 +2,15 @@ package pl.error_handling_app.user.dto;
 
 
 import org.springframework.stereotype.Service;
-import pl.error_handling_app.company.Company;
-import pl.error_handling_app.company.CompanyRepository;
+import pl.error_handling_app.company.entity.Company;
+import pl.error_handling_app.company.repository.CompanyRepository;
 import pl.error_handling_app.exception.CompanyNotFoundException;
 import pl.error_handling_app.exception.RoleNotFoundException;
-import pl.error_handling_app.user.User;
-import pl.error_handling_app.user.UserRole;
-import pl.error_handling_app.user.UserRoleRepository;
+import pl.error_handling_app.user.entity.User;
+import pl.error_handling_app.user.entity.UserRole;
+import pl.error_handling_app.user.repository.UserRoleRepository;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 

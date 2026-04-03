@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import pl.error_handling_app.chat.ChatController;
-import pl.error_handling_app.chat.ChatWebSocketController;
+import pl.error_handling_app.chat.controller.ChatReportDetailsController;
+import pl.error_handling_app.chat.controller.ChatWebSocketController;
 import pl.error_handling_app.exception.*;
 
 import java.security.Principal;
 import java.util.Map;
 
-@ControllerAdvice(assignableTypes = {ChatController.class, ChatWebSocketController.class})
+@ControllerAdvice(assignableTypes = {ChatReportDetailsController.class, ChatWebSocketController.class})
 public class ChatControllerExceptionHandler {
 
     private final SimpMessagingTemplate messagingTemplate;

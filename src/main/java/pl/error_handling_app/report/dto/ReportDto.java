@@ -1,7 +1,5 @@
 package pl.error_handling_app.report.dto;
 
-import pl.error_handling_app.report.RemainingTime;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;

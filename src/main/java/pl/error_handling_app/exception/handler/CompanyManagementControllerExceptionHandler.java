@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import pl.error_handling_app.controller.CompanyManagementController;
+import pl.error_handling_app.company.controller.CompanyManagementController;
 import pl.error_handling_app.exception.CompanyAlreadyExistsException;
 import pl.error_handling_app.exception.CompanyNotFoundException;
 

@@ -2,6 +2,8 @@ package pl.error_handling_app.report;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import pl.error_handling_app.report.entity.Report;
+import pl.error_handling_app.report.repository.ReportRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

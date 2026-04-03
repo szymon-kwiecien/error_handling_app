@@ -2,7 +2,8 @@ package pl.error_handling_app.report;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
-import pl.error_handling_app.user.User;
+import pl.error_handling_app.report.entity.Report;
+import pl.error_handling_app.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
