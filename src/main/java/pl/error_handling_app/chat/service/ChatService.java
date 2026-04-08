@@ -33,23 +33,28 @@ public class ChatService {
     public Page<ChatMessageDto> getMessagesForReport(Long reportId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         return chatMessageRepository.findByReportId(reportId, pageable)
-                .map(message -> new ChatMessageDto(message.getId(), message.getSender(), message.getContent(),
+                .map(message -> new ChatMessageDto(reportId, message.getSender(), message.getContent(),
                         message.getTimestamp()));
     }
 
     @Transactional
-    public void sendMessage(ChatMessageDto dto) {
+    public void sendMessage(ChatMessageDto dto, String senderEmail) {
         LocalDateTime now = LocalDateTime.now();
-        dto.setTimestamp(now);
-        saveMessage(dto, now);
-        chatProducer.send(dto);
+        ChatMessageDto messageToSend = new ChatMessageDto(
+                dto.reportId(),
+                senderEmail,
+                dto.content(),
+                now
+        );;
+        saveMessage(messageToSend, now);
+        chatProducer.send(messageToSend);
     }
 
     private void saveMessage(ChatMessageDto dto, LocalDateTime time) {
-        Report report = reportRepository.getReferenceById(dto.getReportId());
+        Report report = reportRepository.getReferenceById(dto.reportId());
         ChatMessage message = new ChatMessage();
-        message.setContent(dto.getContent());
-        message.setSender(dto.getSender());
+        message.setContent(dto.content());
+        message.setSender(dto.sender());
         message.setTimestamp(time);
         message.setReport(report);
         chatMessageRepository.save(message);

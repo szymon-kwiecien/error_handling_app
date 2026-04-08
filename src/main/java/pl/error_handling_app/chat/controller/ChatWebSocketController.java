@@ -20,8 +20,7 @@ public class ChatWebSocketController {
     @MessageMapping("/chat")
     public void handleChatMessage(ChatMessageDto messageDto, Principal principal) {
         String currentUserEmail = principal.getName();
-        reportService.getReportForChat(messageDto.getReportId(), currentUserEmail);
-        messageDto.setSender(currentUserEmail);
-        chatService.sendMessage(messageDto);
+        reportService.getReportForChat(messageDto.reportId(), currentUserEmail);
+        chatService.sendMessage(messageDto, currentUserEmail);
     }
 }

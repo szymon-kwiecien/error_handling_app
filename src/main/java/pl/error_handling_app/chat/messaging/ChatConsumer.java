@@ -18,6 +18,6 @@ public class ChatConsumer {
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
     public void receive(ChatMessageDto message) {
-        messagingTemplate.convertAndSend("/topic/chat." + message.getReportId(), message);
+        messagingTemplate.convertAndSend("/topic/chat." + message.reportId(), message);
     }
 }
