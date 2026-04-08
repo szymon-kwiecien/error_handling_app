@@ -25,7 +25,7 @@ public class CompanyService {
         this.userService = userService;
     }
 
-    public List<CompanyDto> findALlCompanies() {
+    public List<CompanyDto> findAllCompanies() {
         return companyRepository.findAll().stream().map(CompanyDtoMapper::map).toList();
     }
 
@@ -44,26 +44,27 @@ public class CompanyService {
         validateCompany(companyToUpdate,companyId);
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new CompanyNotFoundException("Firma nie została znaleziona."));
-        company.setName(companyToUpdate.getName());
-        company.setTimeToFirstRespond(companyToUpdate.getTimeToFirstRespond());
-        company.setTimeToResolve(companyToUpdate.getTimeToResolve());
+        company.setName(companyToUpdate.name());
+        company.setTimeToFirstRespond(companyToUpdate.timeToFirstRespond());
+        company.setTimeToResolve(companyToUpdate.timeToResolve());
     }
 
     @Transactional
     public void deleteCompany(Long companyId) {
-        Company companyToDelete = companyRepository.findById(companyId)
-                .orElseThrow(() -> new CompanyNotFoundException("Firma nie została znaleziona."));
-        companyToDelete.getUsers().forEach(userService::detachUserFromReports); //Gdy usuwamy firmę to jednocześnie usuwamy jej wszystkich pracowników
+        if (!companyRepository.existsById(companyId)) {
+            throw new CompanyNotFoundException("Firma nie została znaleziona.");
+        }
+        userService.prepareUsersForCompanyDeletion(companyId);//Gdy usuwamy firmę to jednocześnie usuwamy jej wszystkich pracowników
         //ale aby to zrobić muszę najpierw odłączyć ich od zgłoszeń które obsługują oraz usunąć zgłoszenia które oni utworzyli
-        companyRepository.delete(companyToDelete);
+        companyRepository.deleteById(companyId);
     }
 
     private void validateCompany(CompanyDto companyDto, Long companyToUpdateId) {
-        if (companyRepository.findByName(companyDto.getName()).isPresent()) {
-            Long existingCompanyId = companyRepository.findByName(companyDto.getName()).get().getId();
-            if (companyToUpdateId == null || !existingCompanyId.equals(companyToUpdateId)) {
-                throw new CompanyAlreadyExistsException("Firma o podanej nazwie %s już istnieje".formatted(companyDto.getName()));
-            }
-        }
+        companyRepository.findByName(companyDto.name())
+                .ifPresent(existingCompany -> {
+                    if (companyToUpdateId == null || !existingCompany.getId().equals(companyToUpdateId)) {
+                        throw new CompanyAlreadyExistsException("Firma o nazwie %s już istnieje".formatted(companyDto.name()));
+                    }
+                });
     }
 }

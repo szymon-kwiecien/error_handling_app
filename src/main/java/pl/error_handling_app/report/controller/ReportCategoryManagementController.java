@@ -79,7 +79,7 @@ public class ReportCategoryManagementController {
         Page<ReportCategoryDto> categoriesPage = reportCategoryService.getPagedCategories(pageable);
 
         if(!model.containsAttribute("newCategory")) {
-            model.addAttribute("newCategory", new CompanyDto());
+            model.addAttribute("newCategory", CompanyDto.empty());
         }
         model.addAttribute("categories", categoriesPage);
         model.addAttribute("currentPage", pageable.getPageNumber() + 1);

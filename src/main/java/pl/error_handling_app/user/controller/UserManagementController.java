@@ -100,7 +100,7 @@ public class UserManagementController {
         model.addAttribute("currentPage", pageable.getPageNumber() + 1);
         model.addAttribute("pageSize", pageable.getPageSize());
         model.addAttribute("totalPages", usersPage.getTotalPages());
-        model.addAttribute("companies", companyService.findALlCompanies());
+        model.addAttribute("companies", companyService.findAllCompanies());
         model.addAttribute("roles", userRoleRepository.findAll());
     }
 

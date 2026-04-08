@@ -132,6 +132,12 @@ public class UserService {
         reportRepository.deleteAll(reportsToDelete);
     }
 
+    @Transactional
+    public void prepareUsersForCompanyDeletion(Long companyId) {
+        reportRepository.nullifyAssignmentsForCompanyUsers(companyId);
+        reportRepository.deleteReportsCreatedByCompanyUsers(companyId);
+    }
+
     private void checkUserAlreadyExists(String email) {
         if(userRepository.findByEmail(email).isPresent()) {
             throw new UserAlreadyExistsException("Użytkownik %s już istnieje!".formatted(email));
