@@ -45,7 +45,7 @@ public class ChatService {
                 senderEmail,
                 dto.content(),
                 now
-        );;
+        );
         saveMessage(messageToSend, now);
         chatProducer.send(messageToSend);
     }

@@ -37,7 +37,7 @@ public class ReportDetailsViewHelper {
         model.addAttribute("timeToResolveColor", getProgressColor(resolveProgress));
     }
 
-    private String getStatusColor(ReportStatus status) {
+    String getStatusColor(ReportStatus status) {
         return switch (status) {
             case PENDING -> "orange";
             case UNDER_REVIEW -> "yellow";
@@ -46,7 +46,7 @@ public class ReportDetailsViewHelper {
         };
     }
 
-    private String getProgressColor(int progress) {
+    String getProgressColor(int progress) {
         if (progress >= 70) return "green";
         if (progress >= 25) return "yellow";
         return "red";
