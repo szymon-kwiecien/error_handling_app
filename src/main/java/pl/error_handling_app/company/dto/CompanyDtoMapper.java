@@ -11,9 +11,9 @@ public class CompanyDtoMapper {
 
     public static Company map (CompanyDto companyDto) {
         Company company = new Company();
-        company.setName(companyDto.getName());
-        company.setTimeToFirstRespond(companyDto.getTimeToFirstRespond());
-        company.setTimeToResolve(companyDto.getTimeToResolve());
+        company.setName(companyDto.name());
+        company.setTimeToFirstRespond(companyDto.timeToFirstRespond());
+        company.setTimeToResolve(companyDto.timeToResolve());
         return company;
     }
 }

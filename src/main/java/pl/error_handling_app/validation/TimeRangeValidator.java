@@ -11,6 +11,6 @@ public class TimeRangeValidator implements ConstraintValidator<ValidTimeRange, C
         if (company == null) {
             return true;
         }
-        return company.getTimeToResolve() > company.getTimeToFirstRespond();
+        return company.timeToResolve() > company.timeToFirstRespond();
     }
 }

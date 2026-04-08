@@ -42,7 +42,7 @@ public class CompanyManagementController {
             return "company/manage-companies";
         }
         companyService.saveCompany(newCompany);
-        redirectAttributes.addFlashAttribute("success", "Firma %s została utworzona.".formatted(newCompany.getName()));
+        redirectAttributes.addFlashAttribute("success", "Firma %s została utworzona.".formatted(newCompany.name()));
         return redirectToCompanyManagementPage(page,size);
     }
 
@@ -59,7 +59,7 @@ public class CompanyManagementController {
         }
 
         companyService.updateCompany(companyDto, id);
-        redirectAttributes.addFlashAttribute("success", "Pomyślnie zaaktualizowano dane firmy " + companyDto.getName());
+        redirectAttributes.addFlashAttribute("success", "Pomyślnie zaaktualizowano dane firmy " + companyDto.name());
         return redirectToCompanyManagementPage(page,size);
     }
 
@@ -77,7 +77,7 @@ public class CompanyManagementController {
         Page<CompanyDto> companiesPage = companyService.findPagedCompanies(pageable);
 
         if(!model.containsAttribute("newCompany")) {
-            model.addAttribute("newCompany", new CompanyDto());
+            model.addAttribute("newCompany", CompanyDto.empty());
         }
         model.addAttribute("companies", companiesPage);
         model.addAttribute("currentPage", pageable.getPageNumber() + 1);
