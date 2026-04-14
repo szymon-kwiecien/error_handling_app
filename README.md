@@ -4,9 +4,8 @@ FIXARO is a comprehensive web application built to streamline the process of err
 
 Its standout capabilities include automated email notifications, real-time communication via chat, attachment handling for issue reports, and on-demand PDF report generation. This makes it an ideal solution for organizations looking to manage support tickets and IT errors efficiently.
 
-> 🚧 **Note:** This application is under active development.  
-> The core functionalities have already been implemented.  
-> Validation and tests will be added in the near future.
+> 🚀 **Status:** Core functionalities and data validation are fully implemented.  
+> The project is currently in the final polish stage, focusing on implementing tests and performing minor refactoring in selected modules to ensure high code quality.
 
 ---
 
@@ -131,12 +130,22 @@ spring.rabbitmq.username=guest
 spring.rabbitmq.password=guest
 spring.rabbitmq.virtual-host=/
 
-spring.mail.host=smtp.gmail.com
+spring.mail.host=smtp-relay.brevo.com
 spring.mail.port=587
-spring.mail.username=noreply.fixaroapp@gmail.com
-spring.mail.password=gqqz iemz aijx fcnz
+spring.mail.username=<YOUR_BREVO_USERNAME>
+spring.mail.password=<YOUR_SMTP_KEY_OR_PASSWORD>
+app.mail.from=<YOUR_SENDER_EMAIL_ADDRESS>
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+
+app.token.verification-expiry-minutes=10080
+app.token.reset-expiry-minutes=60
+
+spring.servlet.multipart.max-file-size=5MB
+spring.servlet.multipart.max-request-size=10MB
+
+logging.level.org.springframework.security.authentication.dao.DaoAuthenticationProvider=WARN
 
 ### 4. Build and Run the Application
 
