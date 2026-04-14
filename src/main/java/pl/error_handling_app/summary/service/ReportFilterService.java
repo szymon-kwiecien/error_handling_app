@@ -1,48 +1,53 @@
 package pl.error_handling_app.summary.service;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import pl.error_handling_app.report.entity.ReportCategory;
-import pl.error_handling_app.report.service.ReportService;
+import pl.error_handling_app.report.ReportSpecification;
 import pl.error_handling_app.report.dto.ReportDto;
+import pl.error_handling_app.report.entity.Report;
+import pl.error_handling_app.report.entity.ReportCategory;
+import pl.error_handling_app.report.dto.ReportDtoMapper;
+import pl.error_handling_app.report.repository.ReportRepository;
 import pl.error_handling_app.summary.dto.SummaryFormRequest;
 import pl.error_handling_app.user.entity.User;
 import pl.error_handling_app.user.service.UserService;
-
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReportFilterService {
 
-    private final ReportService reportService;
+    private final ReportRepository reportRepository;
+    private final ReportDtoMapper reportMapper;
     private final UserService userService;
 
-    public ReportFilterService(ReportService reportService, UserService userService) {
-        this.reportService = reportService;
+    public ReportFilterService(ReportRepository reportRepository, ReportDtoMapper reportMapper, UserService userService) {
+        this.reportRepository = reportRepository;
+        this.reportMapper = reportMapper;
         this.userService = userService;
     }
 
     public List<ReportDto> prepareFilteredReports(SummaryFormRequest request, ReportCategory category) {
-        List<ReportDto> reports = new ArrayList<>(reportService.getReportsByDateRange(
+        Specification<Report> spec = Specification.where(null);
+        spec = spec.and((root, query, cb) -> cb.between(root.get("datedAdded"),
                 request.getDateFrom().atStartOfDay(),
-                request.getDateTo().atTime(LocalTime.MAX))
-        );
-
-        if (category != null || request.getStatus() != null) {
-            if (category != null && request.getStatus() != null) {
-                reports.retainAll(reportService.getReportsByCategoryAndStatus(category, request.getStatus()));
-            } else if (category != null) {
-                reports.retainAll(reportService.filterReportsByCategory(category));
-            } else {
-                reports.retainAll(reportService.filterReportsByStatus(request.getStatus()));
+                request.getDateTo().atTime(LocalTime.MAX)));
+        if (category != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("category"), category));
+        }
+        if (request.getStatus() != null) {
+            spec = spec.and(ReportSpecification.filterBy(null, request.getStatus()));
+        }
+        if (request.getUser() != null && !request.getUser().isBlank()) {
+            Optional<User> userOpt = userService.findUserByEmail(request.getUser());
+            if (userOpt.isPresent()) {
+                spec = spec.and(ReportSpecification.filterByAssignedEmployee(userOpt.get()));
             }
         }
-
-        Optional<User> userOpt = userService.findUserByEmail(request.getUser());
-        userOpt.ifPresent(user -> reports.retainAll(reportService.filterReportsByAssignedEmployee(reports, user)));
-        return reports;
+        return reportRepository.findAll(spec).stream()
+                .map(reportMapper::mapToDto)
+                .collect(Collectors.toList());
     }
 }
-

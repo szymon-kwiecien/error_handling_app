@@ -52,7 +52,7 @@ public class SummaryController {
     @GetMapping("/summaries")
     public String getSummariesPanel(Model model) {
         List<String> categories = reportCategoryService.getAllCategories().stream()
-                .map(ReportCategoryDto::getName).toList();
+                .map(ReportCategoryDto::name).toList();
         model.addAttribute("categories", categories);
         model.addAttribute("statusList", ReportStatus.values());
         if (currentUserIsAdmin()) {

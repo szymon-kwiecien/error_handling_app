@@ -45,7 +45,7 @@ public class ChartService {
         // Lista nazw kategorii lub statusów
         List<String> values = byCategory
                 ? reportCategoryService.getAllCategories().stream()
-                .map(ReportCategoryDto::getName)
+                .map(ReportCategoryDto::name)
                 .toList()
                 : Arrays.stream(ReportStatus.values())
                 .map(rs -> rs.description)

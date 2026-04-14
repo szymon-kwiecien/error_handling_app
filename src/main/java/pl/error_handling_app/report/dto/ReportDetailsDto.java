@@ -136,24 +136,4 @@ public class ReportDetailsDto {
         this.attachments = attachments;
     }
 
-    public RemainingTime getRemainingTime(boolean forFirstRespond) {
-        Duration duration = Duration.between(LocalDateTime.now(), forFirstRespond? timeToRespond : dueDate);
-        long days;
-        long hours;
-        long minutes;
-        boolean isExpired;
-        if (duration.getSeconds() < 0){
-            days = 0;
-            hours = 0;
-            minutes = 0;
-            isExpired = true;
-        } else {
-            days = duration.toDays();
-            hours = duration.toHours() % 24;
-            minutes = duration.toMinutes() % 60;
-            isExpired = false;
-        }
-        return new RemainingTime(days, hours, minutes, isExpired);
-    }
-
 }

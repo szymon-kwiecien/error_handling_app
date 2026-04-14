@@ -39,15 +39,15 @@ public class ReportCategoryService {
     }
 
     public void addCategory(ReportCategoryDto categoryDto) {
-        isCategoryNameTaken(categoryDto.getName(), null);
+        isCategoryNameTaken(categoryDto.name(), null);
         ReportCategory reportCategory = new ReportCategory();
-        reportCategory.setName(categoryDto.getName());
+        reportCategory.setName(categoryDto.name());
         reportCategoryRepository.save(reportCategory);
     }
 
     @Transactional
     public void editCategory(Long id, ReportCategoryDto categoryDto) {
-        String newCategoryName = categoryDto.getName();
+        String newCategoryName = categoryDto.name();
         isCategoryNameTaken(newCategoryName, id);
         ReportCategory reportCategory = reportCategoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Kategoria nie została znaleziona."));
