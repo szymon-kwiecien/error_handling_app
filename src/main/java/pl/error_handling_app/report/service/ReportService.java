@@ -81,7 +81,8 @@ public class ReportService {
     public String[] calculateRemainingTime(List<ReportDto> reports) {
         return reports.stream()
                 .map(report -> {
-                    if (COMPLETED_STATUS_POLISH_NAME.equals(report.getStatusName())) return "-";
+                    if (COMPLETED_STATUS_POLISH_NAME.equals(report.getStatusName()) ||
+                            OVERDUE_STATUS_POLISH_NAME.equals(report.getStatusName())) return "-";
                     return RemainingTime.calculate(resolveDeadline(report)).format();
                 })
                 .toArray(String[]::new);
