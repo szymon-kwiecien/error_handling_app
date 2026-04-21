@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.List;
@@ -26,10 +27,7 @@ import java.util.stream.Collectors;
 @Service
 public class ChartService {
 
-    private static final String[] POLISH_MONTHS_NAMES = {
-            "styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec",
-            "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień"
-    };
+    private static final Locale PL_LOCALE = new Locale("pl", "PL");
     private final ReportCategoryService reportCategoryService;
 
     public ChartService(ReportCategoryService reportCategoryService) {
@@ -37,12 +35,8 @@ public class ChartService {
     }
 
     public String generateDistributionChart(List<ReportDto> reports, LocalDate startDate, LocalDate endDate, boolean byCategory) throws IOException {
-        // limit maksymalnie 8 miesięcy
-        final LocalDate adjustedStartDate = startDate.isAfter(endDate.minusMonths(7).withDayOfMonth(1))
-                ? startDate.withDayOfMonth(1)
-                : endDate.minusMonths(7).withDayOfMonth(1);
+        final LocalDate adjustedStartDate = getAdjustedStartDate(startDate, endDate);
 
-        // Lista nazw kategorii lub statusów
         List<String> values = byCategory
                 ? reportCategoryService.getAllCategories().stream()
                 .map(ReportCategoryDto::name)
@@ -71,10 +65,10 @@ public class ChartService {
 
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         groupedData.forEach((date, dataCounts) -> {
-            String monthName = POLISH_MONTHS_NAMES[date.getMonthValue() - 1] + " " + date.getYear();
+            String monthLabel = formatMonthLabel(date);
             values.forEach(value -> {
                 long count = dataCounts.getOrDefault(value, 0L);
-                dataset.addValue(count, value, monthName);
+                dataset.addValue(count, value, monthLabel);
             });
         });
 
@@ -89,31 +83,16 @@ public class ChartService {
         chart.getTitle().setFont(new Font("Arial", Font.BOLD, 14));
         chart.getCategoryPlot().getDomainAxis().setLabelFont(new Font("Arial", Font.PLAIN, 12));
         chart.getCategoryPlot().getRangeAxis().setLabelFont(new Font("Arial", Font.PLAIN, 12));
-        StackedBarRenderer renderer = createRenderer();
-        chart.getCategoryPlot().setRenderer(renderer);
+        chart.getCategoryPlot().setRenderer(createStackedRenderer());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ChartUtils.writeChartAsPNG(outputStream, chart, 800, 500);
         return "data:image/png;base64," + Base64.getEncoder().encodeToString(outputStream.toByteArray());
     }
 
-    private static StackedBarRenderer createRenderer() {
-        StackedBarRenderer renderer = new StackedBarRenderer();
-        renderer.setSeriesPaint(0, new Color(244, 67, 54)); // oczekujące - czerwony
-        renderer.setSeriesPaint(1, new Color(33, 150, 243)); // w trakcei - niebieski
-        renderer.setSeriesPaint(2, new Color(76, 175, 80)); // zakonczone - zielony
-
-        renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-        renderer.setDefaultItemLabelsVisible(true);
-        renderer.setDefaultItemLabelFont(new Font("Arial", Font.BOLD, 10));
-        return renderer;
-    }
-
     public String generateAverageTimeComparisonChart(Map<LocalDate, Double> firstReactionTimes, Map<LocalDate, Double> completionTimes,
                                                      LocalDate startDate, LocalDate endDate, boolean singleEmployee) throws IOException {
-        final LocalDate adjustedStartDate = startDate.isAfter(endDate.minusMonths(7).withDayOfMonth(1))
-                ? startDate.withDayOfMonth(1)
-                : endDate.minusMonths(7).withDayOfMonth(1);
+        final LocalDate adjustedStartDate = getAdjustedStartDate(startDate, endDate);
 
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         String firstLabelName = singleEmployee
@@ -124,8 +103,7 @@ public class ChartService {
         LocalDate last = endDate.withDayOfMonth(1);
 
         while (!current.isAfter(last)) {
-            int monthIndex = current.getMonthValue() - 1;
-            String monthName = POLISH_MONTHS_NAMES[monthIndex] + " " + current.getYear();
+            String monthLabel = formatMonthLabel(current);
 
             Double averageFirstReactionTime = firstReactionTimes.getOrDefault(current, 0.0);
             Double averageCompletionTime = completionTimes.getOrDefault(current, 0.0);
@@ -133,8 +111,8 @@ public class ChartService {
             averageFirstReactionTime = Math.round(averageFirstReactionTime * 10.0) / 10.0;
             averageCompletionTime = Math.round(averageCompletionTime * 10.0) / 10.0;
 
-            dataset.addValue(averageFirstReactionTime, firstLabelName, monthName);
-            dataset.addValue(averageCompletionTime, "Średni czas obsługi zgłoszeń pracownika (godziny)", monthName);
+            dataset.addValue(averageFirstReactionTime, firstLabelName, monthLabel);
+            dataset.addValue(averageCompletionTime, "Średni czas obsługi zgłoszeń pracownika (godziny)", monthLabel);
 
             current = current.plusMonths(1);
         }
@@ -149,19 +127,44 @@ public class ChartService {
         chart.getTitle().setFont(new Font("Arial", Font.BOLD, 14));
         chart.getCategoryPlot().getDomainAxis().setLabelFont(new Font("Arial", Font.PLAIN, 12));
         chart.getCategoryPlot().getRangeAxis().setLabelFont(new Font("Arial", Font.PLAIN, 12));
+        chart.getCategoryPlot().setRenderer(createBarRenderer());
 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        ChartUtils.writeChartAsPNG(outputStream, chart, 800, 500);
+        return "data:image/png;base64," + Base64.getEncoder().encodeToString(outputStream.toByteArray());
+    }
+
+    private LocalDate getAdjustedStartDate(LocalDate startDate, LocalDate endDate) {
+        // limit maksymalnie 8 miesięcy wstecz
+        LocalDate limit = endDate.minusMonths(7).withDayOfMonth(1);
+        return startDate.isAfter(limit) ? startDate.withDayOfMonth(1) : limit;
+    }
+
+    private String formatMonthLabel(LocalDate date) {
+        String monthName = date.getMonth().getDisplayName(TextStyle.FULL, PL_LOCALE);
+        return monthName + " " + date.getYear();
+    }
+
+    private static StackedBarRenderer createStackedRenderer() {
+        StackedBarRenderer renderer = new StackedBarRenderer();
+        renderer.setSeriesPaint(0, new Color(255, 193, 7)); // oczekujące - żółty
+        renderer.setSeriesPaint(1, new Color(33, 150, 243)); // w trakcei - niebieski
+        renderer.setSeriesPaint(2, new Color(76, 175, 80)); // zakończone - zielony
+
+        renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        renderer.setDefaultItemLabelsVisible(true);
+        renderer.setDefaultItemLabelFont(new Font("Arial", Font.BOLD, 10));
+        return renderer;
+    }
+
+    private static BarRenderer createBarRenderer() {
         BarRenderer renderer = new BarRenderer();
         renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
         renderer.setDefaultItemLabelsVisible(true);
         renderer.setDefaultItemLabelFont(new Font("Arial", Font.BOLD, 10));
 
         renderer.setSeriesPaint(0, new Color(79, 129, 189)); // pierwsza reakcja -niebieski
-        renderer.setSeriesPaint(1, new Color(192, 80, 77));  // obsługa zlgoszenia - czerwony
-
-        chart.getCategoryPlot().setRenderer(renderer);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ChartUtils.writeChartAsPNG(outputStream, chart, 800, 500);
-        return "data:image/png;base64," + Base64.getEncoder().encodeToString(outputStream.toByteArray());
+        renderer.setSeriesPaint(1, new Color(192, 80, 77)); // obsługa zlgoszenia - czerwony
+        return renderer;
     }
 }
