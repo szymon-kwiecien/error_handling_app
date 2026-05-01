@@ -28,13 +28,13 @@ public class UserDtoMapper {
      public User map(UserDto userDto) {
 
         User user = new User();
-        user.setId(userDto.getId());
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setEmail(userDto.getEmail());
-        Company company = companyRepository.findById(userDto.getCompanyId()).orElseThrow(() ->
+        user.setId(userDto.id());
+        user.setFirstName(userDto.firstName());
+        user.setLastName(userDto.lastName());
+        user.setEmail(userDto.email());
+        Company company = companyRepository.findById(userDto.companyId()).orElseThrow(() ->
                 new CompanyNotFoundException("Firma nie została znaleziona."));
-        UserRole userRole = roleRepository.findById(userDto.getRoleId()).orElseThrow(() ->
+        UserRole userRole = roleRepository.findById(userDto.roleId()).orElseThrow(() ->
                 new RoleNotFoundException("Rola nie została znaleziona"));
         user.setCompany(company);
         user.getRoles().add(userRole);
@@ -63,7 +63,4 @@ public class UserDtoMapper {
     public static UserInReportDto mapToUserInReportDto(User user) {
         return new UserInReportDto(user.getId(), user.getEmail(), user.getCompany().getName());
     }
-
-
-
 }

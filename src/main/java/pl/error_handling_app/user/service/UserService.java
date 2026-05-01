@@ -64,7 +64,7 @@ public class UserService {
     }
 
     public void addUser(UserDto newUser) {
-            checkUserAlreadyExists(newUser.getEmail());
+            checkUserAlreadyExists(newUser.email());
             User userToSave = mapper.map(newUser);
             userRepository.save(userToSave);
             userPasswordChangeOrActiveService.createVerificationToken(userToSave);
@@ -75,21 +75,21 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Nie znaleziono użytkownika."));
         boolean isSelfUpdate = user.getEmail().equalsIgnoreCase(currentUserEmail);
 
-        if (isSelfUpdate && !user.getEmail().equalsIgnoreCase(userDto.getEmail())) {
+        if (isSelfUpdate && !user.getEmail().equalsIgnoreCase(userDto.email())) {
             throw new UnauthorizedOperationException("Nie możesz zmienić własnego adresu e-mail w tym panelu!");
         }
 
         if (!isSelfUpdate) {
-            userRepository.findByEmail(userDto.getEmail()).ifPresent(foundUser -> {
+            userRepository.findByEmail(userDto.email()).ifPresent(foundUser -> {
                 if (!foundUser.getId().equals(userId))
                     throw new InvalidEmailException("Taki adres e-mail posiada już inny użytkownik.");
             });
-            user.setEmail(userDto.getEmail());
+            user.setEmail(userDto.email());
         }
 
-        Company company = companyRepository.findById(userDto.getCompanyId())
+        Company company = companyRepository.findById(userDto.companyId())
                 .orElseThrow(() -> new CompanyNotFoundException("Wybrana firma nie została znaleziona."));
-        UserRole role = userRoleRepository.findById(userDto.getRoleId())
+        UserRole role = userRoleRepository.findById(userDto.roleId())
                 .orElseThrow(() -> new RoleNotFoundException("Wybrana rola nie została znaleziona"));
 
         if (isSelfUpdate) {
@@ -99,8 +99,8 @@ public class UserService {
                     throw new UnauthorizedOperationException("Nie możesz odebrać sobie uprawnień administratora.");
                 }
         }
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
+        user.setFirstName(userDto.firstName());
+        user.setLastName(userDto.lastName());
         user.setCompany(company);
         Set<UserRole> roles = new HashSet<>();
         roles.add(role);
