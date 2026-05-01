@@ -27,14 +27,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private UserDetails createUserDetails(UserCredentialsDto userCredentialsDto) {
 
-        if (userCredentialsDto.getPassword() == null) {
+        if (userCredentialsDto.password() == null) {
             throw new DisabledException("Konto nie zostało jeszcze aktywowane. Najpierw aktywuj konto.");
         }
 
         return User.builder()
-                .username(userCredentialsDto.getEmail())
-                .password(userCredentialsDto.getPassword())
-                .roles(userCredentialsDto.getRoles().toArray(String[]::new))
+                .username(userCredentialsDto.email())
+                .password(userCredentialsDto.password())
+                .roles(userCredentialsDto.roles().toArray(String[]::new))
                 .build();
     }
 }
