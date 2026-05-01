@@ -54,25 +54,25 @@ public class UserProfileService {
     public void changeEmail(ChangeEmailDto changeEmailDto) {
 
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        String newUserEmail = changeEmailDto.getNewEmail();
+        String newUserEmail = changeEmailDto.newEmail();
 
         if (newUserEmail.equalsIgnoreCase(currentUserEmail)) {
             throw new InvalidEmailException("Próbujesz zmienić adres e-mail na taki sam jaki obecnie posiadasz!");
         }
 
         Optional<User> existingUser = userRepository.findByEmail(newUserEmail);
-        if (existingUser.isPresent() && !existingUser.get().getId().equals(changeEmailDto.getUserId())) {
+        if (existingUser.isPresent() && !existingUser.get().getId().equals(changeEmailDto.userId())) {
             throw new InvalidEmailException("Podany adres e-mail posiada już inny użytkownik!");
         }
 
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new UnauthorizedOperationException("Błąd uwierzytelnienia. Spróbuj jeszcze raz."));
-        if (changeEmailDto.getCurrentPassword() == null || userService.isPasswordInvalid(changeEmailDto.getCurrentPassword(),
+        if (changeEmailDto.currentPassword() == null || userService.isPasswordInvalid(changeEmailDto.currentPassword(),
                 currentUser.getPassword())) {
                 throw new InvalidEmailException("Obecne hasło jest nieprawidłowe!");
         }
-        currentUser.setEmail(changeEmailDto.getNewEmail());
-        updateAuthentication(changeEmailDto.getNewEmail());
+        currentUser.setEmail(changeEmailDto.newEmail());
+        updateAuthentication(changeEmailDto.newEmail());
     }
 
     @Transactional

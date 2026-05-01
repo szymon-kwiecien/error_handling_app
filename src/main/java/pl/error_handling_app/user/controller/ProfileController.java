@@ -69,9 +69,7 @@ public class ProfileController {
         model.addAttribute("userDetails", userProfileDetails);
 
         if (!model.containsAttribute("emailChangeDto")) {
-            ChangeEmailDto changeEmailDto = new ChangeEmailDto();
-            changeEmailDto.setUserId(userProfileDetails.getId());
-            model.addAttribute("emailChangeDto", changeEmailDto);
+            model.addAttribute("emailChangeDto", new ChangeEmailDto(userProfileDetails.getId()));
         }
 
         if (!model.containsAttribute("passwordChangeDto")) {
