@@ -89,7 +89,7 @@ public class UserPasswordChangeOrActiveController {
 
         TokenStatus status = service.validateToken(token, isReset);
         if (status == TokenStatus.VALID) {
-            service.setNewPassword(token, passwords.getPassword());
+            service.setNewPassword(token, passwords.password());
             return "redirect:/account/verification?success";
         }
 

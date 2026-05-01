@@ -78,20 +78,20 @@ public class UserProfileService {
     @Transactional
     public void changePassword(ChangePasswordDto changePasswordDto) {
 
-        if (changePasswordDto.getNewPassword() == null || changePasswordDto.getConfirmedNewPassword() == null
-                || changePasswordDto.getNewPassword().isEmpty() || changePasswordDto.getConfirmedNewPassword().isEmpty()
-                || !changePasswordDto.getNewPassword().equals(changePasswordDto.getConfirmedNewPassword())) {
+        if (changePasswordDto.newPassword() == null || changePasswordDto.confirmedNewPassword() == null
+                || changePasswordDto.newPassword().isEmpty() || changePasswordDto.confirmedNewPassword().isEmpty()
+                || !changePasswordDto.newPassword().equals(changePasswordDto.confirmedNewPassword())) {
             throw new InvalidPasswordException("Hasła nie są takie same!");
         }
         User currentUser = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
                 .orElseThrow(() -> new UnauthorizedOperationException("Błąd uwierzytelnienia. Spróbuj jeszcze raz."));
-        if (changePasswordDto.getCurrentPassword() == null || userService.isPasswordInvalid(changePasswordDto.getCurrentPassword(), currentUser.getPassword())) {
+        if (changePasswordDto.currentPassword() == null || userService.isPasswordInvalid(changePasswordDto.currentPassword(), currentUser.getPassword())) {
             throw new InvalidPasswordException("Obecne hasło jest nieprawidłowe!");
         }
-        if (!userService.isPasswordInvalid(changePasswordDto.getNewPassword(), currentUser.getPassword())) {
+        if (!userService.isPasswordInvalid(changePasswordDto.newPassword(), currentUser.getPassword())) {
             throw new InvalidPasswordException("Nowe hasło jest takie samo jak obecne!");
         }
-        currentUser.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
+        currentUser.setPassword(passwordEncoder.encode(changePasswordDto.newPassword()));
     }
 
     private String getCompanyName(Company company) {

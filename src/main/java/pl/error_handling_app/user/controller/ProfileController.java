@@ -73,9 +73,7 @@ public class ProfileController {
         }
 
         if (!model.containsAttribute("passwordChangeDto")) {
-            ChangePasswordDto changePasswordDto = new ChangePasswordDto();
-            changePasswordDto.setUserId(userProfileDetails.getId());
-            model.addAttribute("passwordChangeDto", changePasswordDto);
+            model.addAttribute("passwordChangeDto", new ChangePasswordDto(userProfileDetails.getId()));
         }
     }
 }

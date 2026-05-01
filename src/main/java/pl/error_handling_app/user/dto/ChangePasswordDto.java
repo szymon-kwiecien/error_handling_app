@@ -5,50 +5,28 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public class ChangePasswordDto {
+public record ChangePasswordDto(
+        @NotNull(message = "Id użytkownika jest wymagane")
+        Long userId,
 
-    @NotNull(message = "Id użytkownika jest wymagane")
-    private Long userId;
-    @Size(min = 7, max = 20, message = "Hasło musi mieć od 7 do 20 znaków")
-    @Pattern(
-            regexp = ".*([\\d\\W]).*",
-            message = "Hasło musi zawierać przynajmniej jedną cyfrę lub znak specjalny"
-    )
-    private String newPassword;
-    @NotBlank(message = "Powtórzenie hasła jest wymagane")
-    private String confirmedNewPassword;
-    @NotBlank(message = "Wpisanie obecnego hasła jest wymagane")
-    private String currentPassword;
+        @Size(min = 7, max = 20, message = "Hasło musi mieć od 7 do 20 znaków")
+        @Pattern(
+                regexp = ".*([\\d\\W]).*",
+                message = "Hasło musi zawierać przynajmniej jedną cyfrę lub znak specjalny"
+        )
+        String newPassword,
 
-    public String getNewPassword() {
-        return newPassword;
+        @NotBlank(message = "Powtórzenie hasła jest wymagane")
+        String confirmedNewPassword,
+
+        @NotBlank(message = "Wpisanie obecnego hasła jest wymagane")
+        String currentPassword
+) {
+    public ChangePasswordDto() {
+        this(null, null, null, null);
     }
 
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
-    }
-
-    public String getConfirmedNewPassword() {
-        return confirmedNewPassword;
-    }
-
-    public void setConfirmedNewPassword(String confirmedNewPassword) {
-        this.confirmedNewPassword = confirmedNewPassword;
-    }
-
-    public String getCurrentPassword() {
-        return currentPassword;
-    }
-
-    public void setCurrentPassword(String currentPassword) {
-        this.currentPassword = currentPassword;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public ChangePasswordDto(Long userId) {
+        this(userId, null, null, null);
     }
 }
