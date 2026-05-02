@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 public record UserDto(
         Long id,
         @NotBlank(message = "Imię jest wymagane")
-        @Size(min = 3, max = 30)
+        @Size(min = 3, max = 30, message = "Imię musi mieć długość między 3 a 30 znaków")
         String firstName,
         @NotBlank(message = "Nazwisko jest wymagane")
         String lastName,

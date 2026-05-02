@@ -1,66 +1,54 @@
 package pl.error_handling_app.user.dto;
 
-
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import pl.error_handling_app.company.entity.Company;
-import pl.error_handling_app.company.repository.CompanyRepository;
-import pl.error_handling_app.exception.CompanyNotFoundException;
-import pl.error_handling_app.exception.RoleNotFoundException;
 import pl.error_handling_app.user.entity.User;
 import pl.error_handling_app.user.entity.UserRole;
-import pl.error_handling_app.user.repository.UserRoleRepository;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 public class UserDtoMapper {
 
-    private final CompanyRepository companyRepository;
-    private final UserRoleRepository roleRepository;
-
-    public UserDtoMapper(CompanyRepository companyRepository, UserRoleRepository roleRepository) {
-        this.companyRepository = companyRepository;
-        this.roleRepository = roleRepository;
-    }
-
-     public User map(UserDto userDto) {
-
+    public User map(UserDto userDto, Company company, UserRole role) {
         User user = new User();
         user.setId(userDto.id());
         user.setFirstName(userDto.firstName());
         user.setLastName(userDto.lastName());
         user.setEmail(userDto.email());
-        Company company = companyRepository.findById(userDto.companyId()).orElseThrow(() ->
-                new CompanyNotFoundException("Firma nie została znaleziona."));
-        UserRole userRole = roleRepository.findById(userDto.roleId()).orElseThrow(() ->
-                new RoleNotFoundException("Rola nie została znaleziona"));
         user.setCompany(company);
-        user.getRoles().add(userRole);
+        user.getRoles().add(role);
         user.setActive(userDto.isActive());
         return user;
     }
 
-    public static UserDto map(User user) {
+    public UserDto map(User user) {
+        Long roleId = user.getRoles().stream()
+                .map(UserRole::getId)
+                .findFirst()
+                .orElse(null);
 
-        Long userRole = user.getRoles().stream().map(UserRole::getId).toList().get(0);
-        List<String> rolesNames = user.getRoles().stream().map(UserRole::getName).toList();
-        return new UserDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(),
-                user.getCompany().getId(), userRole, user.isActive());
+        return new UserDto(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getCompany().getId(),
+                roleId,
+                user.isActive()
+        );
     }
 
-    public static UserCredentialsDto mapToCredentials(User user) {
-        String email = user.getEmail();
-        String password = user.getPassword();
-        Set<String> roles = user.getRoles()
-                .stream()
+    public UserCredentialsDto mapToCredentials(User user) {
+        Set<String> roles = user.getRoles().stream()
                 .map(UserRole::getName)
                 .collect(Collectors.toSet());
-        return new UserCredentialsDto(email, password, roles);
+
+        return new UserCredentialsDto(user.getEmail(), user.getPassword(), roles);
     }
 
-    public static UserInReportDto mapToUserInReportDto(User user) {
+    public UserInReportDto mapToUserInReportDto(User user) {
         return new UserInReportDto(user.getId(), user.getEmail(), user.getCompany().getName());
     }
 }

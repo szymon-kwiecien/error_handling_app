@@ -25,25 +25,27 @@ public class UserService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final UserRoleRepository userRoleRepository;
-    private final UserDtoMapper mapper;
     private final ReportRepository reportRepository;
+    private final UserRoleRepository roleRepository;
+    private final UserDtoMapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final UserPasswordChangeOrActiveService userPasswordChangeOrActiveService;
     private final VerificationTokenRepository verificationTokenRepository;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VerificationTokenRepository verificationTokenRepository) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository, UserRoleRepository roleRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VerificationTokenRepository verificationTokenRepository) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.userRoleRepository = userRoleRepository;
         this.mapper = mapper;
         this.reportRepository = reportRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.userPasswordChangeOrActiveService = userPasswordChangeOrActiveService;
         this.verificationTokenRepository = verificationTokenRepository;
     }
 
     public List<UserInReportDto> findUsersByRoleName(String roleName) {
-        return userRepository.findALlByRoles_Name(roleName).stream().map(UserDtoMapper::mapToUserInReportDto).toList();
+        return userRepository.findALlByRoles_Name(roleName).stream().map(mapper::mapToUserInReportDto).toList();
     }
 
     public Optional<User> findUserByEmail(String email) {
@@ -56,18 +58,23 @@ public class UserService {
     }
 
     public Optional<UserCredentialsDto> findCredentialsByEmail(String email) {
-        return userRepository.findByEmail(email).map(UserDtoMapper::mapToCredentials);
+        return userRepository.findByEmail(email).map(mapper::mapToCredentials);
     }
 
     public Page<UserDto> findPagedUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(UserDtoMapper::map);
+        return userRepository.findAll(pageable).map(mapper::map);
     }
 
+    @Transactional
     public void addUser(UserDto newUser) {
-            checkUserAlreadyExists(newUser.email());
-            User userToSave = mapper.map(newUser);
-            userRepository.save(userToSave);
-            userPasswordChangeOrActiveService.createVerificationToken(userToSave);
+        checkUserAlreadyExists(newUser.email());
+        Company company = companyRepository.findById(newUser.companyId())
+                .orElseThrow(() -> new CompanyNotFoundException("Firma nie została znaleziona."));
+        UserRole role = roleRepository.findById(newUser.roleId())
+                .orElseThrow(() -> new RoleNotFoundException("Rola nie została znaleziona"));
+        User userToSave = mapper.map(newUser, company, role);
+        userRepository.save(userToSave);
+        userPasswordChangeOrActiveService.createVerificationToken(userToSave);
     }
 
     @Transactional
