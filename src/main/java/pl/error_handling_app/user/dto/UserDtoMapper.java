@@ -51,4 +51,17 @@ public class UserDtoMapper {
     public UserInReportDto mapToUserInReportDto(User user) {
         return new UserInReportDto(user.getId(), user.getEmail(), user.getCompany().getName());
     }
+
+    public void updateEntity(User user, UserDto userDto, Company company, UserRole role) {
+        user.setFirstName(userDto.firstName());
+        user.setLastName(userDto.lastName());
+        user.setCompany(company);
+
+        user.getRoles().clear();
+        user.getRoles().add(role);
+    }
+
+    public RoleDto mapToRoleDto(UserRole role) {
+        return new RoleDto(role.getId(), role.getName());
+    }
 }

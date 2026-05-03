@@ -24,7 +24,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
-    private final UserRoleRepository userRoleRepository;
     private final ReportRepository reportRepository;
     private final UserRoleRepository roleRepository;
     private final UserDtoMapper mapper;
@@ -32,10 +31,9 @@ public class UserService {
     private final UserPasswordChangeOrActiveService userPasswordChangeOrActiveService;
     private final VerificationTokenRepository verificationTokenRepository;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserRoleRepository userRoleRepository, UserDtoMapper mapper, ReportRepository reportRepository, UserRoleRepository roleRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VerificationTokenRepository verificationTokenRepository) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserDtoMapper mapper, ReportRepository reportRepository, UserRoleRepository roleRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VerificationTokenRepository verificationTokenRepository) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
-        this.userRoleRepository = userRoleRepository;
         this.mapper = mapper;
         this.reportRepository = reportRepository;
         this.roleRepository = roleRepository;
@@ -96,7 +94,7 @@ public class UserService {
 
         Company company = companyRepository.findById(userDto.companyId())
                 .orElseThrow(() -> new CompanyNotFoundException("Wybrana firma nie została znaleziona."));
-        UserRole role = userRoleRepository.findById(userDto.roleId())
+        UserRole role = roleRepository.findById(userDto.roleId())
                 .orElseThrow(() -> new RoleNotFoundException("Wybrana rola nie została znaleziona"));
 
         if (isSelfUpdate) {
@@ -106,35 +104,31 @@ public class UserService {
                     throw new UnauthorizedOperationException("Nie możesz odebrać sobie uprawnień administratora.");
                 }
         }
-        user.setFirstName(userDto.firstName());
-        user.setLastName(userDto.lastName());
-        user.setCompany(company);
-        Set<UserRole> roles = new HashSet<>();
-        roles.add(role);
-        user.setRoles(roles);
+        mapper.updateEntity(user, userDto, company, role);
     }
 
-        @Transactional
-        public void deleteUser(Long userId, String currentUserEmail) {
-            User userToDelete = userRepository.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException("Użytkownik nie został znaleziony"));
-            if (userToDelete.getEmail().equals(currentUserEmail)) {
+    @Transactional
+    public void deleteUser(Long userId, String currentUserEmail) {
+        User userToDelete = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Użytkownik nie został znaleziony"));
+        if (userToDelete.getEmail().equals(currentUserEmail)) {
                 throw new UnauthorizedOperationException("Nie możesz usunąć własnego konta.");
-            }
-            boolean isTargetAdmin = userToDelete.getRoles().stream()
-                    .anyMatch(role -> role.getName().equals("ADMINISTRATOR"));
-            if (isTargetAdmin) {
-                throw new UnauthorizedOperationException("Nie można usunąć innego administratora");
-            }
-            detachUserFromReports(userToDelete);
-            verificationTokenRepository.findByUser(userToDelete)
-                    .ifPresent(verificationTokenRepository::delete);
-            userRepository.deleteById(userId);
         }
+        boolean isTargetAdmin = userToDelete.getRoles().stream()
+                .anyMatch(role -> role.getName().equals("ADMINISTRATOR"));
+        if (isTargetAdmin) {
+                throw new UnauthorizedOperationException("Nie można usunąć innego administratora");
+        }
+        detachUserFromReports(userToDelete);
+        verificationTokenRepository.findByUser(userToDelete)
+                .ifPresent(verificationTokenRepository::delete);
+        userRepository.deleteById(userId);
+    }
 
-        @Transactional
-        public void detachUserFromReports(User userToDelete) {
-        reportRepository.findAllByAssignedEmployee(userToDelete).forEach(report -> report.setAssignedEmployee(null));
+    @Transactional
+    public void detachUserFromReports(User userToDelete) {
+        reportRepository.findAllByAssignedEmployee(userToDelete)
+                .forEach(report -> report.setAssignedEmployee(null));
         List<Report> reportsToDelete = reportRepository.findAllByReportingUser(userToDelete); //Gdy usuwamy użytkownika to jego zgłoszenia również usuwamy
         reportRepository.deleteAll(reportsToDelete);
     }
@@ -153,5 +147,11 @@ public class UserService {
 
     public boolean isPasswordInvalid(String password, String currentPassword) {
         return !passwordEncoder.matches(password, currentPassword); //Sprawdzam czy obecne hasło podane w formularzy zmianu e-maila jest nieprawidłowe
+    }
+
+    public List<RoleDto> findAllRoles() {
+        return roleRepository.findAll().stream()
+                .map(mapper::mapToRoleDto)
+                .toList();
     }
 }
