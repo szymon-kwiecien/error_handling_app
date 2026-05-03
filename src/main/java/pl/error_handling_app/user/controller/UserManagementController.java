@@ -5,7 +5,6 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,10 +12,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 import pl.error_handling_app.company.service.CompanyService;
-import pl.error_handling_app.user.repository.UserRoleRepository;
 import pl.error_handling_app.user.service.UserService;
 import pl.error_handling_app.user.dto.UserDto;
 import pl.error_handling_app.utils.PaginationUtils;
+import pl.error_handling_app.utils.SecurityUtils;
 
 import java.util.List;
 
@@ -26,12 +25,10 @@ public class UserManagementController {
 
     private final UserService userService;
     private final CompanyService companyService;
-    private final UserRoleRepository userRoleRepository;
 
-    public UserManagementController(UserService userService, CompanyService companyService, UserRoleRepository userRoleRepository) {
+    public UserManagementController(UserService userService, CompanyService companyService) {
         this.userService = userService;
         this.companyService = companyService;
-        this.userRoleRepository = userRoleRepository;
     }
 
     @GetMapping("/manage-users")
@@ -67,7 +64,6 @@ public class UserManagementController {
                     BindingResult bindingResult,
                     @RequestParam(defaultValue = "1") int page,
                     @RequestParam(defaultValue = "10") int size,
-                    Authentication authentication,
                     RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
@@ -78,7 +74,8 @@ public class UserManagementController {
             return redirectToUserManagementPage(page,size);
         }
 
-        userService.updateUser(id, user, authentication.getName());
+        String currentUserEmail = SecurityUtils.getCurrentUserEmail();
+        userService.updateUser(id, user, currentUserEmail);
         addSuccessMessage(redirectAttributes, "Edycja danych użytkownika przebiegła pomyślnie.");
         return redirectToUserManagementPage(page,size);
     }
@@ -86,8 +83,8 @@ public class UserManagementController {
     @PostMapping("/delete-user/{id}")
     String deleteUser(@PathVariable Long id,
                       @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size,
-                      Authentication authentication, RedirectAttributes redirectAttributes) {
-        userService.deleteUser(id, authentication.getName());
+                      RedirectAttributes redirectAttributes) {
+        userService.deleteUser(id, SecurityUtils.getCurrentUserEmail());
         addSuccessMessage(redirectAttributes, "Użytkownik został usunięty.");
         return redirectToUserManagementPage(page,size);
     }
@@ -101,7 +98,7 @@ public class UserManagementController {
         model.addAttribute("pageSize", pageable.getPageSize());
         model.addAttribute("totalPages", usersPage.getTotalPages());
         model.addAttribute("companies", companyService.findAllCompanies());
-        model.addAttribute("roles", userRoleRepository.findAll());
+        model.addAttribute("roles", userService.findAllRoles());
     }
 
     private void addSuccessMessage(RedirectAttributes redirectAttributes, String message) {

@@ -17,6 +17,7 @@ import pl.error_handling_app.user.dto.ChangeEmailDto;
 import pl.error_handling_app.user.dto.ChangePasswordDto;
 import pl.error_handling_app.user.dto.UserProfileDetailsDto;
 import pl.error_handling_app.user.repository.UserRepository;
+import pl.error_handling_app.utils.SecurityUtils;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -33,7 +34,6 @@ public class UserProfileService {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
-
 
     public UserProfileDetailsDto findUserProfileDetailsByEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() ->
@@ -53,7 +53,7 @@ public class UserProfileService {
     @Transactional
     public void changeEmail(ChangeEmailDto changeEmailDto) {
 
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUserEmail = SecurityUtils.getCurrentUserEmail();
         String newUserEmail = changeEmailDto.newEmail();
 
         if (newUserEmail.equalsIgnoreCase(currentUserEmail)) {
@@ -83,7 +83,7 @@ public class UserProfileService {
                 || !changePasswordDto.newPassword().equals(changePasswordDto.confirmedNewPassword())) {
             throw new InvalidPasswordException("Hasła nie są takie same!");
         }
-        User currentUser = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+        User currentUser = userRepository.findByEmail(SecurityUtils.getCurrentUserEmail())
                 .orElseThrow(() -> new UnauthorizedOperationException("Błąd uwierzytelnienia. Spróbuj jeszcze raz."));
         if (changePasswordDto.currentPassword() == null || userService.isPasswordInvalid(changePasswordDto.currentPassword(), currentUser.getPassword())) {
             throw new InvalidPasswordException("Obecne hasło jest nieprawidłowe!");
