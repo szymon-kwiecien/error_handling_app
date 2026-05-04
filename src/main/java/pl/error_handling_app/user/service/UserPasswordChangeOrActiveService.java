@@ -38,6 +38,9 @@ public class UserPasswordChangeOrActiveService {
     @Value("${app.token.reset-expiry-minutes:60}")
     private int resetExpiry;
 
+    @Value("${app.token.cleanup-days:14}")
+    private int cleanupDays;
+
     public UserPasswordChangeOrActiveService(VerificationTokenRepository tokenRepository,
                                              MailService mailService,
                                              UserRepository userRepository,
@@ -66,7 +69,10 @@ public class UserPasswordChangeOrActiveService {
             String url = buildUrl("account/forgot-password/", token.getToken());
             mailService.forgotPasswordMessage(user.getEmail(), user.getFirstName(), url, token.getExpirationTime().format(FORMATTER));
             return true;
-        }).orElse(false);
+        }).orElseGet(() -> {
+            log.debug("Próba resetu hasła dla nieistniejącego lub nieaktywnego konta:{}", email);
+            return false;
+        });
     }
 
     public TokenStatus validateToken(String token, boolean userIsAlreadyActive) {
@@ -99,7 +105,7 @@ public class UserPasswordChangeOrActiveService {
     @Scheduled(cron = "0 0 2 * * ?")
     @Transactional
     public void cleanupOldTokens() {
-        LocalDateTime threshold = LocalDateTime.now().minusDays(14);
+        LocalDateTime threshold = LocalDateTime.now().minusDays(cleanupDays);
 
         tokenRepository.deleteAllByExpirationTimeBefore(threshold);
 

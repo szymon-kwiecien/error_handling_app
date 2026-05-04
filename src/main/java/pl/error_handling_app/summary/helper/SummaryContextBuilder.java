@@ -27,7 +27,7 @@ public class SummaryContextBuilder {
         context.setVariable("currentUserName", SecurityContextHolder.getContext().getAuthentication().getName());
         context.setVariable("dateRange", from + " - " + to);
         context.setVariable("categories", category != null ? category.getName() : "Wszystkie");
-        context.setVariable("status", status != null ? status.description : "Wszystkie");
+        context.setVariable("status", status != null ? status.polishName : "Wszystkie");
         context.setVariable("sort", sortedBy);
         return context;
     }

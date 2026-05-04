@@ -65,7 +65,7 @@ public class ReportDetailsViewHelper {
         dto.setDateAdded(report.getDateAdded());
         dto.setToRespondDate(report.getTimeToRespond());
         dto.setDueDate(report.getDueDate());
-        dto.setStatusName(forFirstRespond ? report.getStatus().description : "W trakcie");
+        dto.setStatusName(forFirstRespond ? report.getStatus().polishName : "W trakcie");
         return dto;
     }
 }

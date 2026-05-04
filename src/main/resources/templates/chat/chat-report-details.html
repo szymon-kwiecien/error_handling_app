@@ -20,7 +20,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <h5 class="text-lg">Status:
-                    <span class="font-semibold" th:styleappend="'color: ' + ${statusColor}" th:text="${report.getStatus().description}">W trakcie</span>
+                    <span class="font-semibold" th:styleappend="'color: ' + ${statusColor}" th:text="${report.getStatus().polishName}">W trakcie</span>
                 </h5>
             </div>
             <div class="flex space-x-4">

@@ -6,6 +6,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityUtils {
 
+    public static final String ADMIN_ROLE = "ADMINISTRATOR";
+    public static final String EMPLOYEE_ROLE = "EMPLOYEE";
+
     public static boolean hasRole(Authentication authentication, String roleName) {
         if (authentication == null) {
             return false;
@@ -21,6 +24,6 @@ public class SecurityUtils {
     }
 
     public static boolean isAdmin(Authentication authentication) {
-        return hasRole(authentication, "ROLE_ADMINISTRATOR");
+        return hasRole(authentication, "ROLE_" + ADMIN_ROLE);
     }
 }

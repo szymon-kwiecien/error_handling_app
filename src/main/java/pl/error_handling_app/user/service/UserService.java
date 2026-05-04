@@ -8,14 +8,14 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.error_handling_app.company.entity.Company;
 import pl.error_handling_app.company.repository.CompanyRepository;
 import pl.error_handling_app.exception.*;
-import pl.error_handling_app.report.entity.Report;
-import pl.error_handling_app.report.repository.ReportRepository;
+import pl.error_handling_app.report.service.ReportService;
 import pl.error_handling_app.user.entity.User;
 import pl.error_handling_app.user.entity.UserRole;
 import pl.error_handling_app.user.repository.VerificationTokenRepository;
 import pl.error_handling_app.user.dto.*;
 import pl.error_handling_app.user.repository.UserRepository;
 import pl.error_handling_app.user.repository.UserRoleRepository;
+import pl.error_handling_app.utils.SecurityUtils;
 
 import java.util.*;
 
@@ -24,18 +24,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
-    private final ReportRepository reportRepository;
+    private final ReportService reportService;
     private final UserRoleRepository roleRepository;
     private final UserDtoMapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final UserPasswordChangeOrActiveService userPasswordChangeOrActiveService;
     private final VerificationTokenRepository verificationTokenRepository;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserDtoMapper mapper, ReportRepository reportRepository, UserRoleRepository roleRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VerificationTokenRepository verificationTokenRepository) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository, UserDtoMapper mapper, ReportService reportService, UserRoleRepository roleRepository, PasswordEncoder passwordEncoder, UserPasswordChangeOrActiveService userPasswordChangeOrActiveService, VerificationTokenRepository verificationTokenRepository) {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.mapper = mapper;
-        this.reportRepository = reportRepository;
+        this.reportService = reportService;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.userPasswordChangeOrActiveService = userPasswordChangeOrActiveService;
@@ -99,8 +99,8 @@ public class UserService {
 
         if (isSelfUpdate) {
                 boolean currentlyAdmin = user.getRoles().stream()
-                        .anyMatch(r -> r.getName().equals("ADMINISTRATOR"));
-                if (currentlyAdmin && !role.getName().equals("ADMINISTRATOR")) {
+                        .anyMatch(r -> r.getName().equals(SecurityUtils.ADMIN_ROLE));
+                if (currentlyAdmin && !role.getName().equals(SecurityUtils.ADMIN_ROLE)) {
                     throw new UnauthorizedOperationException("Nie możesz odebrać sobie uprawnień administratora.");
                 }
         }
@@ -115,28 +115,19 @@ public class UserService {
                 throw new UnauthorizedOperationException("Nie możesz usunąć własnego konta.");
         }
         boolean isTargetAdmin = userToDelete.getRoles().stream()
-                .anyMatch(role -> role.getName().equals("ADMINISTRATOR"));
+                .anyMatch(role -> role.getName().equals(SecurityUtils.ADMIN_ROLE));
         if (isTargetAdmin) {
                 throw new UnauthorizedOperationException("Nie można usunąć innego administratora");
         }
-        detachUserFromReports(userToDelete);
+        reportService.handleUserRemoval(userToDelete);
         verificationTokenRepository.findByUser(userToDelete)
                 .ifPresent(verificationTokenRepository::delete);
         userRepository.deleteById(userId);
     }
 
     @Transactional
-    public void detachUserFromReports(User userToDelete) {
-        reportRepository.findAllByAssignedEmployee(userToDelete)
-                .forEach(report -> report.setAssignedEmployee(null));
-        List<Report> reportsToDelete = reportRepository.findAllByReportingUser(userToDelete); //Gdy usuwamy użytkownika to jego zgłoszenia również usuwamy
-        reportRepository.deleteAll(reportsToDelete);
-    }
-
-    @Transactional
     public void prepareUsersForCompanyDeletion(Long companyId) {
-        reportRepository.nullifyAssignmentsForCompanyUsers(companyId);
-        reportRepository.deleteReportsCreatedByCompanyUsers(companyId);
+        reportService.handleCompanyRemoval(companyId);
     }
 
     private void checkUserAlreadyExists(String email) {

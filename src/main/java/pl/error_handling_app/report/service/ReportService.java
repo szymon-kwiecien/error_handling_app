@@ -3,7 +3,6 @@ package pl.error_handling_app.report.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,15 +18,12 @@ import pl.error_handling_app.report.dto.ReportDtoMapper;
 import pl.error_handling_app.report.repository.ReportRepository;
 import pl.error_handling_app.user.entity.User;
 import pl.error_handling_app.user.repository.UserRepository;
+import pl.error_handling_app.utils.SecurityUtils;
 import java.time.*;
 import java.util.*;
 
 @Service
 public class ReportService {
-
-    public final static String PENDING_STATUS_POLISH_NAME = "Oczekujące";
-    public final static String COMPLETED_STATUS_POLISH_NAME = "Zakończone";
-    public final static String OVERDUE_STATUS_POLISH_NAME = "Nieobsłużone w terminie";
 
     private final ReportRepository reportRepository;
     private final ReportCategoryService reportCategoryService;
@@ -52,8 +48,8 @@ public class ReportService {
 
     public Page<ReportDto> findReports(String titleFragment, ReportStatus status, Pageable pageable) {
         User user = getCurrentUser();
-        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getName().equals("ADMINISTRATOR"));
-        boolean isEmployee = user.getRoles().stream().anyMatch(role -> role.getName().equals("EMPLOYEE"));
+        boolean isAdmin = user.getRoles().stream().anyMatch(role -> role.getName().equals(SecurityUtils.ADMIN_ROLE));
+        boolean isEmployee = user.getRoles().stream().anyMatch(role -> role.getName().equals(SecurityUtils.EMPLOYEE_ROLE));
 
         Specification<Report> spec = ReportSpecification.filterBy(titleFragment, status);
 
@@ -68,7 +64,7 @@ public class ReportService {
     }
 
     public int calculateTimeLeftPercentage(ReportDto report) {
-        if (OVERDUE_STATUS_POLISH_NAME.equals(report.getStatusName()) || COMPLETED_STATUS_POLISH_NAME.equals(report.getStatusName())) {
+        if ((ReportStatus.OVERDUE.polishName).equals(report.getStatusName()) || (ReportStatus.COMPLETED.polishName).equals(report.getStatusName())) {
             return 0;
         }
         LocalDateTime targetDate = resolveDeadline(report);
@@ -81,8 +77,8 @@ public class ReportService {
     public String[] calculateRemainingTime(List<ReportDto> reports) {
         return reports.stream()
                 .map(report -> {
-                    if (COMPLETED_STATUS_POLISH_NAME.equals(report.getStatusName()) ||
-                            OVERDUE_STATUS_POLISH_NAME.equals(report.getStatusName())) return "-";
+                    if ((ReportStatus.COMPLETED.polishName).equals(report.getStatusName()) ||
+                            (ReportStatus.OVERDUE.polishName).equals(report.getStatusName())) return "-";
                     return RemainingTime.calculate(resolveDeadline(report)).format();
                 })
                 .toArray(String[]::new);
@@ -123,7 +119,7 @@ public class ReportService {
         Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportNotFoundException("Zgłoszenie nie istnieje"));
         User employee = userRepository.findById(employeeId).orElseThrow(() -> new UserNotFoundException("Pracownik nie istnieje"));
 
-        if (employee.getRoles().stream().noneMatch(role -> role.getName().equals("EMPLOYEE"))) {
+        if (employee.getRoles().stream().noneMatch(role -> role.getName().equals(SecurityUtils.EMPLOYEE_ROLE))) {
             throw new UserLacksRequiredRoleException("Wybrany użytkownik nie jest pracownikiem!");
         }
 
@@ -157,14 +153,14 @@ public class ReportService {
             case "remainingTimeAsc" -> {
                 reports.sort(Comparator.comparing((ReportDto r) -> {
                     LocalDateTime deadline = resolveDeadline(r);
-                    return deadline.isBefore(now) || COMPLETED_STATUS_POLISH_NAME.equals(r.getStatusName());
+                    return deadline.isBefore(now) || (ReportStatus.COMPLETED.polishName).equals(r.getStatusName());
                 }).thenComparing(this::resolveDeadline));
                 yield "Pozostały czas do końca (rosnąco)";
             }
             case "remainingTimeDesc" -> {
                 reports.sort(Comparator.comparing((ReportDto r) -> {
                     LocalDateTime deadline = resolveDeadline(r);
-                    return deadline.isBefore(now) || COMPLETED_STATUS_POLISH_NAME.equals(r.getStatusName());
+                    return deadline.isBefore(now) || (ReportStatus.COMPLETED.polishName).equals(r.getStatusName());
                 }).reversed().thenComparing(this::resolveDeadline, Comparator.reverseOrder()));
                 yield "Pozostały czas do końca (malejąco)";
             }
@@ -203,7 +199,7 @@ public class ReportService {
     }
 
     private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityUtils.getCurrentUserEmail();
         return userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("Użytkownik nie istnieje"));
     }
 
@@ -216,14 +212,14 @@ public class ReportService {
     }
 
     public boolean isUserAuthorizedForReport(Report report, User user) {
-        boolean isAdmin = user.getRoles().stream().anyMatch(r -> "ADMINISTRATOR".equals(r.getName()));
+        boolean isAdmin = user.getRoles().stream().anyMatch(r -> SecurityUtils.ADMIN_ROLE.equals(r.getName()));
         boolean isOwner = report.getReportingUser().equals(user);
         boolean isAssigned = report.getAssignedEmployee() != null && report.getAssignedEmployee().equals(user);
         return isOwner || isAssigned || isAdmin;
     }
 
     private LocalDateTime resolveDeadline(ReportDto report) {
-        return PENDING_STATUS_POLISH_NAME.equals(report.getStatusName())
+        return (ReportStatus.PENDING.polishName).equals(report.getStatusName())
                 ? report.getToRespondDate()
                 : report.getDueDate();
     }
@@ -235,5 +231,19 @@ public class ReportService {
                 new ReportNotFoundException("Zgłoszenie nie zostało znalezione"));
         if (!isUserAuthorizedForReport(report, user)) throw new UnauthorizedOperationException("Brak uprawnień");
         return reportMapper.mapToReportDetailsDto(report);
+    }
+
+    @Transactional
+    public void handleUserRemoval(User userToDelete) {
+        reportRepository.findAllByAssignedEmployee(userToDelete)
+                .forEach(report -> report.setAssignedEmployee(null));
+        List<Report> reportsToDelete = reportRepository.findAllByReportingUser(userToDelete);
+        reportRepository.deleteAll(reportsToDelete);
+    }
+
+    @Transactional
+    public void handleCompanyRemoval(Long companyId) {
+        reportRepository.nullifyAssignmentsForCompanyUsers(companyId);
+        reportRepository.deleteReportsCreatedByCompanyUsers(companyId);
     }
 }

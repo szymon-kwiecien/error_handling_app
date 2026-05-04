@@ -42,7 +42,7 @@ public class ChartService {
                 .map(ReportCategoryDto::name)
                 .toList()
                 : Arrays.stream(ReportStatus.values())
-                .map(rs -> rs.description)
+                .map(rs -> rs.polishName)
                 .toList();
 
         Map<LocalDate, Map<String, Long>> groupedData = new LinkedHashMap<>();

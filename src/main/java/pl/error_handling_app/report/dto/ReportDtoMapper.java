@@ -29,7 +29,7 @@ public class ReportDtoMapper {
         dto.setDueDate(report.getDueDate());
         dto.setToRespondDate(report.getTimeToRespond());
         dto.setCategoryName(report.getCategory() != null ? report.getCategory().getName() : "-");
-        dto.setStatusName(report.getStatus() != null ? report.getStatus().description : "-");
+        dto.setStatusName(report.getStatus() != null ? report.getStatus().polishName : "-");
         dto.setAssignedEmployee(report.getAssignedEmployee() != null ? report.getAssignedEmployee().getEmail() : "-");
         dto.setReportingUser(report.getReportingUser() != null ? report.getReportingUser().getEmail() : "-");
         dto.setLastMessageTime(chatService.getLastMessageTimeByReportId(report.getId()));

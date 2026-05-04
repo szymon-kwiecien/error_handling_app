@@ -7,7 +7,7 @@ public enum ReportStatus {
     COMPLETED("Zakończone"),
     OVERDUE("Nieobsłużone w terminie");
 
-    public final String description;
+    public final String polishName;
 
     public static ReportStatus getStatusFromString(String status) {
         for (ReportStatus rs : ReportStatus.values()) {
@@ -18,7 +18,7 @@ public enum ReportStatus {
         return null;
     }
 
-    ReportStatus(String description) {
-        this.description = description;
+    ReportStatus(String polishName) {
+        this.polishName = polishName;
     }
 }

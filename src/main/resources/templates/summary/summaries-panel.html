@@ -30,7 +30,7 @@
                 <label for="status" class="block text-lg mb-2">Status:</label>
                 <select id="status" name="status" class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">
                     <option value="">Wszystkie</option>
-                    <option th:each="status : ${statusList}" th:value="${status}" th:text="${status.description}"></option>
+                    <option th:each="status : ${statusList}" th:value="${status}" th:text="${status.polishName}"></option>
                 </select>
             </div>
 
