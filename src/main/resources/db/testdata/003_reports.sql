@@ -17,18 +17,18 @@ INSERT INTO report_category(name) VALUES
 ('Problem z uprawnieniami');
 
 INSERT INTO report (title, description, dated_added, due_date, time_to_respond, category_id, status, reporting_user_id, assigned_employee_id) VALUES
-('Aplikacja nie uruchamia się', 'Po aktualizacji systemu aplikacja przestała działać.', '2026-04-14 11:30:00', '2026-04-28 15:00:00', '2026-04-21 13:30:00', 1, 'PENDING', 1, NULL),
-('Błąd podczas logowania', 'Użytkownicy zgłaszają problemy z logowaniem do systemu.', '2026-04-13 09:00:00', '2026-04-27 12:00:00', '2026-04-16 10:00:00', 2, 'UNDER_REVIEW', 1, 2),
-('Wolne ładowanie strony', 'Główna strona aplikacji ładuje się ponad 10 sekund.', '2026-04-03 14:45:00', '2026-04-15 18:00:00', '2026-04-14 16:00:00', 3, 'PENDING', 4, NULL),
-('Nowa funkcja - eksport danych', 'Potrzebna funkcja eksportu raportów do plików CSV.', '2026-04-12 11:15:00', '2026-04-29 20:30:00', '2026-04-26 13:15:00', 4, 'PENDING', 4, NULL),
-('Luki bezpieczeństwa', 'Podejrzenie podatności XSS w formularzach.', '2026-04-14 13:20:00', '2026-04-27 14:00:00', '2026-04-22 15:20:00', 5, 'PENDING', 1, NULL),
-('Znikające dane w tabeli', 'Po odświeżeniu strony znikają rekordy w tabeli.', '2026-04-02 08:10:00', '2026-04-18 17:00:00', '2026-04-14 09:00:00', 6, 'COMPLETED', 1, 5),
-('Awarie serwera', 'Serwer restartuje się bez ostrzeżenia.', '2026-04-11 16:30:00', '2026-04-21 09:00:00', '2026-04-19 17:00:00', 7, 'PENDING', 4, NULL),
-('Problem z responsywnością', 'Strona nie dostosowuje się poprawnie na urządzeniach mobilnych.', '2026-04-13 10:00:00', '2026-05-01 14:00:00', '2026-04-21 11:00:00', 8, 'UNDER_REVIEW', 1, 2),
-('Dodanie ciemnego motywu', 'Sugestia dodania trybu ciemnego w aplikacji.', '2026-04-10 12:30:00', '2026-04-24 15:00:00', '2026-04-20 13:30:00', 7, 'PENDING', 4, NULL),
-('Brak powiadomień email', 'System nie wysyła powiadomień o nowych zgłoszeniach.', '2026-04-01 17:00:00', '2026-04-13 19:30:00', '2026-04-09 18:00:00', 6, 'PENDING', 1, NULL),
-('Przekierowanie na błędną stronę', 'Po wylogowaniu użytkownik trafia na nieistniejącą stronę.', '2026-04-13 13:10:00', '2026-04-28 11:00:00', '2026-04-22 14:00:00', 5, 'PENDING', 1, NULL),
-('Błąd w kalkulatorze', 'System źle liczy sumę zamówień.', '2026-04-03 15:20:00', '2026-04-19 13:00:00', '2026-04-16 16:20:00', 3, 'UNDER_REVIEW', 4, 3),
-('Nieczytelna czcionka', 'Na ekranach o wysokiej rozdzielczości czcionka jest zbyt mała.', '2026-04-04 09:50:00', '2026-04-22 16:00:00', '2026-04-18 10:30:00', 6, 'PENDING', 1, NULL),
-('Brak możliwości zmiany hasła', 'Użytkownicy nie mogą resetować swoich haseł.', '2026-04-13 14:00:00', '2026-04-29 10:30:00', '2026-04-22 15:00:00', 4, 'PENDING', 4, NULL),
-('Niepoprawne uprawnienia', 'Zwykły użytkownik ma dostęp do panelu administratora.', '2026-04-05 16:30:00', '2026-04-25 12:00:00', '2026-04-18 17:00:00', 5, 'COMPLETED', 1, 5);
+('Aplikacja nie uruchamia się', 'Po aktualizacji systemu aplikacja przestała działać.', '2026-05-01 11:30:00', '2026-05-16 15:00:00', '2026-05-10 13:30:00', 1, 'PENDING', 1, NULL),
+('Błąd podczas logowania', 'Użytkownicy zgłaszają problemy z logowaniem do systemu.', '2026-05-02 09:00:00', '2026-05-18 12:00:00', '2026-05-11 10:00:00', 2, 'UNDER_REVIEW', 1, 2),
+('Wolne ładowanie strony', 'Główna strona aplikacji ładuje się ponad 10 sekund.', '2026-05-03 14:45:00', '2026-05-15 18:00:00', '2026-05-09 16:00:00', 3, 'PENDING', 4, NULL),
+('Nowa funkcja - eksport danych', 'Potrzebna funkcja eksportu raportów do plików CSV.', '2026-04-28 11:15:00', '2026-05-09 20:30:00', '2026-05-07 13:15:00', 4, 'PENDING', 4, NULL),
+('Luki bezpieczeństwa', 'Podejrzenie podatności XSS w formularzach.', '2026-04-29 13:20:00', '2026-05-03 14:00:00', '2026-05-01 15:20:00', 5, 'PENDING', 1, NULL),
+('Znikające dane w tabeli', 'Po odświeżeniu strony znikają rekordy w tabeli.', '2026-04-26 08:10:00', '2026-05-06 17:00:00', '2026-05-02 09:00:00', 6, 'COMPLETED', 1, 5),
+('Awarie serwera', 'Serwer restartuje się bez ostrzeżenia.', '2026-04-27 16:30:00', '2026-05-08 09:00:00', '2026-05-06 17:00:00', 7, 'PENDING', 4, NULL),
+('Problem z responsywnością', 'Strona nie dostosowuje się poprawnie na urządzeniach mobilnych.', '2026-04-30 10:00:00', '2026-05-09 14:00:00', '2026-05-07 11:00:00', 8, 'UNDER_REVIEW', 1, 2),
+('Dodanie ciemnego motywu', 'Sugestia dodania trybu ciemnego w aplikacji.', '2026-05-04 12:30:00', '2026-05-15 15:00:00', '2026-05-10 13:30:00', 7, 'PENDING', 4, NULL),
+('Brak powiadomień email', 'System nie wysyła powiadomień o nowych zgłoszeniach.', '2026-05-03 17:00:00', '2026-05-14 19:30:00', '2026-05-09 18:00:00', 6, 'PENDING', 1, NULL),
+('Przekierowanie na błędną stronę', 'Po wylogowaniu użytkownik trafia na nieistniejącą stronę.', '2026-05-02 13:10:00', '2026-05-11 11:00:00', '2026-05-08 14:00:00', 5, 'PENDING', 1, NULL),
+('Błąd w kalkulatorze', 'System źle liczy sumę zamówień.', '2026-05-03 15:20:00', '2026-05-17 13:00:00', '2026-05-12 16:20:00', 3, 'UNDER_REVIEW', 4, 3),
+('Nieczytelna czcionka', 'Na ekranach o wysokiej rozdzielczości czcionka jest zbyt mała.', '2026-05-01 09:50:00', '2026-05-12 16:00:00', '2026-05-06 10:30:00', 6, 'PENDING', 1, NULL),
+('Brak możliwości zmiany hasła', 'Użytkownicy nie mogą resetować swoich haseł.', '2026-05-04 14:00:00', '2026-05-19 10:30:00', '2026-05-14 15:00:00', 4, 'PENDING', 4, NULL),
+('Niepoprawne uprawnienia', 'Zwykły użytkownik ma dostęp do panelu administratora.', '2026-05-03 16:30:00', '2026-05-17 12:00:00', '2026-05-13 17:00:00', 5, 'COMPLETED', 1, 5);
