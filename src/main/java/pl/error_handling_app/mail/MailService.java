@@ -73,7 +73,7 @@ public class MailService {
     private void sendActualEmail(EmailData data) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true,"utf-8");
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
 
             helper.setFrom(fromEmailId);
             helper.setTo(data.to());
