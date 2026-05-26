@@ -30,10 +30,7 @@ public class ProfileControllerExceptionHandler {
         } else if(uri.contains("/change-password")) {
             message = "Podczas zmiany hasła wystąpił błąd: ";
         }
-
         redirectAttributes.addFlashAttribute("error", message + e.getMessage());
-
         return "redirect:/profile";
-
     }
 }
