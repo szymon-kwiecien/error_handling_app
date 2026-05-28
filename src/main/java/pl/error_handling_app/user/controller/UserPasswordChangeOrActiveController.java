@@ -99,7 +99,7 @@ public class UserPasswordChangeOrActiveController {
 
     private String showStatusPage(Model model, TokenStatus status) {
         model.addAttribute("tokenStatus", status);
-        return "verification-status-page";
+        return "user/verification-status-page";
     }
 
     private void preparePasswordForm(Model model, String token, boolean isActivation, String actionPath) {
