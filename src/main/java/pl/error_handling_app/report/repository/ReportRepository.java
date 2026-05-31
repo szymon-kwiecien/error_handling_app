@@ -15,7 +15,6 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
 
     List<Report> findAllByAssignedEmployee(User user);
     List<Report> findAllByReportingUser(User user);
-    List<Report> findAllByDatedAddedIsBetween(LocalDateTime dateFrom, LocalDateTime dateTo);
     List<Report> findByStatusAndTimeToRespondLessThanEqual(ReportStatus status, LocalDateTime dateTime);
     List<Report> findByStatusAndDueDateLessThanEqual(ReportStatus status, LocalDateTime dateTime);
     @Modifying
